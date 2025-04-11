@@ -122,10 +122,10 @@ const effectOptions = [
     icon: Heart, 
     emoji: '❤️',
     cursorClass: 'cursor-heart',
-    particleCount: 60,
+    particleCount: 30,
     particleSpeed: 2.5,
     sway: 1.2,
-    maxSize: 22
+    maxSize: 15
   },
   { 
     id: 'flowers', 
@@ -133,7 +133,7 @@ const effectOptions = [
     icon: Flower, 
     emoji: '🌸',
     cursorClass: 'cursor-flower',
-    particleCount: 50,
+    particleCount: 25,
     particleSpeed: 1.8,
     sway: 2,
     maxSize: 20
@@ -144,7 +144,7 @@ const effectOptions = [
     icon: Snowflake, 
     emoji: '❄️',
     cursorClass: 'cursor-default',
-    particleCount: 70,
+    particleCount: 35,
     particleSpeed: 1.5,
     sway: 0.7,
     maxSize: 18
@@ -155,7 +155,7 @@ const effectOptions = [
     icon: Sparkles, 
     emoji: '✨',
     cursorClass: 'cursor-ring',
-    particleCount: 80,
+    particleCount: 40,
     particleSpeed: 2.2,
     sway: 1.5,
     maxSize: 16
@@ -205,7 +205,7 @@ const HeroSection = () => {
   const [customButtonClass, setCustomButtonClass] = useState('bg-white/20 hover:bg-white/30 border-white/50 text-gray-800');
 
   // Effect particles state
-  const [particles, setParticles] = useState<{ id: number; x: number; y: number; size: number; rotation: number; opacity: number; speed: number; sway: number; swayOffset: number }[]>([]);
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; size: number; rotation: number; opacity: number; speed: number; sway: number; swayOffset: number; scale: number; rotationSpeed: number; swayFrequency: number }[]>([]);
 
   // Function to determine text color based on background color brightness
   const getTextColorForBackground = (color: string): string => {
@@ -239,13 +239,18 @@ const HeroSection = () => {
   // Update text color when custom colors change
   useEffect(() => {
     if (useCustomColors) {
-      const avgColor = getTextColorForBackground(customStartColor);
-      setCustomTextColor(avgColor);
+      const newTextColor = getTextColorForBackground(customStartColor);
+      const newButtonClass = getButtonClassForBackground(customStartColor);
       
-      const buttonClass = getButtonClassForBackground(customStartColor);
-      setCustomButtonClass(buttonClass);
+      // Only update if values have actually changed
+      if (newTextColor !== customTextColor) {
+        setCustomTextColor(newTextColor);
+      }
+      if (newButtonClass !== customButtonClass) {
+        setCustomButtonClass(newButtonClass);
+      }
     }
-  }, [customStartColor, customEndColor, useCustomColors]);
+  }, [customStartColor, useCustomColors, customTextColor, customButtonClass]);
 
   // Apply cursor style globally
   useEffect(() => {
@@ -272,41 +277,53 @@ const HeroSection = () => {
       return;
     }
     
-    // Create new particles
+    // Create new particles with smoother initial positions
     const createParticles = () => {
       if (currentEffect.id === 'none') return;
       
       const newParticle = {
         id: Math.random(),
         x: Math.random() * window.innerWidth,
-        y: -20,
+        y: -20 - Math.random() * 50, // Start slightly above viewport
         size: Math.random() * currentEffect.maxSize + 8,
         rotation: Math.random() * 360,
         opacity: 0.7 + Math.random() * 0.3,
         speed: currentEffect.particleSpeed * (0.7 + Math.random() * 0.6),
         sway: currentEffect.sway * (0.8 + Math.random() * 0.4),
-        swayOffset: Math.random() * 100
+        swayOffset: Math.random() * 100,
+        scale: 0.8 + Math.random() * 0.4, // Add scale variation
+        rotationSpeed: 0.1 + Math.random() * 0.2, // Add rotation speed variation
+        swayFrequency: 0.02 + Math.random() * 0.03 // Add sway frequency variation
       };
       
-      setParticles(prev => [...prev.slice(-currentEffect.particleCount), newParticle]); 
+      setParticles(prev => {
+        const updatedParticles = [...prev.slice(-currentEffect.particleCount), newParticle];
+        return updatedParticles;
+      });
     };
     
-    // Move particles
+    // Move particles with smoother animation
     const moveParticles = () => {
       setParticles(prev => 
-        prev.map(p => ({
-          ...p,
-          y: p.y + p.speed,
-          x: p.x + Math.sin((p.y + p.swayOffset) / 40) * p.sway, // Enhanced sideways motion
-          rotation: p.rotation + 0.3,
-          opacity: p.y > window.innerHeight * 0.8 ? p.opacity * 0.97 : p.opacity // Gradually fade out
-        })).filter(p => p.y < window.innerHeight && p.opacity > 0.1) // Remove particles that are offscreen or faded out
+        prev.map(p => {
+          const progress = p.y / window.innerHeight;
+          const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+          
+          return {
+            ...p,
+            y: p.y + p.speed * (1 + easeOut * 0.5), // Gradually increase speed
+            x: p.x + Math.sin((p.y + p.swayOffset) * p.swayFrequency) * p.sway * (1 - progress * 0.5), // Reduce sway as particle falls
+            rotation: p.rotation + p.rotationSpeed,
+            opacity: p.y > window.innerHeight * 0.8 ? p.opacity * 0.98 : p.opacity, // Smoother fade out
+            scale: p.y > window.innerHeight * 0.8 ? p.scale * 0.99 : p.scale // Slight scale reduction near bottom
+          };
+        }).filter(p => p.y < window.innerHeight && p.opacity > 0.1)
       );
     };
     
     // Set up intervals for particle creation and animation
-    const createInterval = setInterval(createParticles, 200); // Faster creation rate
-    const moveInterval = setInterval(moveParticles, 30); // Faster movement updates
+    const createInterval = setInterval(createParticles, 150); // Slightly faster creation
+    const moveInterval = setInterval(moveParticles, 16); // 60fps animation
     
     return () => {
       clearInterval(createInterval);
@@ -369,14 +386,14 @@ const HeroSection = () => {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="fixed pointer-events-none select-none z-[1000]"
+          className="fixed pointer-events-none select-none z-[1000] transition-transform duration-300 ease-out"
           style={{
             left: `${particle.x}px`,
             top: `${particle.y}px`,
             fontSize: `${particle.size}px`,
             opacity: particle.opacity,
-            transform: `rotate(${particle.rotation}deg)`,
-            transition: 'transform 0.3s ease-out'
+            transform: `rotate(${particle.rotation}deg) scale(${particle.scale})`,
+            transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
           }}
         >
           {currentEffect.emoji}
@@ -620,13 +637,16 @@ const HeroSection = () => {
           {/* Center Image inside frame */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className={`relative rounded-full overflow-hidden transform ${currentFrame.imageSize} ${currentFrame.imagePosition}`}>
-              <Image 
-                src="/images/album/hero.png"
-                alt="Wedding"
-                fill
-                style={{ objectFit: 'cover' }}
-                className="rounded-full"
-              />
+              <div className="absolute inset-0 w-full h-full">
+                <Image
+                  src="/images/album/hero.png"
+                  alt="Hero background"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                  priority
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -634,37 +654,38 @@ const HeroSection = () => {
         {/* Content below frame */}
         <div className="flex flex-col items-center space-y-6 pt-4 animated fadeInUp">
           <h1 className="text-4xl md:text-6xl font-extrabold font-script italic">
-            {groomName} & {brideName}
-          </h1>
+          {groomName} & {brideName}
+        </h1>
           <p className="text-xl md:text-2xl animated fadeInUp delay-1s">We are getting married</p>
           <p className="text-lg md:text-xl font-semibold animated fadeInUp delay-2s">{weddingDate}</p>
+        </div>
 
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4 animated fadeIn delay-3s">
-            <Button
-              variant="outline"
-              className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
-              onClick={() => scrollToSection('wishes')}
-            >
-              Gửi lời chúc
-            </Button>
-            <RsvpModal
-              trigger={
-                <Button 
-                  variant="outline" 
-                  className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
-                >
-                  Xác nhận tham dự
-                </Button>
-              }
-            />
-            <Button
-              variant="outline"
-              className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
-              onClick={() => scrollToSection('gift')}
-            >
-              Mừng cưới
-            </Button>
-          </div>
+        {/* Button group - Repositioned for desktop */}
+        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4 animated fadeIn delay-3s md:absolute md:bottom-8 md:left-8">
+          <Button
+            variant="outline"
+            className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+            onClick={() => scrollToSection('wishes')}
+          >
+            Gửi lời chúc
+          </Button>
+          <RsvpModal
+            trigger={
+              <Button 
+                variant="outline" 
+                className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+              >
+                Xác nhận tham dự
+              </Button>
+            }
+          />
+          <Button
+            variant="outline"
+            className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+            onClick={() => scrollToSection('gift')}
+          >
+            Mừng cưới
+          </Button>
         </div>
       </div>
     </section>

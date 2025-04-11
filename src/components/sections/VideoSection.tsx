@@ -39,35 +39,39 @@ const VideoSection = () => {
       }}
     >
       {/* Decorative flower corners */}
-      <div className="absolute top-0 left-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-180 sway">
+      <div className="absolute top-0 left-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-[125deg] sway">
         <Image 
           src="/images/flower-corner.png" 
           alt="Flower decoration" 
           fill 
+          sizes="(max-width: 768px) 80px, 128px"
           style={{ objectFit: 'contain' }} 
         />
       </div>
-      <div className="absolute top-0 right-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-270 sway delay-1s">
+      <div className="absolute top-0 right-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-[220deg] sway delay-1s">
         <Image 
           src="/images/flower-corner.png" 
           alt="Flower decoration" 
           fill 
+          sizes="(max-width: 768px) 80px, 128px"
           style={{ objectFit: 'contain' }} 
         />
       </div>
-      <div className="absolute bottom-0 left-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-90 sway delay-2s">
+      <div className="absolute bottom-0 left-0 w-20 h-20 md:w-32 md:h-32 opacity-60 transform rotate-[40deg] sway delay-2s">
         <Image 
           src="/images/flower-corner.png" 
           alt="Flower decoration" 
           fill 
+          sizes="(max-width: 768px) 80px, 128px"
           style={{ objectFit: 'contain' }} 
         />
       </div>
-      <div className="absolute bottom-0 right-0 w-20 h-20 md:w-32 md:h-32 opacity-60 sway delay-3s">
+      <div className="absolute bottom-0 right-0 w-20 h-20 md:w-32 md:h-32 opacity-60 rotate-[-40deg] sway delay-3s">
         <Image 
           src="/images/flower-corner.png" 
           alt="Flower decoration" 
           fill 
+          sizes="(max-width: 768px) 80px, 128px"
           style={{ objectFit: 'contain' }} 
         />
       </div>
@@ -81,6 +85,7 @@ const VideoSection = () => {
               src="/images/divider-ornament.png" 
               alt="Ornament" 
               fill 
+              sizes="160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
@@ -92,6 +97,7 @@ const VideoSection = () => {
               src="/images/divider-ornament.png" 
               alt="Ornament" 
               fill 
+              sizes="160px"
               style={{ objectFit: 'contain' }}
             />
           </div>
@@ -145,6 +151,7 @@ const VideoSection = () => {
             alt="Heart divider" 
             width={500}
             height={50}
+            sizes="(max-width: 768px) 288px, 500px"
             style={{ objectFit: 'contain' }}
           />
         </div>

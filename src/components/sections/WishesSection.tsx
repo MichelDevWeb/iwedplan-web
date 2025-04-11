@@ -4,30 +4,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button } from "@/components/ui/button";
+import Image from 'next/image';
+import { Heart, MessageSquare, Send, Clock } from 'lucide-react';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { app } from '@/lib/firebase/firebaseConfig';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
 
@@ -46,8 +25,8 @@ interface Wish {
 }
 
 // Initialize Firestore
-const db = getFirestore(app);
-const wishesCollectionRef = collection(db, "wishes");
+// const db = getFirestore(app);
+// const wishesCollectionRef = collection(db, "wishes");
 
 const WishesSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,26 +66,19 @@ const WishesSection = () => {
   //   return () => unsubscribe();
   // }, []); // Empty dependency array ensures this runs only once on mount
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     setIsSubmitting(true);
     setSubmitStatus(null);
-    console.log("Submitting wish:", values);
 
     try {
-      const docRef = await addDoc(wishesCollectionRef, {
-        name: values.name,
-        message: values.message,
-        timestamp: serverTimestamp(),
-      });
-      console.log("Document written with ID: ", docRef.id);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setSubmitStatus('success');
       form.reset();
-      // Clear success message after a few seconds
       setTimeout(() => setSubmitStatus(null), 3000);
-    } catch (e) {
-      console.error("Error adding document: ", e);
+    } catch (error) {
+      console.error("Error submitting wish: ", error);
       setSubmitStatus('error');
-      // Clear error message after a few seconds
       setTimeout(() => setSubmitStatus(null), 3000);
     } finally {
       setIsSubmitting(false);
@@ -114,91 +86,180 @@ const WishesSection = () => {
   }
 
   return (
-    <section id="wishes" className="w-full py-16 flex flex-col items-center justify-center bg-white px-4 overflow-hidden">
-      <h2 className="text-3xl font-bold mb-8 text-center animated fadeInDown">Sổ Lưu Bút</h2>
+    <section 
+      id="wishes" 
+      className="w-full py-16 px-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(to bottom, rgba(254, 242, 242, 0.8), rgba(252, 231, 243, 0.8))"
+      }}
+    >
+      {/* Decorative corner elements */}
+      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+        <Image 
+          src="/images/flower-corner.png" 
+          alt="Corner decoration" 
+          width={100}
+          height={100}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+        <Image 
+          src="/images/flower-corner.png" 
+          alt="Corner decoration" 
+          width={100}
+          height={100}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
 
-      {/* --- Wish Submission Form --- */}
-      <Card className="w-full max-w-lg mb-12 shadow-md animated fadeInUp delay-1s">
-        <CardHeader>
-          <CardTitle className="text-center">Gửi lời chúc</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* Section Header */}
+        <div className="relative mb-16 text-center">
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-8 opacity-70">
+            <Image 
+              src="/images/divider-ornament.png" 
+              alt="Ornament" 
+              fill
+              sizes="(max-width: 768px) 128px, 160px"
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-script text-rose-700 font-bold relative z-10 px-4 md:px-8 inline-block animated fadeInDown">
+            Sổ Lưu Bút
+          </h2>
+          <p className="text-center text-gray-600 mt-6 max-w-2xl mx-auto animated fadeInUp delay-1s">
+            Cảm ơn bạn rất nhiều vì đã gửi những lời chúc mừng tốt đẹp nhất đến đám cưới của chúng tôi!
+          </p>
+          <div className="absolute left-1/2 transform -translate-x-1/2 rotate-180 w-32 md:w-40 h-8 opacity-70">
+            <Image 
+              src="/images/divider-ornament.png" 
+              alt="Ornament" 
+              fill
+              sizes="(max-width: 768px) 128px, 160px"
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+
+        {/* Wish Form */}
+        <div className="relative group mb-16 animated fadeInUp">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
+          <div className="relative bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-rose-100 transform group-hover:scale-[1.02] transition-all duration-500">
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-rose-100 flex items-center justify-center">
+                <MessageSquare className="w-8 h-8 text-rose-600" />
+              </div>
+            </div>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên của bạn</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nhập tên của bạn..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Tên của bạn</label>
+                <input
+                  {...form.register("name")}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-colors"
+                  placeholder="Nhập tên của bạn..."
+                />
+                {form.formState.errors.name && (
+                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Lời chúc</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Để lại lời chúc của bạn tại đây..."
-                        className="resize-none h-28"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Lời chúc</label>
+                <textarea
+                  {...form.register("message")}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-rose-300 focus:ring-2 focus:ring-rose-100 transition-colors resize-none h-32"
+                  placeholder="Để lại lời chúc của bạn tại đây..."
+                />
+                {form.formState.errors.message && (
+                  <p className="text-sm text-red-500">{form.formState.errors.message.message}</p>
                 )}
-              />
-              <Button type="submit" disabled={isSubmitting} className="w-full bg-pink-500 hover:bg-pink-600 text-white">
-                {isSubmitting ? 'Đang gửi...' : 'Gửi lời chúc'}
-              </Button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 px-6 bg-rose-500 hover:bg-rose-600 text-white rounded-lg flex items-center justify-center space-x-2 transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Đang gửi...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span>Gửi lời chúc</span>
+                  </>
+                )}
+              </button>
 
               {submitStatus === 'success' && (
-                <p className="text-sm text-green-600 text-center">Cảm ơn bạn đã gửi lời chúc!</p>
+                <div className="p-4 bg-green-50 text-green-600 rounded-lg flex items-center justify-center space-x-2">
+                  <Heart className="w-5 h-5" />
+                  <span>Cảm ơn bạn đã gửi lời chúc!</span>
+                </div>
               )}
               {submitStatus === 'error' && (
-                <p className="text-sm text-red-600 text-center">Đã xảy ra lỗi. Vui lòng thử lại.</p>
+                <div className="p-4 bg-red-50 text-red-600 rounded-lg flex items-center justify-center space-x-2">
+                  <span>Đã xảy ra lỗi. Vui lòng thử lại.</span>
+                </div>
               )}
             </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {/* --- Display Submitted Wishes --- */}
-      <div className="w-full max-w-lg">
-        <h3 className="text-2xl font-semibold mb-6 text-center animated fadeInUp delay-2s">Lời chúc từ mọi người</h3>
-        {isLoadingWishes ? (
-          <p className="text-center text-gray-500 animated fadeIn delay-3s">Đang tải lời chúc...</p>
-        ) : wishes.length === 0 ? (
-          <p className="text-center text-gray-500 animated fadeIn delay-3s">Chưa có lời chúc nào.</p>
-        ) : (
-          <div className="space-y-4">
-            {wishes.map((wish, index) => (
-              <Card
-                key={wish.id}
-                className="shadow-sm animated fadeInUp"
-                style={{ animationDelay: `${index * 0.1 + 2.5}s` }}
-              >
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{wish.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700">{wish.message}</p>
-                </CardContent>
-                <CardFooter className="text-xs text-gray-500 pt-2">
-                  {/* Format timestamp if needed */}
-                  {wish.timestamp?.toDate().toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </CardFooter>
-              </Card>
-            ))}
           </div>
-        )}
+        </div>
+
+        {/* Wishes List */}
+        <div className="space-y-6">
+          <h3 className="text-2xl font-script text-rose-700 text-center mb-8 animated fadeInUp delay-1s">
+            Lời chúc từ mọi người
+          </h3>
+
+          {isLoadingWishes ? (
+            <div className="flex justify-center">
+              <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : wishes.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <p>Chưa có lời chúc nào.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {wishes.map((wish, index) => (
+                <div
+                  key={wish.id}
+                  className="relative group animated fadeInUp"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl transform group-hover:rotate-0 transition-transform duration-500"></div>
+                  <div className="relative bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-rose-100 transform group-hover:scale-[1.02] transition-all duration-500">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-medium text-gray-800">{wish.name}</h4>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>{wish.timestamp?.toDate().toLocaleDateString('vi-VN')}</span>
+                      </div>
+                    </div>
+                    <p className="text-gray-600">{wish.message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Decoration */}
+        <div className="mt-16 flex justify-center">
+          <div className="w-48 md:w-72 h-8 opacity-70">
+            <Image 
+              src="/images/heart-divider.png" 
+              alt="Heart divider" 
+              width={500}
+              height={50}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

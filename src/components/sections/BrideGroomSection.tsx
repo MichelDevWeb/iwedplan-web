@@ -1,78 +1,175 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Instagram, Facebook, Twitter } from 'lucide-react';
 
 // TODO: Replace with actual Bride & Groom data
 const coupleInfo = {
   groom: {
     name: "Tên Chú Rể",
     title: "Chú Rể",
-    imageSrc: "/images/iWedPlan.png", // TODO: Add groom photo
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vitae arcu ut est finibus dignissim.",
+    imageSrc: "/images/album/hero.png",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vitae arcu ut est finibus dignissim.",
+    social: {
+      instagram: "#",
+      facebook: "#",
+      twitter: "#"
+    }
   },
   bride: {
     name: "Tên Cô Dâu",
     title: "Cô Dâu",
-    imageSrc: "/images/iWedPlan.png", // TODO: Add bride photo
-    description:
-      "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+    imageSrc: "/images/album/hero.png",
+    description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
+    social: {
+      instagram: "#",
+      facebook: "#",
+      twitter: "#"
+    }
   },
 };
 
 const BrideGroomSection = () => {
   return (
-    <section id="bridegroom" className="w-full py-16 flex flex-col items-center justify-center bg-white px-4 overflow-hidden">
-      <h2 className="text-3xl font-bold mb-12 text-center animated fadeInDown">Cô Dâu & Chú Rể</h2>
+    <section 
+      id="bridegroom" 
+      className="w-full py-16 px-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(to bottom, rgba(254, 242, 242, 0.8), rgba(252, 231, 243, 0.8))"
+      }}
+    >
+      {/* Decorative corner elements */}
+      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+        <Image 
+          src="/images/flower-corner.png" 
+          alt="Corner decoration" 
+          width={100}
+          height={100}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+        <Image 
+          src="/images/flower-corner.png" 
+          alt="Corner decoration" 
+          width={100}
+          height={100}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 w-full max-w-4xl">
-        {/* Groom Info Card */}
-        <Card className="shadow-md overflow-hidden flex flex-col items-center text-center animated fadeInLeft">
-          <CardHeader className="pb-2">
-             <CardTitle className="text-2xl text-pink-600">{coupleInfo.groom.title}</CardTitle>
-             <CardDescription>{coupleInfo.groom.name}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center px-6 pb-6">
-            <div className="mb-4 w-48 h-48 relative rounded-full overflow-hidden border-4 border-pink-100">
-                <Image
-                    src={coupleInfo.groom.imageSrc}
-                    alt={`Ảnh ${coupleInfo.groom.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    // TODO: Add placeholder style or image
-                    // style={{ background: '#eee' }}
-                />
+      <div className="max-w-5xl mx-auto relative z-10">
+        {/* Section Header */}
+        <div className="relative mb-16 text-center">
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-32 md:w-40 h-8 opacity-70">
+            <Image 
+              src="/images/divider-ornament.png" 
+              alt="Ornament" 
+              fill
+              sizes="(max-width: 768px) 128px, 160px"
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-script text-rose-700 font-bold relative z-10 px-4 md:px-8 inline-block animated fadeInDown">
+            Cô Dâu & Chú Rể
+          </h2>
+          <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 rotate-180 w-32 md:w-40 h-8 opacity-70">
+            <Image 
+              src="/images/divider-ornament.png" 
+              alt="Ornament" 
+              fill
+              sizes="(max-width: 768px) 128px, 160px"
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
+
+        {/* Couple Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+          {/* Groom Card */}
+          <div className="relative group animated fadeInLeft">
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
+            <div className="relative bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-rose-100 transform group-hover:scale-[1.02] transition-all duration-500">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative w-48 h-48 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-200 to-rose-300 rounded-full transform rotate-45 group-hover:rotate-0 transition-transform duration-500"></div>
+                  <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    <Image
+                      src={coupleInfo.groom.imageSrc}
+                      alt={`Ảnh ${coupleInfo.groom.title}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-script text-rose-700 mb-2">{coupleInfo.groom.title}</h3>
+                <h4 className="text-xl font-medium text-gray-800 mb-4">{coupleInfo.groom.name}</h4>
+                <p className="text-gray-600 mb-6">{coupleInfo.groom.description}</p>
+                <div className="flex space-x-4">
+                  <a href={coupleInfo.groom.social.instagram} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a href={coupleInfo.groom.social.facebook} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Facebook className="w-5 h-5" />
+                  </a>
+                  <a href={coupleInfo.groom.social.twitter} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-gray-600">
-              {coupleInfo.groom.description}
-            </p>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Bride Info Card */}
-        <Card className="shadow-md overflow-hidden flex flex-col items-center text-center animated fadeInRight">
-          <CardHeader className="pb-2">
-             <CardTitle className="text-2xl text-pink-600">{coupleInfo.bride.title}</CardTitle>
-             <CardDescription>{coupleInfo.bride.name}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center px-6 pb-6">
-             <div className="mb-4 w-48 h-48 relative rounded-full overflow-hidden border-4 border-pink-100">
-                 <Image
-                    src={coupleInfo.bride.imageSrc}
-                    alt={`Ảnh ${coupleInfo.bride.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    // TODO: Add placeholder style or image
-                    // style={{ background: '#eee' }}
-                />
-             </div>
-            <p className="text-sm text-gray-600">
-              {coupleInfo.bride.description}
-            </p>
-          </CardContent>
-        </Card>
+          {/* Bride Card */}
+          <div className="relative group animated fadeInRight">
+            <div className="absolute inset-0 bg-gradient-to-br from-rose-100 to-rose-200 rounded-2xl transform rotate-2 group-hover:rotate-0 transition-transform duration-500"></div>
+            <div className="relative bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-rose-100 transform group-hover:scale-[1.02] transition-all duration-500">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative w-48 h-48 mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-200 to-rose-300 rounded-full transform -rotate-45 group-hover:rotate-0 transition-transform duration-500"></div>
+                  <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    <Image
+                      src={coupleInfo.bride.imageSrc}
+                      alt={`Ảnh ${coupleInfo.bride.title}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-script text-rose-700 mb-2">{coupleInfo.bride.title}</h3>
+                <h4 className="text-xl font-medium text-gray-800 mb-4">{coupleInfo.bride.name}</h4>
+                <p className="text-gray-600 mb-6">{coupleInfo.bride.description}</p>
+                <div className="flex space-x-4">
+                  <a href={coupleInfo.bride.social.instagram} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a href={coupleInfo.bride.social.facebook} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Facebook className="w-5 h-5" />
+                  </a>
+                  <a href={coupleInfo.bride.social.twitter} className="text-rose-500 hover:text-rose-600 transition-colors">
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Decoration */}
+        <div className="mt-16 flex justify-center">
+          <div className="w-48 md:w-72 h-8 opacity-70">
+            <Image 
+              src="/images/heart-divider.png" 
+              alt="Heart divider" 
+              width={500}
+              height={50}
+              style={{ objectFit: 'contain' }}
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
