@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Palette, Sparkles, ImageIcon, PaintBucket, Type, MousePointer2, Snowflake, Heart, Flower } from 'lucide-react';
+import { Palette, Sparkles, ImageIcon, PaintBucket, MousePointer2, Snowflake, Heart, Flower } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
@@ -65,8 +65,8 @@ const colorThemes = [
     gradientTo: 'to-indigo-200',
     startColor: '#fad1e6', 
     endColor: '#d6d3f0',   
-    textColor: 'text-gray-800', 
-    buttonClass: 'bg-pink-500/20 hover:bg-pink-500/30 border-pink-500/50 text-gray-800'
+    textColor: 'text-rose-800',
+    buttonClass: 'bg-pink-500/20 hover:bg-pink-500/30 border-pink-500/50 text-rose-800'
   },
   {
     id: 'sage',
@@ -76,8 +76,8 @@ const colorThemes = [
     gradientTo: 'to-teal-100',
     startColor: '#e3f1ea', 
     endColor: '#e6f7f4',   
-    textColor: 'text-gray-800', 
-    buttonClass: 'bg-green-500/20 hover:bg-green-500/30 border-green-500/50 text-gray-800'
+    textColor: 'text-rose-800',
+    buttonClass: 'bg-green-500/20 hover:bg-green-500/30 border-green-500/50 text-rose-800'
   },
   {
     id: 'rose',
@@ -87,8 +87,8 @@ const colorThemes = [
     gradientTo: 'to-yellow-100',
     startColor: '#fde4e4', 
     endColor: '#fef3c7',   
-    textColor: 'text-gray-800', 
-    buttonClass: 'bg-rose-500/20 hover:bg-rose-500/30 border-rose-500/50 text-gray-800'
+    textColor: 'text-rose-800',
+    buttonClass: 'bg-rose-500/20 hover:bg-rose-500/30 border-rose-500/50 text-rose-800'
   },
   {
     id: 'lavender',
@@ -98,8 +98,8 @@ const colorThemes = [
     gradientTo: 'to-blue-100',
     startColor: '#e9e4f9', 
     endColor: '#dbeafe',   
-    textColor: 'text-gray-800', 
-    buttonClass: 'bg-purple-500/20 hover:bg-purple-500/30 border-purple-500/50 text-gray-800'
+    textColor: 'text-rose-800',
+    buttonClass: 'bg-purple-500/20 hover:bg-purple-500/30 border-purple-500/50 text-rose-800'
   },
   {
     id: 'peach',
@@ -109,8 +109,8 @@ const colorThemes = [
     gradientTo: 'to-yellow-50',
     startColor: '#feeadd', 
     endColor: '#fefce8',   
-    textColor: 'text-gray-800', 
-    buttonClass: 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/50 text-gray-800'
+    textColor: 'text-rose-800',
+    buttonClass: 'bg-orange-500/20 hover:bg-orange-500/30 border-orange-500/50 text-rose-800'
   }
 ];
 
@@ -201,8 +201,7 @@ const HeroSection = () => {
   const [customStartColor, setCustomStartColor] = useState('#ffd6e8');
   const [customEndColor, setCustomEndColor] = useState('#d1e5ff');
   const [useCustomColors, setUseCustomColors] = useState(false);
-  const [customTextColor, setCustomTextColor] = useState('text-gray-800');
-  const [customButtonClass, setCustomButtonClass] = useState('bg-white/20 hover:bg-white/30 border-white/50 text-gray-800');
+  const [customButtonClass, setCustomButtonClass] = useState('bg-white/20 hover:bg-white/30 border-white/50 text-rose-800');
 
   // Effect particles state
   const [particles, setParticles] = useState<{ id: number; x: number; y: number; size: number; rotation: number; opacity: number; speed: number; sway: number; swayOffset: number; scale: number; rotationSpeed: number; swayFrequency: number }[]>([]);
@@ -239,18 +238,12 @@ const HeroSection = () => {
   // Update text color when custom colors change
   useEffect(() => {
     if (useCustomColors) {
-      const newTextColor = getTextColorForBackground(customStartColor);
       const newButtonClass = getButtonClassForBackground(customStartColor);
-      
-      // Only update if values have actually changed
-      if (newTextColor !== customTextColor) {
-        setCustomTextColor(newTextColor);
-      }
       if (newButtonClass !== customButtonClass) {
         setCustomButtonClass(newButtonClass);
       }
     }
-  }, [customStartColor, useCustomColors, customTextColor, customButtonClass]);
+  }, [customStartColor, useCustomColors, customButtonClass]);
 
   // Apply cursor style globally
   useEffect(() => {
@@ -373,7 +366,7 @@ const HeroSection = () => {
   };
 
   // Calculate current styles
-  const currentTextColor = useCustomColors ? customTextColor : currentColorTheme.textColor;
+  const currentTextColor = useCustomColors ? getTextColorForBackground(customStartColor) : currentColorTheme.textColor;
   const currentButtonClass = useCustomColors ? customButtonClass : currentColorTheme.buttonClass;
 
   return (
@@ -482,26 +475,6 @@ const HeroSection = () => {
                         onChange={(e) => setCustomEndColor(e.target.value)}
                         className="w-16 text-xs border border-gray-200 rounded px-1 py-0.5"
                       />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Text Color:</label>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full border border-gray-300" style={{
-                        backgroundColor: customTextColor === 'text-white' ? 'white' : '#1f2937'
-                      }}></div>
-                      <span className="text-xs">
-                        {customTextColor === 'text-white' ? 'Light' : 'Dark'}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-6 px-1 text-xs py-0 ml-1"
-                        onClick={() => setCustomTextColor(customTextColor === 'text-white' ? 'text-gray-800' : 'text-white')}
-                      >
-                        <Type className="h-3 w-3" />
-                      </Button>
                     </div>
                   </div>
                   
@@ -654,17 +627,29 @@ const HeroSection = () => {
         {/* Content below frame */}
         <div className="flex flex-col items-center space-y-6 pt-4 animated fadeInUp">
           <h1 className="text-4xl md:text-6xl font-extrabold font-script italic">
-          {groomName} & {brideName}
-        </h1>
+            {groomName} & {brideName}
+          </h1>
           <p className="text-xl md:text-2xl animated fadeInUp delay-1s">We are getting married</p>
-          <p className="text-lg md:text-xl font-semibold animated fadeInUp delay-2s">{weddingDate}</p>
+          <div className="relative group">
+            <p className="text-lg md:text-xl font-semibold animated fadeInUp delay-2s bg-gradient-to-r from-rose-600 to-rose-800 bg-clip-text text-transparent">
+              {weddingDate}
+            </p>
+            <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-rose-800 blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
+          </div>
         </div>
 
         {/* Button group - Repositioned for desktop */}
-        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4 animated fadeIn delay-3s md:absolute md:bottom-8 md:left-8">
+        <div className="flex flex-col space-y-4 pt-4 animated fadeIn delay-3s md:absolute md:bottom-8 md:left-8">
           <Button
             variant="outline"
-            className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+            className={cn(
+              "backdrop-blur-sm hover:scale-105 transition-all duration-300 transform hover:shadow-lg",
+              "border-2 border-rose-200 hover:border-rose-300",
+              "bg-white/80 hover:bg-white/90",
+              "text-rose-700 hover:text-rose-800",
+              "px-6 py-2 rounded-full w-full md:w-auto",
+              currentButtonClass
+            )}
             onClick={() => scrollToSection('wishes')}
           >
             Gửi lời chúc
@@ -673,7 +658,14 @@ const HeroSection = () => {
             trigger={
               <Button 
                 variant="outline" 
-                className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+                className={cn(
+                  "backdrop-blur-sm hover:scale-105 transition-all duration-300 transform hover:shadow-lg",
+                  "border-2 border-rose-200 hover:border-rose-300",
+                  "bg-white/80 hover:bg-white/90",
+                  "text-rose-700 hover:text-rose-800",
+                  "px-6 py-2 rounded-full w-full md:w-auto",
+                  currentButtonClass
+                )}
               >
                 Xác nhận tham dự
               </Button>
@@ -681,7 +673,14 @@ const HeroSection = () => {
           />
           <Button
             variant="outline"
-            className={cn("backdrop-blur-sm hover:scale-105 transition-transform", currentButtonClass)}
+            className={cn(
+              "backdrop-blur-sm hover:scale-105 transition-all duration-300 transform hover:shadow-lg",
+              "border-2 border-rose-200 hover:border-rose-300",
+              "bg-white/80 hover:bg-white/90",
+              "text-rose-700 hover:text-rose-800",
+              "px-6 py-2 rounded-full w-full md:w-auto",
+              currentButtonClass
+            )}
             onClick={() => scrollToSection('gift')}
           >
             Mừng cưới

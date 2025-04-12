@@ -40,21 +40,39 @@ const BrideGroomSection = () => {
       }}
     >
       {/* Decorative corner elements */}
-      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+      <div className="absolute top-0 left-0 w-32 h-32 opacity-60">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
-      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-60 transform rotate-90">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 opacity-60 transform rotate-270">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 opacity-60 transform rotate-180">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>

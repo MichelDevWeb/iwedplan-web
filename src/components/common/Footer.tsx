@@ -13,9 +13,9 @@ const Footer = () => {
           Mãi mãi và luôn luôn ❤️ {brideName} & {groomName}
         </p>
         <p>
-          &copy; {currentYear} | Made with love
+          &copy; {currentYear} | Made with love -
           {/* Optional: Add link to template creator or personal site */}
-          {/* | <a href="#" className="hover:text-pink-500">Designed by X</a> */}
+           <a href="mailto:micheldevweb2020@gmail.com" className="hover:text-pink-500">Designed by MichelDevWeb</a>
         </p>
       </div>
     </footer>

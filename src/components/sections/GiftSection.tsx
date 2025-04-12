@@ -38,21 +38,39 @@ const GiftSection = () => {
       }}
     >
       {/* Decorative corner elements */}
-      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+      <div className="absolute top-0 left-0 w-32 h-32 opacity-60">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
-      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-60 transform rotate-90">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 opacity-60 transform rotate-270">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 opacity-60 transform rotate-180">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
@@ -72,10 +90,6 @@ const GiftSection = () => {
           <h2 className="text-3xl md:text-4xl font-script text-rose-700 font-bold relative z-10 px-4 md:px-8 inline-block animated fadeInDown">
             Hộp Mừng Cưới
           </h2>
-          <p className="text-center text-gray-600 mt-6 max-w-2xl mx-auto animated fadeInUp delay-1s">
-            Thật vui vì được gặp và đón tiếp các bạn trong một dịp đặc biệt như đám cưới của chúng tôi.
-            Sự hiện diện của bạn là món quà quý giá nhất. Nếu bạn muốn gửi quà mừng, thông tin dưới đây có thể hữu ích.
-          </p>
           <div className="absolute left-1/2 transform -translate-x-1/2 rotate-180 w-32 md:w-40 h-8 opacity-70">
             <Image 
               src="/images/divider-ornament.png" 
@@ -85,6 +99,10 @@ const GiftSection = () => {
               style={{ objectFit: 'contain' }}
             />
           </div>
+          <p className="text-center text-gray-600 mt-10 max-w-2xl mx-auto animated fadeInUp delay-1s">
+            Thật vui vì được gặp và đón tiếp các bạn trong một dịp đặc biệt như đám cưới của chúng tôi.
+            Sự hiện diện của bạn là món quà quý giá nhất. Nếu bạn muốn gửi quà mừng, thông tin dưới đây có thể hữu ích.
+          </p>
         </div>
 
         {/* Gift Cards */}

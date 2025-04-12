@@ -7,15 +7,16 @@ import { Button } from "@/components/ui/button";
 
 // TODO: Replace with your actual image data (consider fetching from storage or CMS)
 const albumImages = [
-  { id: 1, src: "/images/album/hero.png", alt: "Wedding moment 1" },
-  { id: 2, src: "/images/album/hero.png", alt: "Wedding moment 2" },
-  { id: 3, src: "/images/album/hero.png", alt: "Wedding moment 3" },
-  { id: 4, src: "/images/album/hero.png", alt: "Wedding moment 4" },
-  { id: 5, src: "/images/album/hero.png", alt: "Wedding moment 5" },
-  { id: 6, src: "/images/album/hero.png", alt: "Wedding moment 6" },
-  { id: 7, src: "/images/album/hero.png", alt: "Wedding moment 7" },
-  { id: 8, src: "/images/album/hero.png", alt: "Wedding moment 8" },
-  { id: 9, src: "/images/album/hero.png", alt: "Wedding moment 9" },
+  { id: 1, src: "/images/album/1.jpg", alt: "Wedding moment 1" },
+  { id: 2, src: "/images/album/2.jpg", alt: "Wedding moment 2" },
+  { id: 3, src: "/images/album/3.jpg", alt: "Wedding moment 3" },
+  { id: 4, src: "/images/album/4.jpg", alt: "Wedding moment 4" },
+  { id: 5, src: "/images/album/5.jpg", alt: "Wedding moment 5" },
+  { id: 6, src: "/images/album/6.jpg", alt: "Wedding moment 6" },
+  { id: 7, src: "/images/album/7.jpg", alt: "Wedding moment 7" },
+  { id: 8, src: "/images/album/8.jpg", alt: "Wedding moment 8" },
+  { id: 9, src: "/images/album/9.jpg", alt: "Wedding moment 9" },
+  { id: 10, src: "/images/album/10.jpg", alt: "Wedding moment 10" },
 ];
 
 const AlbumSection = () => {
@@ -59,21 +60,39 @@ const AlbumSection = () => {
       }}
     >
       {/* Decorative corner elements */}
-      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+      <div className="absolute top-0 left-0 w-32 h-32 opacity-60">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
-      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-60 transform rotate-90">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 opacity-60 transform rotate-270">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 opacity-60 transform rotate-180">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
@@ -144,29 +163,29 @@ const AlbumSection = () => {
 
         {/* Image Preview Modal */}
         {isModalOpen && selectedImage !== null && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
             <button 
-              className="absolute top-4 right-4 text-white hover:text-rose-200 transition-colors"
+              className="absolute top-4 right-4 text-white hover:text-rose-200 transition-colors z-[10000]"
               onClick={handleCloseModal}
             >
               <X className="w-8 h-8" />
             </button>
             
             <button 
-              className="absolute left-4 text-white hover:text-rose-200 transition-colors"
+              className="absolute left-4 text-white hover:text-rose-200 transition-colors z-[10000]"
               onClick={handlePrevImage}
             >
               <ChevronLeft className="w-8 h-8" />
             </button>
             
             <button 
-              className="absolute right-4 text-white hover:text-rose-200 transition-colors"
+              className="absolute right-4 text-white hover:text-rose-200 transition-colors z-[10000]"
               onClick={handleNextImage}
             >
               <ChevronRight className="w-8 h-8" />
             </button>
 
-            <div className="relative w-full max-w-4xl aspect-square">
+            <div className="relative w-full max-w-4xl aspect-square z-[10000]">
               <Image
                 src={albumImages[selectedImage].src}
                 alt={albumImages[selectedImage].alt}

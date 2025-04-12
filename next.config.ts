@@ -11,7 +11,12 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
+    unoptimized: true,
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
       {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
@@ -20,6 +25,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  output: 'export',
+  distDir: 'dist',
+  trailingSlash: true,
 };
 
 export default withPWA(nextConfig as any);

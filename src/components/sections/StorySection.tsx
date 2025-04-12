@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Heart } from 'lucide-react';
+import { Heart, Sparkles } from 'lucide-react';
 
 const StorySection = () => {
   const timelineEvents = [
@@ -49,21 +49,39 @@ const StorySection = () => {
       }}
     >
       {/* Decorative corner elements */}
-      <div className="hidden md:block absolute top-0 left-0 w-24 h-24 opacity-60 sway">
+      <div className="absolute top-0 left-0 w-32 h-32 opacity-60">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
-      <div className="hidden md:block absolute top-0 right-0 w-24 h-24 opacity-60 transform rotate-90 sway delay-1s">
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-60 transform rotate-90">
         <Image 
-          src="/images/flower-corner.png" 
+          src="/images/album-corner.png" 
           alt="Corner decoration" 
-          width={100}
-          height={100}
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 opacity-60 transform rotate-270">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
+          style={{ objectFit: 'contain' }}
+        />
+      </div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 opacity-60 transform rotate-180">
+        <Image 
+          src="/images/album-corner.png" 
+          alt="Corner decoration" 
+          width={150}
+          height={150}
           style={{ objectFit: 'contain' }}
         />
       </div>
@@ -97,7 +115,33 @@ const StorySection = () => {
         {/* Timeline */}
         <div className="relative">
           {/* Timeline Line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-rose-200 to-rose-300 hidden md:block"></div>
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-full h-full hidden md:block">
+            {/* Main Timeline Line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-rose-200 via-rose-300 to-rose-200"></div>
+            
+            {/* Decorative Elements */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full overflow-hidden">
+              {/* Floating Hearts */}
+              <div className="absolute top-0 left-0 w-full h-full">
+                <div className="absolute top-0 left-0 w-full h-full animate-float">
+                  <Heart className="w-4 h-4 text-rose-400 absolute top-0 left-1/2 transform -translate-x-1/2" />
+                  <Heart className="w-3 h-3 text-rose-300 absolute top-1/4 left-1/2 transform -translate-x-1/2" />
+                  <Heart className="w-2 h-2 text-rose-200 absolute top-1/2 left-1/2 transform -translate-x-1/2" />
+                  <Heart className="w-3 h-3 text-rose-300 absolute top-3/4 left-1/2 transform -translate-x-1/2" />
+                </div>
+              </div>
+              
+              {/* Sparkles */}
+              <div className="absolute top-0 left-0 w-full h-full">
+                <div className="absolute top-0 left-0 w-full h-full animate-sparkle">
+                  <Sparkles className="w-2 h-2 text-rose-300 absolute top-1/8 left-1/2 transform -translate-x-1/2" />
+                  <Sparkles className="w-2 h-2 text-rose-300 absolute top-3/8 left-1/2 transform -translate-x-1/2" />
+                  <Sparkles className="w-2 h-2 text-rose-300 absolute top-5/8 left-1/2 transform -translate-x-1/2" />
+                  <Sparkles className="w-2 h-2 text-rose-300 absolute top-7/8 left-1/2 transform -translate-x-1/2" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Timeline Events */}
           {timelineEvents.map((event, index) => (
@@ -106,12 +150,18 @@ const StorySection = () => {
               className={`relative mb-16 md:mb-24 last:mb-0 animated fadeInUp delay-${index + 1}s`}
             >
               {/* Timeline Dot */}
-              <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-rose-500 rounded-full border-4 border-white shadow-lg hidden md:block"></div>
+              <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full border-4 border-white shadow-lg hidden md:block group">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 animate-pulse"></div>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 group-hover:scale-110 transition-transform duration-300"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Heart className="w-4 h-4 text-white" />
+                </div>
+              </div>
 
               {/* Event Content */}
               <div className={`md:flex items-center ${event.position === 'left' ? 'md:flex-row-reverse' : ''}`}>
                 {/* Image */}
-                <div className="w-full md:w-1/2 mb-4 md:mb-0">
+                <div className={`w-full md:w-1/2 mb-4 md:mb-0 ${event.position === 'left' ? 'md:pl-4' : 'md:pr-4'}`}>
                   <div className="relative aspect-square rounded-lg overflow-hidden shadow-xl transform hover:scale-[1.02] transition-transform duration-300">
                     <Image
                       src={event.image}
@@ -120,12 +170,13 @@ const StorySection = () => {
                       sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   </div>
                 </div>
 
                 {/* Text Content */}
                 <div className={`w-full md:w-1/2 ${event.position === 'left' ? 'md:pr-8' : 'md:pl-8'}`}>
-                  <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-rose-100">
+                  <div className="bg-white/80 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-rose-100 transform hover:scale-[1.02] transition-transform duration-300">
                     <div className="flex items-center mb-2">
                       <Heart className="w-5 h-5 text-rose-500 mr-2" />
                       <span className="text-rose-600 font-medium">{event.date}</span>
@@ -152,6 +203,25 @@ const StorySection = () => {
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes float {
+          0% { transform: translateY(0) translateX(-50%); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(100%) translateX(-50%); opacity: 0; }
+        }
+        @keyframes sparkle {
+          0% { transform: translateX(-50%) scale(0); opacity: 0; }
+          50% { transform: translateX(-50%) scale(1); opacity: 1; }
+          100% { transform: translateX(-50%) scale(0); opacity: 0; }
+        }
+        .animate-float {
+          animation: float 8s linear infinite;
+        }
+        .animate-sparkle {
+          animation: sparkle 4s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };
