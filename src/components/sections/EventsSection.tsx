@@ -19,7 +19,7 @@ const events = [
   },
   {
     id: 'thanh-hon',
-    title: 'Lễ Thành Hôn',
+    title: 'Lễ Tân Hôn',
     date: 'Thứ Bảy, Ngày DD tháng MM năm YYYY',
     time: '6:00 chiều',
     location: 'Trung tâm Hội nghị Tiệc cưới ABC',
