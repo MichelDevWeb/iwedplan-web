@@ -1,49 +1,31 @@
-# IWedPlan - Wedding Website
+# iWEDPLAN Wedding Website
 
-A beautiful and modern wedding website built with Next.js, Tailwind CSS, and Framer Motion. This website features elegant animations, responsive design, and a romantic theme perfect for sharing wedding details with guests.
+Beautiful and customizable wedding website built with Next.js and Tailwind CSS.
+
+![iWEDPLAN Wedding Website](public/images/iWEDPLAN.png)
 
 ## Features
 
-- 🎨 Beautiful and modern UI design
-- ✨ Smooth animations and transitions
-- 📱 Fully responsive layout
-- 🎭 Interactive elements and hover effects
-- 📅 Event details and RSVP functionality
-- 📍 Location maps and directions
-- 📸 Photo gallery
-- 💌 Guest book and messages
-
-## Tech Stack
-
-- **Framework**: Next.js 14
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Images**: Next.js Image Optimization
-- **Deployment**: Vercel
-
-## Project Structure
-
-```
-src/
-├── components/
-│   ├── common/           # Reusable components
-│   │   ├── AnimatedWeddingImages.tsx
-│   │   └── ...
-│   ├── sections/         # Page sections
-│   │   ├── BrideGroomSection.tsx
-│   │   ├── EventsSection.tsx
-│   │   └── ...
-│   └── ...
-├── public/
-│   ├── images/
-│   │   ├── album/        # Wedding photos
-│   │   └── ...
-│   └── ...
-└── ...
-```
+- 📱 Responsive design optimized for all devices
+- 🎨 Beautiful wedding-themed UI with elegant animations
+- 🌙 Light/dark mode support 
+- 🗓️ Dynamic date calculations for countdown timers
+- 📷 Image gallery with carousel
+- 📋 RSVP form with guest management
+- 📝 Interactive wishes/messages section
+- 📅 Relationship timeline and calendar
+- 🎬 Video integration
+- 💝 Gift registry/money transfer options
+- 🗺️ Maps and event location details
 
 ## Getting Started
+
+### Prerequisites
+
+- Node.js 14.6.0 or newer
+- npm, yarn, or pnpm
+
+### Installation
 
 1. Clone the repository:
    ```bash
@@ -54,53 +36,78 @@ src/
 2. Install dependencies:
    ```bash
    npm install
+   # or
+   yarn install
+   # or
+   pnpm install
    ```
 
-3. Run the development server:
+3. Start the development server:
    ```bash
    npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to view the website.
 
 ## Customization
 
-### Images
-Place your wedding photos in the following directories:
-- `/public/images/album/bride.png` - Bride's photo
-- `/public/images/album/groom.png` - Groom's photo
-- `/public/images/album/vuquy.png` - Lễ Vu Quy photo
-- `/public/images/album/tanhon.png` - Lễ Thành Hôn photo
+### Personalization
 
-### Content
-Update the following files to customize your wedding details:
-- `src/components/sections/BrideGroomSection.tsx` - Bride and groom information
-- `src/components/sections/EventsSection.tsx` - Wedding events and locations
-- `src/components/sections/RSVPSection.tsx` - RSVP form and details
+1. Edit bride and groom information in `src/components/sections/BrideGroomSection.tsx`
+2. Update wedding date and event details in `src/components/sections/EventsSection.tsx`
+3. Change the relationship start date in `src/components/sections/CalendarSection.tsx`
+4. Replace sample pictures in the `public/images` directory with your own
+
+### Styling
+
+The website uses Tailwind CSS for styling. Main theme colors can be modified in:
+
+- `src/app/globals.css` - Contains wedding theme color variables
+- `tailwind.config.js` - Extends the default theme with custom values
+
+### Adding/Removing Sections
+
+The main layout is defined in `src/app/page.tsx`. You can easily add, remove, or reorder sections by modifying this file.
+
+## Project Structure
+
+```
+iwedplan-web/
+├── public/           # Static assets (images, fonts, etc.)
+├── src/
+│   ├── app/          # Next.js app router
+│   ├── components/   # React components
+│   │   ├── common/   # Shared components (header, footer, etc.)
+│   │   ├── sections/ # Main page sections
+│   │   └── ui/       # UI components (buttons, cards, etc.)
+│   └── lib/          # Utility functions
+└── tailwind.config.js # Tailwind configuration
+```
 
 ## Deployment
 
-This project is configured for deployment on Vercel. To deploy:
+This project can be easily deployed on Vercel:
 
-1. Push your changes to GitHub
-2. Connect your repository to Vercel
-3. Deploy automatically or manually through the Vercel dashboard
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fiwedplan-web)
+
+For other deployment options, refer to the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Feel free to submit a pull request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+## Acknowledgements
 
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [Lucide React](https://lucide.dev/)
+- Built with [Next.js](https://nextjs.org)
+- Styled with [Tailwind CSS](https://tailwindcss.com)
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+- Icons from [Lucide](https://lucide.dev)
+- Inspiration from various wedding websites and templates
