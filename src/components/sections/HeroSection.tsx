@@ -627,8 +627,8 @@ const HeroSection = () => {
         {/* Content below frame */}
         <div className="flex flex-col items-center space-y-6 pt-4 animated fadeInUp">
           <h1 className="text-4xl md:text-6xl font-extrabold font-script italic">
-            {groomName} & {brideName}
-          </h1>
+          {groomName} & {brideName}
+        </h1>
           <p className="text-xl md:text-2xl animated fadeInUp delay-1s">We are getting married</p>
           <div className="relative group">
             <p className="text-lg md:text-xl font-semibold animated fadeInUp delay-2s bg-gradient-to-r from-rose-600 to-rose-800 bg-clip-text text-transparent">
