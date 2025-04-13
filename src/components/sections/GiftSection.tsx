@@ -10,13 +10,13 @@ const giftInfo = {
     name: "Tên Chú Rể",
     bankName: "Ngân hàng XYZ",
     accountNumber: "1234567890",
-    qrCodeSrc: "/images/album/hero.png",
+    qrCodeSrc: "/images/album/qr-groom.jpg",
   },
   bride: {
     name: "Tên Cô Dâu",
     bankName: "Ngân hàng ABC",
     accountNumber: "0987654321",
-    qrCodeSrc: "/images/album/hero.png",
+    qrCodeSrc: "/images/album/qr-groom.jpg",
   },
 };
 
