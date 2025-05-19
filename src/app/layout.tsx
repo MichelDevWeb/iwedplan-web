@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Great_Vibes } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,9 +43,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${greatVibes.variable} antialiased font-serif`}
       >
-        {children}
-        <Toaster richColors position="top-center" />
-        <FloatingActionButton />
+        <AuthProvider>
+          {children}
+          <Toaster richColors position="top-center" />
+          <FloatingActionButton />
+        </AuthProvider>
       </body>
     </html>
   );

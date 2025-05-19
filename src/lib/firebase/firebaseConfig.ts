@@ -1,31 +1,97 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics"; // Uncomment if you need Analytics
-// import { getFirestore } from "firebase/firestore"; // Uncomment if you need Firestore
-// import { getAuth } from "firebase/auth"; // Uncomment if you need Auth
-// import { getStorage } from "firebase/storage"; // Uncomment if you need Storage
+import { initializeApp, getApps, FirebaseApp } from '@firebase/app';
+import { Firestore } from '@firebase/firestore';
+import { Auth } from '@firebase/auth';
+import { FirebaseStorage } from '@firebase/storage';
 
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY, // Add your Firebase API Key here or in .env.local
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, // Add your Firebase Auth Domain here or in .env.local
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID, // Add your Firebase Project ID here or in .env.local
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, // Add your Firebase Storage Bucket here or in .env.local
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID, // Add your Firebase Messaging Sender ID here or in .env.local
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID, // Add your Firebase App ID here or in .env.local
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, // Add your Firebase Measurement ID here or in .env.local (optional)
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
+// Service instances cache
 let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+let firestoreInstance: Firestore;
+let storageInstance: FirebaseStorage;
+let authInstance: Auth;
+
+/**
+ * Initialize Firebase app if not already initialized
+ */
+export function getFirebaseApp(): FirebaseApp {
+  if (!app && typeof window !== 'undefined') {
+    // Only initialize on client side
+    const apps = getApps();
+    if (apps.length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = apps[0];
+    }
+  }
+  return app;
 }
 
-// Initialize other Firebase services as needed
-// const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-// const db = getFirestore(app);
-// const auth = getAuth(app);
-// const storage = getStorage(app);
+/**
+ * Get Firestore instance with lazy initialization
+ */
+export async function getFirestore(): Promise<Firestore> {
+  try {
+    if (!firestoreInstance) {
+      const app = getFirebaseApp();
+      const { getFirestore: getFirestoreFromFB } = await import('firebase/firestore');
+      firestoreInstance = getFirestoreFromFB(app);
+    }
+    return firestoreInstance;
+  } catch (error) {
+    console.error('Error initializing Firestore:', error);
+    throw new Error('Failed to initialize Firestore. Please try again later.');
+  }
+}
 
-export { app }; // Export other services like db, auth, storage as needed 
+/**
+ * Get Storage instance with lazy initialization
+ */
+export async function getStorage(): Promise<FirebaseStorage> {
+  try {
+    if (!storageInstance) {
+      const app = getFirebaseApp();
+      const { getStorage: getStorageFromFB } = await import('firebase/storage');
+      storageInstance = getStorageFromFB(app);
+    }
+    return storageInstance;
+  } catch (error) {
+    console.error('Error initializing Storage:', error);
+    throw new Error('Failed to initialize Storage. Please try again later.');
+  }
+}
+
+/**
+ * Get Auth instance with lazy initialization
+ */
+export async function getAuth(): Promise<Auth> {
+  try {
+    if (!authInstance) {
+      const app = getFirebaseApp();
+      const { getAuth: getAuthFromFB } = await import('firebase/auth');
+      authInstance = getAuthFromFB(app);
+    }
+    return authInstance;
+  } catch (error) {
+    console.error('Error initializing Auth:', error);
+    throw new Error('Failed to initialize Auth. Please try again later.');
+  }
+}
+
+/**
+ * Reset Firebase instances (useful for testing or after logout)
+ */
+export function resetFirebaseInstances(): void {
+  firestoreInstance = null as unknown as Firestore;
+  storageInstance = null as unknown as FirebaseStorage;
+  authInstance = null as unknown as Auth;
+} 

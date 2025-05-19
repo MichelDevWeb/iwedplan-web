@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import RsvpModal from '@/components/common/RsvpModal';
 import Image from 'next/image';
+import { WeddingData } from '@/lib/firebase/models';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -187,20 +188,61 @@ const frameSuggestions: Record<string, string[]> = {
   '5': ['peach', 'rose']
 };
 
-const HeroSection = () => {
-  const groomName = "Chú Rể";
-  const brideName = "Cô Dâu";
-  const weddingDate = "Ngày 04 tháng 12 năm 2023";
+interface HeroSectionProps {
+  weddingData: WeddingData;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ weddingData }) => {
+  const groomName = weddingData.groomName || "Chú Rể";
+  const brideName = weddingData.brideName || "Cô Dâu";
+  
+  // Format date as string if available
+  const formatWeddingDate = () => {
+    if (weddingData.eventDate) {
+      const date = weddingData.eventDate.toDate();
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      return `Ngày ${day} tháng ${month} năm ${year}`;
+    }
+    return "Ngày 04 tháng 12 năm 2023"; // Default if no date is set
+  };
+  
+  const weddingDate = formatWeddingDate();
+  
+  // Use wedding data for theme if available
+  const getInitialColorTheme = () => {
+    if (weddingData.color) {
+      const found = colorThemes.find(theme => theme.id === weddingData.color);
+      if (found) return found;
+    }
+    return colorThemes[0];
+  };
+  
+  // Get initial frame from wedding data
+  const getInitialFrame = () => {
+    if (weddingData.flowerFrame) {
+      const frameId = weddingData.flowerFrame.replace('rose', '1')
+        .replace('sage', '2')
+        .replace('gold', '3')
+        .replace('lavender', '4')
+        .replace('peach', '5');
+      
+      const found = flowerFrames.find(frame => frame.id === frameId);
+      if (found) return found;
+    }
+    return flowerFrames[0];
+  };
   
   // State for theme options
-  const [currentColorTheme, setCurrentColorTheme] = useState(colorThemes[0]);
-  const [currentFrame, setCurrentFrame] = useState(flowerFrames[0]);
+  const [currentColorTheme, setCurrentColorTheme] = useState(getInitialColorTheme());
+  const [currentFrame, setCurrentFrame] = useState(getInitialFrame());
   const [currentEffect, setCurrentEffect] = useState(effectOptions[0]); // Default: hearts
   
   // State for custom colors
-  const [customStartColor, setCustomStartColor] = useState('#ffd6e8');
+  const [customStartColor, setCustomStartColor] = useState(weddingData.customColor || '#ffd6e8');
   const [customEndColor, setCustomEndColor] = useState('#d1e5ff');
-  const [useCustomColors, setUseCustomColors] = useState(false);
+  const [useCustomColors, setUseCustomColors] = useState(!!weddingData.customColor);
   const [customButtonClass, setCustomButtonClass] = useState('bg-white/20 hover:bg-white/30 border-white/50 text-rose-800');
 
   // Effect particles state

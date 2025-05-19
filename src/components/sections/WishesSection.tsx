@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Heart, MessageSquare, Send, Clock } from 'lucide-react';
 import {
   Timestamp,
-} from 'firebase/firestore';
+} from '@firebase/firestore';
 
 // Define the form schema using Zod
 const formSchema = z.object({

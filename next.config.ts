@@ -25,9 +25,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'export',
-  distDir: 'dist',
-  trailingSlash: true,
 };
 
 export default withPWA(nextConfig as any);

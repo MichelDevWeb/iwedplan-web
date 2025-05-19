@@ -1,0 +1,76 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is the owner of a document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Allow read access
+      allow read: if true;
+      
+      // Allow create/write operations for authenticated users
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow users to update their own documents
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow deletion
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow access to subcollections of users
+      match /{subcollection}/{document=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Weddings collection rules
+    match /weddings/{weddingId} {
+      // Allow read for all
+      allow read: if true;
+      
+      // Allow write operations for authenticated users
+      allow create: if isAuthenticated();
+      
+      // Allow update and delete for document owners
+      allow update, delete: if isAuthenticated() && 
+                             (resource.data.ownerId == request.auth.uid || 
+                              request.resource.data.ownerId == request.auth.uid);
+                              
+      // Allow access to weddings subcollections
+      match /{subcollection}/{document=**} {
+        allow read: if true;
+        allow write: if isAuthenticated() && 
+                      (get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid);
+      }
+    }
+    
+    // Allow public access to subdomain_checks collection
+    match /subdomain_checks/{docId} {
+      allow read, write: if true;
+    }
+    
+    // Allow access to rsvps collection
+    match /rsvps/{docId} {
+      allow read, write: if true;
+    }
+    
+    // Allow access to test collection for connection testing
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

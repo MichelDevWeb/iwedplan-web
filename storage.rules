@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Allow public access to wedding images
+    match /weddings/{weddingId}/{fileName} {
+      // Anyone can read wedding files
+      allow read: if true;
+      
+      // Only authenticated users can write
+      allow create, update, delete: if isAuthenticated() || true; // Temporarily allow all writes for development
+    }
+    
+    // Allow access to user profile images
+    match /users/{userId}/{fileName} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated() && request.auth.uid == userId || true; // Temporarily allow all writes for development
+    }
+    
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+} 

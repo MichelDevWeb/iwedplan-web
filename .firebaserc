@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "iwedplan"
-  }
+    "default": "iwed-plan",
+    "staging": "iwed-plan"
+  },
+  "targets": {},
+  "etags": {}
 }

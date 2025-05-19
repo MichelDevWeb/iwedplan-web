@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { app } from '@/lib/firebase/firebaseConfig';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirebaseApp, getFirestore } from '@/lib/firebase/firebaseConfig';
+import { collection, addDoc, serverTimestamp } from '@firebase/firestore';
 
 // Define the RSVP form schema
 const rsvpFormSchema = z.object({
@@ -44,9 +44,14 @@ const rsvpFormSchema = z.object({
   path: ["guests"],
 });
 
-// Initialize Firestore
-const db = getFirestore(app);
-const rsvpCollectionRef = collection(db, "rsvps");
+// Initialize Firestore lazily
+let db: any;
+let rsvpCollectionRef: any;
+
+const initializeFirestore = async () => {
+  db = await getFirestore();
+  rsvpCollectionRef = collection(db, "rsvps");
+};
 
 interface RsvpModalProps {
   trigger: React.ReactNode;
@@ -73,6 +78,11 @@ const RsvpModal: React.FC<RsvpModalProps> = ({ trigger }) => {
     setIsSubmitting(true);
     setSubmitStatus(null);
     console.log("Submitting RSVP:", values);
+
+    // Initialize Firestore if not already done
+    if (!db) {
+      await initializeFirestore();
+    }
 
     const submissionData = {
         ...values,
