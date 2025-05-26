@@ -190,4 +190,56 @@ export const addPaymentRecord = async (
     console.error('Error adding payment record:', error);
     throw error;
   }
+};
+
+/**
+ * Get all weddings created by a user
+ */
+export const getUserWeddings = async (userId: string): Promise<{id: string, groomName: string, brideName: string}[]> => {
+  try {
+    const db = await getFirestore();
+    
+    // First get user document to check if they have weddings
+    const userRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userRef);
+    
+    if (!userDoc.exists()) {
+      console.warn('User not found:', userId);
+      return [];
+    }
+    
+    const userData = userDoc.data();
+    const weddingIds = userData.weddingIds || [];
+    
+    if (weddingIds.length === 0) {
+      return [];
+    }
+    
+    // Query weddings where ownerId equals userId
+    const weddingsQuery = query(
+      collection(db, 'weddings'),
+      where('ownerId', '==', userId)
+    );
+    
+    const weddingsSnap = await getDocs(weddingsQuery);
+    
+    if (weddingsSnap.empty) {
+      return [];
+    }
+    
+    // Map the results to the expected format
+    const weddings = weddingsSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        groomName: data.groomName || '',
+        brideName: data.brideName || ''
+      };
+    });
+    
+    return weddings;
+  } catch (error) {
+    console.error('Error fetching user weddings:', error);
+    return [];
+  }
 }; 

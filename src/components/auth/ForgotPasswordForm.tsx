@@ -40,7 +40,7 @@ export default function ForgotPasswordForm({ language }: ForgotPasswordFormProps
   return (
     <Card className="w-full max-w-md mx-auto bg-white/90 backdrop-blur-sm border-pink-100 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl text-center">{language === 'vi' ? 'Đặt Lại Mật Khẩu' : 'Reset Password'}</CardTitle>
+        <CardTitle className="text-2xl text-center">{t.auth.forgotPassword}</CardTitle>
         <CardDescription className="text-center">
           {language === 'vi' 
             ? 'Nhập email của bạn và chúng tôi sẽ gửi cho bạn liên kết để đặt lại mật khẩu' 
@@ -73,7 +73,7 @@ export default function ForgotPasswordForm({ language }: ForgotPasswordFormProps
             </p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button asChild className="mt-4 bg-rose-500 hover:bg-rose-600 text-white" variant="default">
-                <Link href="/auth/login">{language === 'vi' ? 'Quay lại đăng nhập' : 'Back to login'}</Link>
+                <Link href="/auth/login">{t.auth.backToLogin}</Link>
               </Button>
             </motion.div>
           </motion.div>
@@ -108,7 +108,7 @@ export default function ForgotPasswordForm({ language }: ForgotPasswordFormProps
         <p className="text-sm text-center text-muted-foreground">
           {language === 'vi' ? 'Đã nhớ mật khẩu?' : 'Remember your password?'}{' '}
           <Link href="/auth/login" className="text-rose-600 hover:underline">
-            {language === 'vi' ? 'Quay lại đăng nhập' : 'Back to login'}
+            {t.auth.backToLogin}
           </Link>
         </p>
       </CardFooter>

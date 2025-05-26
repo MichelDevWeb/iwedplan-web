@@ -1,5 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/create/template/[userWedID]/page": "app/create/template/[userWedID]/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
-}

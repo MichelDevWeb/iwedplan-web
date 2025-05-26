@@ -2,163 +2,38 @@
 
 import { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Loader2, Upload, CheckCircle, ChevronLeft, ChevronRight, Music, 
-  Link as LinkIcon, Crown, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Play, Pause, Plus, Minus, Sparkles, Gift
-} from "lucide-react";
-import { getWeddingWebsite, updateWeddingWebsite, uploadImage } from "@/lib/firebase/weddingService";
+import { ChevronLeft, ChevronRight, Sparkles, Gift } from "lucide-react";
+import { getWeddingWebsite, updateWeddingWebsite, uploadImage, getTemplateSections, updateTemplateSections, TemplateSection } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Slider } from "@/components/ui/slider";
-import ConfirmationModal from "@/components/ConfirmationModal";
+import ConfirmationModal from "@/components/modals/ConfirmationModal";
+import LoadingScreen from "@/components/ui/loading-screen";
+import { toast } from "sonner";
 
 // Import new tab components
-import TemplateTab from "@/components/template/TemplateTab";
-import FlowerFrameTab from "@/components/template/FlowerFrameTab";
-import HeroImageTab from "@/components/template/HeroImageTab";
-import ColorTab from "@/components/template/ColorTab";
-import MusicTab from "@/components/template/MusicTab";
+import TemplateTab from "@/components/create-template/TemplateTab";
+import FlowerFrameTab from "@/components/create-template/FlowerFrameTab";
+import HeroImageTab from "@/components/create-template/HeroImageTab";
+import ColorTab from "@/components/create-template/ColorTab";
+import MusicTab from "@/components/create-template/MusicTab";
+import SectionsTab from "@/components/create-template/SectionsTab";
+import EffectsTab from "@/components/create-template/EffectsTab";
 
-interface TemplateOption {
-  id: string;
-  name: string;
-  image: string;
-}
+// Import from templateConfig
+import { 
+  templates, 
+  flowerFrameOptions, 
+  colorOptions, 
+  VIP_PRICES,
+  effectOptions
+} from "@/config/templateConfig";
 
-// Template options
-const templates: TemplateOption[] = [
-  {
-    id: "default",
-    name: "Template Mặc định",
-    image: "/images/templates/default.jpg",
-  },
-  {
-    id: "elegant",
-    name: "Elegant",
-    image: "/images/templates/elegant.jpg",
-  },
-  {
-    id: "modern",
-    name: "Modern",
-    image: "/images/templates/modern.jpg",
-  },
-];
-
-// Flower frame options from HeroSection
-const flowerFrames = [
-  { 
-    id: 'rose',
-    name: 'Blush Flower',
-    image: '/images/flower-frame/1.png'
-  },
-  { 
-    id: 'sage',
-    name: 'Sage Flower',
-    image: '/images/flower-frame/2.png'
-  },
-  { 
-    id: 'gold',
-    name: 'Rose Gold Flower',
-    image: '/images/flower-frame/3.png'
-  },
-  { 
-    id: 'lavender',
-    name: 'Lavender Flower',
-    image: '/images/flower-frame/4.png'
-  },
-  { 
-    id: 'peach',
-    name: 'Peach Flower',
-    image: '/images/flower-frame/5.png'
-  },
-];
-
-// Color options from HeroSection
-const colorOptions = [
-  {
-    id: "blush",
-    name: "Hồng Blush",
-    value: "#fad1e6",
-  },
-  {
-    id: "sage",
-    name: "Xanh Sage",
-    value: "#e3f1ea",
-  },
-  {
-    id: "rose",
-    name: "Hồng Rose Gold",
-    value: "#fde4e4",
-  },
-  {
-    id: "lavender",
-    name: "Tím Lavender",
-    value: "#e9e4f9",
-  },
-  {
-    id: "peach",
-    name: "Đào Peach",
-    value: "#feeadd",
-  },
-  {
-    id: "custom",
-    name: "Màu tùy chỉnh",
-    value: "",
-  },
-];
-
+// No longer need this since flowerFrameOptions now includes the positioning
 // Define frame options with specific image positioning for previewing
-const flowerFramesWithPositioning = [
-  { 
-    id: 'rose',
-    name: 'Blush Flower',
-    image: '/images/flower-frame/1.png',
-    imageSize: 'w-[85%] h-[85%]', 
-    imagePosition: 'translate-x-0 translate-y-0' 
-  },
-  { 
-    id: 'sage',
-    name: 'Sage Flower',
-    image: '/images/flower-frame/2.png',
-    imageSize: 'w-[85%] h-[85%]', 
-    imagePosition: 'translate-x-0 translate-y-2' 
-  },
-  { 
-    id: 'gold',
-    name: 'Rose Gold Flower',
-    image: '/images/flower-frame/3.png',
-    imageSize: 'w-[75%] h-[75%]', 
-    imagePosition: 'translate-x-0 translate-y-0' 
-  },
-  { 
-    id: 'lavender',
-    name: 'Lavender Flower',
-    image: '/images/flower-frame/4.png',
-    imageSize: 'w-[85%] h-[90%]', 
-    imagePosition: 'translate-x-0 translate-y-1' 
-  },
-  { 
-    id: 'peach',
-    name: 'Peach Flower',
-    image: '/images/flower-frame/5.png',
-    imageSize: 'w-[85%] h-[85%]', 
-    imagePosition: 'translate-x-0 translate-y-0' 
-  }
-];
-
-// Update vip price constants
-const VIP_PRICES = {
-  TEMPLATE: 150000, // 150,000 VND
-  FLOWER_FRAME: 100000, // 100,000 VND
-  COLOR: 50000, // 50,000 VND
-  MUSIC: 200000, // 200,000 VND per song
-};
+const flowerFramesWithPositioning = flowerFrameOptions;
 
 // Add CSS for animation
 const pulseAnimation = `
@@ -206,19 +81,30 @@ export default function TemplatePage({
   const [imageOffsetY, setImageOffsetY] = useState(0);
   
   // Music states
-  const [musicFile, setMusicFile] = useState<File | null>(null);
-  const [musicLink, setMusicLink] = useState("");
+  const [musicFiles, setMusicFiles] = useState<File[]>([]);
+  const [musicLinks, setMusicLinks] = useState<string[]>([]);
   const [musicSource, setMusicSource] = useState<"file" | "link">("file");
-  const [musicFileName, setMusicFileName] = useState("");
-  const [musicPreviewUrl, setMusicPreviewUrl] = useState("");
+  const [musicFileNames, setMusicFileNames] = useState<string[]>([]);
+  const [musicPreviewUrls, setMusicPreviewUrls] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [musicCount, setMusicCount] = useState(1);
   
   const [activeTab, setActiveTab] = useState("template");
   
-  const [showAffiliateBanner, setShowAffiliateBanner] = useState(true);
-  const [discountCode, setDiscountCode] = useState("");
-  const [showDiscount, setShowDiscount] = useState(false);
+  // Add new state for sections
+  const [sections, setSections] = useState<TemplateSection[]>([]);
+  
+  // Add new state for effects
+  const [selectedEffect, setSelectedEffect] = useState("none");
+  
+  // Define tabs array for easy mapping
+  const tabs = [
+    { id: "template", label: "Template" },
+    { id: "design", label: "Thiết kế" },
+    { id: "image", label: "Ảnh bìa" },
+    { id: "sections", label: "Cấu trúc" },
+    { id: "music", label: "Nhạc nền" },
+  ];
   
   // Load existing wedding data
   useEffect(() => {
@@ -241,20 +127,36 @@ export default function TemplatePage({
             setHeroImagePreview(data.heroImageUrl);
           }
           
-          if (data.musicUrl) {
-            if (data.musicUrl.startsWith('http')) {
-              setMusicSource("link");
-              setMusicLink(data.musicUrl);
-            } else {
-              setMusicSource("file");
-              setMusicFileName(data.musicFileName || "Đã tải lên nhạc nền");
-              setMusicPreviewUrl(data.musicUrl);
-            }
+          if (data.musicUrls && data.musicUrls.length > 0) {
+            const fileUrls: string[] = [];
+            const linkUrls: string[] = [];
+            const fileNames: string[] = [];
+            const previewUrls: string[] = [];
+            
+            data.musicUrls.forEach(url => {
+              if (url.startsWith('http')) {
+                linkUrls.push(url);
+                setMusicSource("link");
+              } else {
+                fileUrls.push(url);
+                fileNames.push(data.musicFileName || "Đã tải lên nhạc nền");
+                previewUrls.push(url);
+              }
+            });
+            
+            setMusicLinks(linkUrls);
+            setMusicFileNames(fileNames);
+            setMusicPreviewUrls(previewUrls);
           }
           
           // Set music count
           if (data.musicCount) {
             setMusicCount(data.musicCount > 3 ? 3 : data.musicCount);
+          }
+          
+          // Set effect if available
+          if (data.effect) {
+            setSelectedEffect(data.effect);
           }
         } else {
           setError("Không tìm thấy thông tin website cưới");
@@ -267,6 +169,19 @@ export default function TemplatePage({
     }
     
     loadWeddingData();
+  }, [userWedID]);
+  
+  // Load sections when component mounts
+  useEffect(() => {
+    async function loadSections() {
+      try {
+        const loadedSections = await getTemplateSections(userWedID);
+        setSections(loadedSections);
+      } catch (error) {
+        console.error('Error loading sections:', error);
+      }
+    }
+    loadSections();
   }, [userWedID]);
   
   // Handle hero image selection
@@ -284,23 +199,26 @@ export default function TemplatePage({
   
   // Handle music file selection
   const handleMusicFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        setError("File nhạc không được vượt quá 10MB");
-        return;
-      }
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          setError("File nhạc không được vượt quá 10MB");
+          return false;
+        }
+        return true;
+      });
       
-      setMusicFile(file);
-      setMusicFileName(file.name);
+      setMusicFiles(validFiles);
+      setMusicFileNames(validFiles.map(file => file.name));
       setMusicSource("file");
       
-      // Create a preview URL for the audio file
-      const previewUrl = URL.createObjectURL(file);
-      setMusicPreviewUrl(previewUrl);
+      // Create preview URLs for the audio files
+      const previewUrls = validFiles.map(file => URL.createObjectURL(file));
+      setMusicPreviewUrls(previewUrls);
       
       return () => {
-        URL.revokeObjectURL(previewUrl);
+        previewUrls.forEach(url => URL.revokeObjectURL(url));
       };
     }
   };
@@ -356,6 +274,17 @@ export default function TemplatePage({
     }
   };
   
+  // Handle sections change
+  const handleSectionsChange = async (newSections: TemplateSection[]) => {
+    try {
+      await updateTemplateSections(userWedID, newSections);
+      setSections(newSections);
+    } catch (error) {
+      console.error('Error updating sections:', error);
+      toast.error('Không thể cập nhật cấu trúc website');
+    }
+  };
+  
   // Save settings and continue
   const handleSave = async () => {
     try {
@@ -370,22 +299,25 @@ export default function TemplatePage({
       let heroImageUrl = weddingData.heroImageUrl;
       if (heroImage) {
         const path = `weddings/${userWedID}/hero-image.jpg`;
-        heroImageUrl = await uploadImage(heroImage, path);
+        heroImageUrl = await uploadImage(userWedID, heroImage, path);
       }
       
       // Handle music
-      let musicUrl = weddingData.musicUrl || "";
-      let musicFileName = weddingData.musicFileName || "";
+      let musicUrls: string[] = [];
+      let musicFileName = "";
       
-      if (musicSource === "file" && musicFile) {
-        musicUrl = await uploadMusicFile(musicFile);
-        musicFileName = musicFile.name;
-      } else if (musicSource === "link" && musicLink) {
-        if (!validateMusicLink(musicLink)) {
-          throw new Error("Link nhạc không hợp lệ. Vui lòng sử dụng link từ YouTube, SoundCloud hoặc Spotify.");
+      if (musicSource === "file" && musicFiles.length > 0) {
+        // Upload all music files
+        const uploadPromises = musicFiles.map(file => uploadMusicFile(file));
+        musicUrls = await Promise.all(uploadPromises);
+        musicFileName = musicFiles.map(file => file.name).join(", ");
+      } else if (musicSource === "link" && musicLinks.length > 0) {
+        // Validate all music links
+        const invalidLinks = musicLinks.filter(link => !validateMusicLink(link));
+        if (invalidLinks.length > 0) {
+          throw new Error("Một số link nhạc không hợp lệ. Vui lòng sử dụng link từ YouTube, SoundCloud hoặc Spotify.");
         }
-        musicUrl = musicLink;
-        musicFileName = "";
+        musicUrls = musicLinks;
       }
       
       // Update wedding data
@@ -395,12 +327,13 @@ export default function TemplatePage({
         color: selectedColor,
         customColor: selectedColor === "custom" ? customColor : "",
         heroImageUrl,
-        musicUrl,
+        musicUrls,
         musicFileName,
         musicCount,
         imageScale,
         imageOffsetX,
-        imageOffsetY
+        imageOffsetY,
+        effect: selectedEffect
       });
       
       // Navigate to completed page
@@ -414,17 +347,17 @@ export default function TemplatePage({
   
   // Handle tab navigation
   const nextTab = () => {
-    if (activeTab === "template") setActiveTab("frame");
-    else if (activeTab === "frame") setActiveTab("image");
-    else if (activeTab === "image") setActiveTab("color");
-    else if (activeTab === "color") setActiveTab("music");
+    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1].id);
+    }
   };
   
   const prevTab = () => {
-    if (activeTab === "music") setActiveTab("color");
-    else if (activeTab === "color") setActiveTab("image");
-    else if (activeTab === "image") setActiveTab("frame");
-    else if (activeTab === "frame") setActiveTab("template");
+    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1].id);
+    }
   };
   
   // Check if user has selected VIP features
@@ -441,7 +374,7 @@ export default function TemplatePage({
     }
     
     // Check flower frame
-    const frameIndex = flowerFrames.findIndex(frame => frame.id === selectedFlowerFrame);
+    const frameIndex = flowerFrameOptions.findIndex(frame => frame.id === selectedFlowerFrame);
     if (frameIndex > 1) { // VIP frames start after index 1
       vipFeatures.push({
         name: "Khung hoa VIP",
@@ -469,47 +402,28 @@ export default function TemplatePage({
       });
     }
     
+    // Check effect
+    if (selectedEffect !== 'none' && selectedEffect !== 'hearts') {
+      vipFeatures.push({
+        name: "Hiệu ứng đặc biệt",
+        count: 1,
+        price: VIP_PRICES.EFFECT
+      });
+    }
+    
     return {
       hasVip: vipFeatures.length > 0,
       features: vipFeatures
     };
   };
   
-  // Generate discount code function
-  const generateDiscountCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = 'IWED';
-    for (let i = 0; i < 5; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setDiscountCode(code);
-    setShowDiscount(true);
-    
-    // Save the code to localStorage to persist it
-    localStorage.setItem('iwedplan_discount_code', code);
-    
-    // Hide banner after code is generated
-    setTimeout(() => {
-      setShowAffiliateBanner(false);
-    }, 5000);
+  // Handle effect change
+  const handleEffectChange = (effectId: string) => {
+    setSelectedEffect(effectId);
   };
   
-  // Check for existing discount code in localStorage
-  useEffect(() => {
-    const savedCode = localStorage.getItem('iwedplan_discount_code');
-    if (savedCode) {
-      setDiscountCode(savedCode);
-      setShowDiscount(true);
-      setShowAffiliateBanner(false);
-    }
-  }, []);
-  
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-pink-50">
-        <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
-      </div>
-    );
+    return <LoadingScreen message="Đang tải dữ liệu mẫu..." size="md" />;
   }
   
   if (error && !weddingData) {
@@ -526,67 +440,60 @@ export default function TemplatePage({
   }
   
   return (
-    <div className="min-h-screen bg-pink-50 py-8 px-4">
-      <style jsx global>{pulseAnimation}</style>
+    <div className="min-h-screen bg-pink-50 py-8 px-4 md:px-6">
+      <style jsx global>{`
+        ${pulseAnimation}
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
       
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold">Tùy chỉnh Website Cưới</h1>
-          <p className="text-gray-500">
+        <div className="p-4 md:p-6 border-b">
+          <h1 className="text-xl md:text-2xl font-bold">Tùy chỉnh Website Cưới</h1>
+          <p className="text-gray-500 text-sm md:text-base">
             {weddingData?.groomName} & {weddingData?.brideName} - {weddingData?.subdomain}.iwedplan.com
           </p>
         </div>
         
-        {showAffiliateBanner && (
-          <div 
-            className="relative bg-gradient-to-r from-pink-100 to-purple-100 p-4 mx-4 mt-4 rounded-lg border-2 border-pink-300 cursor-pointer"
-            style={{ animation: 'pulse-border 2s infinite' }}
-            onClick={generateDiscountCode}
-          >
-            <div className="flex items-center">
-              <Sparkles className="h-5 w-5 text-pink-500 mr-2" />
-              <p className="text-pink-800 font-medium flex-1">
-                Nhấn vào đây để nhận mã giảm giá 20% cho các tính năng VIP!
-              </p>
-              <Gift className="h-5 w-5 text-pink-500 ml-2 animate-bounce" />
-            </div>
-          </div>
-        )}
-        
-        {showDiscount && (
-          <div className="bg-green-50 p-4 mx-4 mt-4 rounded-lg border border-green-200">
-            <div className="flex items-center">
-              <div className="flex-1">
-                <p className="text-green-800 font-medium">
-                  Mã giảm giá của bạn: <span className="font-bold text-green-600">{discountCode}</span>
-                </p>
-                <p className="text-sm text-green-600">Giảm 20% cho tất cả các tính năng VIP!</p>
-              </div>
-              <Button 
-                size="sm" 
-                className="bg-green-500 hover:bg-green-600"
-                onClick={() => {
-                  navigator.clipboard.writeText(discountCode);
-                }}
-              >
-                Sao chép
-              </Button>
-            </div>
-          </div>
-        )}
-        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="px-6 pt-4">
-            <TabsList className="w-full grid grid-cols-5">
-              <TabsTrigger value="template">Template</TabsTrigger>
-              <TabsTrigger value="frame">Khung hoa</TabsTrigger>
-              <TabsTrigger value="image">Ảnh bìa</TabsTrigger>
-              <TabsTrigger value="color">Màu sắc</TabsTrigger>
-              <TabsTrigger value="music">Nhạc nền</TabsTrigger>
-            </TabsList>
+          <div className="px-4 md:px-6 pt-4">
+            {/* Mobile: Horizontal scrollable tabs */}
+            <div className="md:hidden overflow-x-auto scrollbar-hide">
+              <TabsList className="flex w-max min-w-full gap-1 p-1">
+                {tabs.map((tab) => (
+                  <TabsTrigger 
+                    key={tab.id} 
+                    value={tab.id} 
+                    className="text-xs py-2 px-3 whitespace-nowrap flex-shrink-0 min-w-[80px]"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            
+            {/* Desktop: Grid layout */}
+            <div className="hidden md:block">
+              <TabsList className="w-full grid grid-cols-5 gap-2">
+                {tabs.map((tab) => (
+                  <TabsTrigger 
+                    key={tab.id} 
+                    value={tab.id} 
+                    className="text-sm py-2 px-3"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </div>
           
-          <TabsContent value="template" className="p-6">
+          <TabsContent value="template" className="p-4 md:p-6">
             <TemplateTab 
               templates={templates}
               selectedTemplate={selectedTemplate}
@@ -595,16 +502,43 @@ export default function TemplatePage({
             />
           </TabsContent>
           
-          <TabsContent value="frame" className="p-6">
-            <FlowerFrameTab 
-              flowerFrames={flowerFrames}
-              selectedFlowerFrame={selectedFlowerFrame}
-              setSelectedFlowerFrame={setSelectedFlowerFrame}
-              VIP_PRICES={VIP_PRICES}
-            />
+          <TabsContent value="design" className="p-4 md:p-6">
+            <div className="space-y-8">
+              {/* Flower Frame Section */}
+              <div className="border-b pb-6">
+                <FlowerFrameTab 
+                  flowerFrames={flowerFrameOptions}
+                  selectedFlowerFrame={selectedFlowerFrame}
+                  setSelectedFlowerFrame={setSelectedFlowerFrame}
+                  VIP_PRICES={VIP_PRICES}
+                />
+              </div>
+              
+              {/* Color Section */}
+              <div className="border-b pb-6">
+                <ColorTab 
+                  colorOptions={colorOptions}
+                  selectedColor={selectedColor}
+                  setSelectedColor={setSelectedColor}
+                  customColor={customColor}
+                  setCustomColor={setCustomColor}
+                  VIP_PRICES={VIP_PRICES}
+                />
+              </div>
+              
+              {/* Effects Section */}
+              <div>
+                <EffectsTab 
+                  effectOptions={effectOptions}
+                  selectedEffect={selectedEffect}
+                  onEffectChange={handleEffectChange}
+                  VIP_PRICES={VIP_PRICES}
+                />
+              </div>
+            </div>
           </TabsContent>
           
-          <TabsContent value="image" className="p-6">
+          <TabsContent value="image" className="p-4 md:p-6">
             <HeroImageTab 
               heroImage={heroImage}
               heroImagePreview={heroImagePreview}
@@ -620,79 +554,78 @@ export default function TemplatePage({
             />
           </TabsContent>
           
-          <TabsContent value="color" className="p-6">
-            <ColorTab 
-              colorOptions={colorOptions}
-              selectedColor={selectedColor}
-              setSelectedColor={setSelectedColor}
-              customColor={customColor}
-              setCustomColor={setCustomColor}
-              VIP_PRICES={VIP_PRICES}
+          <TabsContent value="sections" className="p-4 md:p-6">
+            <SectionsTab 
+              weddingId={userWedID}
+              sections={sections}
+              onSectionsChange={handleSectionsChange}
             />
           </TabsContent>
           
-          <TabsContent value="music" className="p-6">
+          <TabsContent value="music" className="p-4 md:p-6">
             <MusicTab 
-              musicFile={musicFile}
-              musicFileName={musicFileName}
-              musicPreviewUrl={musicPreviewUrl}
-              musicLink={musicLink}
+              musicFiles={musicFiles}
+              musicFileNames={musicFileNames}
+              musicPreviewUrls={musicPreviewUrls}
+              musicLinks={musicLinks}
               musicSource={musicSource}
               isPlaying={isPlaying}
               musicCount={musicCount}
               setMusicSource={setMusicSource}
               handleMusicFileChange={handleMusicFileChange}
-              setMusicLink={setMusicLink}
+              setMusicLinks={setMusicLinks}
               toggleAudio={toggleAudio}
               increaseMusicCount={increaseMusicCount}
               decreaseMusicCount={decreaseMusicCount}
               validateMusicLink={validateMusicLink}
               VIP_PRICES={VIP_PRICES}
             />
-            {/* Hidden audio element for preview */}
-            {musicPreviewUrl && (
+            {/* Hidden audio elements for preview */}
+            {musicPreviewUrls.map((url, index) => (
               <audio 
+                key={index}
                 ref={audioRef}
-                src={musicPreviewUrl} 
+                src={url} 
                 onEnded={() => setIsPlaying(false)}
                 style={{ display: 'none' }}
               />
-            )}
+            ))}
           </TabsContent>
           
           {error && (
-            <div className="px-6 py-2">
+            <div className="px-4 md:px-6 py-2">
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             </div>
           )}
           
-          <div className="p-6 border-t flex justify-between">
+          <div className="p-4 md:p-6 border-t flex justify-between">
             <Button 
               type="button" 
               variant="outline" 
               onClick={prevTab}
-              disabled={activeTab === "template" || saving}
+              disabled={activeTab === tabs[0].id || saving}
+              className="text-sm md:text-base"
             >
-              <ChevronLeft className="mr-2 h-4 w-4" /> Quay lại
+              <ChevronLeft className="mr-1 md:mr-2 h-4 w-4" /> Quay lại
             </Button>
             
-            {activeTab === "music" ? (
+            {activeTab === tabs[tabs.length - 1].id ? (
               <ConfirmationModal
                 onSave={handleSave}
                 userWedID={userWedID}
                 hasVipFeatures={hasVipFeatures().hasVip}
                 vipFeatures={hasVipFeatures().features}
                 trigger={
-                  <Button type="button" disabled={saving}>
+                  <Button type="button" disabled={saving} className="text-sm md:text-base">
                     Hoàn tất
                   </Button>
                 }
               />
             ) : (
-              <Button type="button" onClick={nextTab} disabled={saving}>
-                Tiếp tục <ChevronRight className="ml-2 h-4 w-4" />
+              <Button type="button" onClick={nextTab} disabled={saving} className="text-sm md:text-base">
+                Tiếp tục <ChevronRight className="ml-1 md:ml-2 h-4 w-4" />
               </Button>
             )}
           </div>

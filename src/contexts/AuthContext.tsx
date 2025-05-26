@@ -4,8 +4,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
 import { 
   onAuthChange, 
-  getCurrentUser, 
-  isAuthenticated as checkIsAuthenticated 
 } from '@/lib/firebase/authService';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -44,7 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               
               // If user is accessing auth pages with cached data, redirect to dashboard
               if (pathname?.startsWith('/auth')) {
-                router.push('/dashboard');
+                router.push('/landing');
               }
             } catch (e) {
               // Invalid cache, will be replaced by real auth
@@ -72,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             
             // Redirect from auth pages if user is authenticated
             if (pathname?.startsWith('/auth')) {
-              router.push('/dashboard');
+              router.push('/landing');
             }
           } else if (!firebaseUser && typeof window !== 'undefined') {
             localStorage.removeItem('iwedplan_user');
