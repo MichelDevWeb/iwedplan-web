@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { FaGoogle } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import CreateWeddingDialog from '@/components/dialogs/CreateWeddingDialog';
+import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import { Language, translations } from '@/lib/translations';
 import { motion } from 'framer-motion';
 
@@ -67,9 +67,9 @@ export default function RegisterForm({ language }: RegisterFormProps) {
     <>
       <Card className="w-full max-w-md mx-auto border-pink-100 shadow-lg bg-white/90 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center text-gray-800">{language === 'vi' ? 'Tạo tài khoản' : 'Create an Account'}</CardTitle>
+          <CardTitle className="text-2xl text-center text-gray-800">{t.auth.register}</CardTitle>
           <CardDescription className="text-center text-gray-500">
-            {language === 'vi' ? 'Nhập thông tin của bạn để tạo tài khoản' : 'Enter your details to create your account'}
+            {t.auth.registerSubtitle}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -170,7 +170,7 @@ export default function RegisterForm({ language }: RegisterFormProps) {
           <p className="text-sm text-center text-gray-500">
             {language === 'vi' ? 'Đã có tài khoản?' : 'Already have an account?'}{' '}
             <Link href="/auth/login" className="text-pink-600 hover:underline">
-              {language === 'vi' ? 'Đăng nhập' : 'Sign in'}
+              {t.auth.signIn}
             </Link>
           </p>
         </CardFooter>

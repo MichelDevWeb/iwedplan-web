@@ -29,8 +29,8 @@ const greatVibes = Great_Vibes({
 });
 
 export const metadata: Metadata = {
-  title: "Chú Rể & Cô Dâu",
-  description: "Chú Rể & Cô Dâu - iWedPlan",
+  title: "iWedPlan",
+  description: "iWedPlan - Tạo website cưới đẹp mắt và chuyên nghiệp",
 };
 
 export default function RootLayout({

@@ -5,12 +5,14 @@ import { ArrowRight, Calendar, Heart, Image as ImageIcon, MessageSquare, Users, 
 import Link from "next/link";
 import NextImage from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState } from "react";
-import CreateWeddingDialog from "@/components/dialogs/CreateWeddingDialog";
+import { useRef, useState, useEffect } from "react";
+import CreateWeddingDialog from "@/components/modals/CreateWeddingModal";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/common/Header";
 import { translations, Language } from "@/lib/translations";
+import { getFeaturedWeddingWebsites } from "@/lib/firebase/weddingService";
+import { WeddingData } from "@/lib/firebase/models";
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,11 +25,40 @@ export default function LandingPage() {
   const [language, setLanguage] = useState<Language>('vi');
   const { isAuthenticated, loading } = useAuth();
   const t = translations[language];
+  const [featuredWeddings, setFeaturedWeddings] = useState<WeddingData[]>([]);
+  const [loadingWeddings, setLoadingWeddings] = useState(true);
 
   const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 0.5, 0]);
 
   const router = useRouter();
+
+  // Fetch featured weddings from database
+  useEffect(() => {
+    const fetchFeaturedWeddings = async () => {
+      try {
+        setLoadingWeddings(true);
+        const weddings = await getFeaturedWeddingWebsites(6);
+        setFeaturedWeddings(weddings);
+      } catch (error) {
+        console.error("Error fetching featured weddings:", error);
+      } finally {
+        setLoadingWeddings(false);
+      }
+    };
+
+    fetchFeaturedWeddings();
+  }, []);
+
+  // Transform wedding data to display format
+  const transformedWeddings = featuredWeddings.map(wedding => ({
+    id: wedding.id,
+    title: `${wedding.groomName} & ${wedding.brideName}`,
+    description: wedding.description || t.websitesTitle,
+    image: wedding.heroImageUrl || '/images/weddings/default-wedding.jpg',
+    rating: "4.9",
+    url: `/${wedding.id}`
+  }));
 
   const handleCreateClick = () => {
     if (isAuthenticated) {
@@ -228,8 +259,9 @@ export default function LandingPage() {
               <NextImage
                 src="/images/app-preview.png"
                 alt="App Preview"
-                width={500}
-                height={800}
+                height={0}
+                width={0}
+                style={{width:'100%', height: "auto" }}
                 className="rounded-2xl shadow-2xl"
               />
             </motion.div>
@@ -238,7 +270,7 @@ export default function LandingPage() {
       </section>
 
       {/* Public Wedding Websites Section */}
-      <section className="py-20 px-4">
+      <section id="websites" className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.h2 
             className="text-3xl md:text-4xl font-bold text-center mb-12 font-playfair"
@@ -251,64 +283,95 @@ export default function LandingPage() {
           </motion.h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {weddingWebsites.map((website, index) => (
-              <motion.div
-                key={index}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ 
-                  scale: 1.05,
-                  transition: { duration: 0.3 }
-                }}
-              >
-                <motion.div 
-                  className="relative h-48"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.3 }}
+            {loadingWeddings ? (
+              // Loading state - skeleton placeholders
+              Array.from({ length: 3 }).map((_, index) => (
+                <div 
+                  key={`skeleton-${index}`}
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse"
                 >
-                  <NextImage
-                    src={website.image}
-                    alt={website.title}
-                    fill
-                    className="object-cover"
-                  />
-                </motion.div>
-                <div className="p-6">
-                  <motion.h3 
-                    className="text-xl font-semibold mb-2"
-                    whileHover={{ color: "#ec4899" }}
-                  >
-                    {website.title}
-                  </motion.h3>
-                  <p className="text-gray-600 mb-4">{website.description}</p>
-                  <div className="flex items-center justify-between">
-                    <motion.div 
-                      className="flex items-center"
-                      whileHover={{ scale: 1.1 }}
-                    >
-                      <Star className="w-5 h-5 text-yellow-400 mr-1" />
-                      <span className="text-gray-600">{website.rating}</span>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ x: 5 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        className="text-pink-500 hover:text-pink-600"
-                        asChild
-                      >
-                        <Link href={website.url}>
-                          {t.viewWebsite} <ChevronRight className="ml-1 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </motion.div>
+                  <div className="h-48 bg-gray-200"></div>
+                  <div className="p-6">
+                    <div className="h-5 bg-gray-200 rounded mb-4 w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="flex justify-between items-center">
+                      <div className="h-4 bg-gray-200 rounded w-12"></div>
+                      <div className="h-8 bg-gray-200 rounded w-28"></div>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              ))
+            ) : transformedWeddings.length === 0 ? (
+              // Empty state
+              <div className="col-span-full text-center py-12">
+                <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-medium text-gray-600 mb-2">
+                  Chưa có website cưới công khai
+                </h3>
+                <p className="text-gray-500">
+                  Hãy tạo website cưới đầu tiên và chia sẻ với mọi người!
+                </p>
+              </div>
+            ) : (
+              transformedWeddings.map((website, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    transition: { duration: 0.3 }
+                  }}
+                >
+                  <motion.div 
+                    className="relative h-48"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <NextImage
+                      src={website.image}
+                      alt={website.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </motion.div>
+                  <div className="p-6">
+                    <motion.h3 
+                      className="text-xl font-semibold mb-2"
+                      whileHover={{ color: "#ec4899" }}
+                    >
+                      {website.title}
+                    </motion.h3>
+                    <p className="text-gray-600 mb-4">{website.description}</p>
+                    <div className="flex items-center justify-between">
+                      <motion.div 
+                        className="flex items-center"
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        <Star className="w-5 h-5 text-yellow-400 mr-1" />
+                        <span className="text-gray-600">{website.rating}</span>
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ x: 5 }}
+                      >
+                        <Button
+                          variant="ghost"
+                          className="text-pink-500 hover:text-pink-600"
+                          asChild
+                        >
+                          <Link href={website.url}>
+                            {t.viewWebsite} <ChevronRight className="ml-1 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -387,19 +450,28 @@ export default function LandingPage() {
               <h3 className="text-lg font-semibold mb-4">{t.quickLinks}</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#features" className="text-gray-300 hover:text-pink-400">
+                  <button 
+                    onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-gray-300 hover:text-pink-400"
+                  >
                     {t.features}
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="#download-app" className="text-gray-300 hover:text-pink-400">
+                  <button 
+                    onClick={() => document.getElementById('download-app')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-gray-300 hover:text-pink-400"
+                  >
                     {t.downloadApp}
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="#pricing" className="text-gray-300 hover:text-pink-400">
-                    {t.pricing}
-                  </Link>
+                  <button 
+                    onClick={() => document.getElementById('websites')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-gray-300 hover:text-pink-400"
+                  >
+                    {t.websitesTitle}
+                  </button>
                 </li>
               </ul>
             </div>
@@ -473,28 +545,4 @@ function getFeatureIcon(index: number) {
   ];
   
   return icons[index % icons.length];
-}
-
-const weddingWebsites = [
-  {
-    title: "Minh & Linh",
-    description: "Một đám cưới đầy màu sắc và niềm vui",
-    image: "/images/weddings/minh-linh.jpg",
-    rating: "4.9",
-    url: "https://minh-linh.iwedplan.com"
-  },
-  {
-    title: "Hùng & Mai",
-    description: "Đám cưới truyền thống với nét hiện đại",
-    image: "/images/weddings/hung-mai.jpg",
-    rating: "4.8",
-    url: "https://hung-mai.iwedplan.com"
-  },
-  {
-    title: "Tuấn & Hương",
-    description: "Đám cưới lãng mạn bên bờ biển",
-    image: "/images/weddings/tuan-huong.jpg",
-    rating: "4.9",
-    url: "https://tuan-huong.iwedplan.com"
-  }
-]; 
+} 

@@ -5,39 +5,30 @@ import {
   setDoc, 
   getDoc, 
   query, 
-  where, 
   getDocs,
+  where,
   Timestamp,
-  collectionGroup,
   limit as firestoreLimit,
   serverTimestamp,
-  deleteDoc,
   updateDoc
 } from '@firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from '@firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from '@firebase/storage';
 import { WeddingData } from './models';
 import { addWeddingToUser } from './userService';
 
 /**
  * Generate a wedding document ID from groom and bride names and date
  */
-export const generateWeddingId = (groomName: string, brideName: string, weddingDate?: Date): string => {
-  // Extract first and last names
-  const groomNames = groomName.trim().split(' ');
-  const brideNames = brideName.trim().split(' ');
-  
-  // Extract full first names (may include middle names)
-  const groomFirstName = groomNames.length > 1 ? 
-    groomNames.slice(0, -1).join('') : groomNames[0] || '';
-  
-  const brideFirstName = brideNames.length > 1 ? 
-    brideNames.slice(0, -1).join('') : brideNames[0] || '';
-  
+export const generateWeddingId = async (groomName: string, brideName: string, weddingDate?: Date): Promise<string> => {
   // Remove diacritical marks (Vietnamese accents)
   const removeAccents = (str: string) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
               .replace(/[đĐ]/g, d => d === 'đ' ? 'd' : 'D');
   };
+
+  // Join all parts of the name without spaces
+  const groomFullName = groomName.trim().split(' ').join('');
+  const brideFullName = brideName.trim().split(' ').join('');
   
   // Use current date if no date provided
   const date = weddingDate || new Date();
@@ -48,11 +39,22 @@ export const generateWeddingId = (groomName: string, brideName: string, weddingD
   const year = date.getFullYear().toString().slice(-2);
   const dateStr = `${day}_${month}_${year}`;
   
-  // Format: FirstName_LastName_dd_mm_yy (no spaces, accents removed)
-  const weddingId = `${removeAccents(groomFirstName)}_${removeAccents(brideFirstName)}_${dateStr}`.toLowerCase();
+  // Format: fullname_fullname_dd_mm_yy (no spaces, accents removed)
+  const baseId = `${removeAccents(groomFullName)}_${removeAccents(brideFullName)}_${dateStr}`.toLowerCase();
   
-  // Remove any special characters and spaces, only keep alphanumeric and underscore
-  return weddingId.replace(/[^a-z0-9_]/g, '');
+  // Remove any special characters, only keep alphanumeric and underscore
+  const cleanId = baseId.replace(/[^a-z0-9_]/g, '');
+  
+  // Check if ID exists and add index if needed
+  let weddingId = cleanId;
+  let index = 1;
+  
+  while (await isWeddingIdTaken(weddingId)) {
+    weddingId = `${index}${cleanId}`;
+    index++;
+  }
+  
+  return weddingId;
 };
 
 /**
@@ -89,7 +91,7 @@ export const createWeddingWebsite = async (data: {
     
     // Generate wedding ID
     const weddingDate = data.eventDate ? data.eventDate.toDate() : new Date();
-    const weddingId = generateWeddingId(data.groomName, data.brideName, weddingDate);
+    const weddingId = await generateWeddingId(data.groomName, data.brideName, weddingDate);
     
     // Check if the ID is already taken
     const isTaken = await isWeddingIdTaken(weddingId);
@@ -136,9 +138,13 @@ export const createWeddingWebsite = async (data: {
 /**
  * Upload an image to Firebase Storage and return the URL
  */
-export const uploadImage = async (file: File, path: string): Promise<string> => {
+export const uploadImage = async (weddingId: string, file: File, customPath?: string): Promise<string> => {
   try {
     const storage = await getStorage();
+    
+    // Use custom path if provided, otherwise generate default path
+    const path = customPath || `weddings/${weddingId}/album/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    
     const storageRef = ref(storage, path);
     const uploadResult = await uploadBytes(storageRef, file);
     return await getDownloadURL(uploadResult.ref);
@@ -155,7 +161,17 @@ export const updateWeddingWebsite = async (weddingId: string, data: Partial<Wedd
   try {
     const db = await getFirestore();
     const weddingRef = doc(db, 'weddings', weddingId);
-    await setDoc(weddingRef, data, { merge: true });
+    
+    // Filter out undefined values
+    const cleanData = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+    
+    console.log('Cleaned data for update:', cleanData);
+    await setDoc(weddingRef, cleanData, { merge: true });
   } catch (error) {
     console.error("Error updating wedding website:", error);
     throw new Error("Không thể cập nhật thông tin. Vui lòng thử lại sau.");
@@ -189,12 +205,20 @@ export const getFeaturedWeddingWebsites = async (limit: number = 3): Promise<Wed
   try {
     const db = await getFirestore();
     const weddingsRef = collection(db, 'weddings');
-    const q = query(weddingsRef, firestoreLimit(limit));
+    
+    // Query only public weddings
+    const q = query(
+      weddingsRef, 
+      where('isPublic', '==', true),
+      firestoreLimit(limit)
+    );
+    
     const querySnapshot = await getDocs(q);
     
     const websites: WeddingData[] = [];
     querySnapshot.forEach((doc) => {
-      websites.push(doc.data() as WeddingData);
+      const data = doc.data() as WeddingData;
+      websites.push(data);
     });
     
     // Sort by creation date and limit
@@ -227,7 +251,7 @@ export const createFirestoreWedding = async (userId: string, data: WeddingData):
     
     // Generate document ID using groom, bride names, and wedding date
     const weddingDate = data.eventDate ? data.eventDate.toDate() : new Date();
-    const weddingId = generateWeddingId(data.groomName, data.brideName, weddingDate);
+    const weddingId = await generateWeddingId(data.groomName, data.brideName, weddingDate);
     
     // Check if the wedding ID already exists
     const idTaken = await isWeddingIdTaken(weddingId);
@@ -299,5 +323,108 @@ export const updateFirestoreWedding = async (weddingId: string, data: Partial<We
       status: 'error',
       message: 'Failed to update wedding'
     };
+  }
+}; 
+
+// Add new interface for template sections
+export interface TemplateSection {
+  id: string;
+  name: string;
+  enabled: boolean;
+  order: number;
+  settings?: Record<string, any>;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+// Add new function to update template sections
+export const updateTemplateSections = async (
+  weddingId: string,
+  sections: TemplateSection[]
+): Promise<void> => {
+  try {
+    const db = await getFirestore();
+    const weddingRef = doc(db, 'weddings', weddingId);
+    
+    // First, get the current document to ensure it exists
+    const weddingDoc = await getDoc(weddingRef);
+    if (!weddingDoc.exists()) {
+      throw new Error('Wedding document not found');
+    }
+    
+    // Update only the templateSections field and updatedAt timestamp
+    await updateDoc(weddingRef, {
+      templateSections: sections.map(section => ({
+        id: section.id,
+        name: section.name,
+        enabled: section.enabled,
+        order: section.order,
+        settings: section.settings || {}
+      })),
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating template sections:', error);
+    throw new Error('Failed to update template sections');
+  }
+};
+
+// Add new function to get template sections
+export const getTemplateSections = async (weddingId: string): Promise<TemplateSection[]> => {
+  try {
+    const db = await getFirestore();
+    const weddingRef = doc(db, 'weddings', weddingId);
+    const weddingDoc = await getDoc(weddingRef);
+    
+    if (weddingDoc.exists()) {
+      const data = weddingDoc.data();
+      return data.templateSections || [];
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error getting template sections:', error);
+    throw new Error('Failed to get template sections');
+  }
+};
+
+// Add the deleteImage function to delete images from Firebase Storage
+export const deleteImage = async (imageUrl: string): Promise<boolean> => {
+  try {
+    // Extract the storage path from the URL
+    const storage = await getStorage();
+    const storageRef = ref(storage);
+    
+    // Create a reference from the full URL
+    const imageRef = ref(storage, imageUrl);
+    
+    // Delete the file
+    await deleteObject(imageRef);
+    
+    return true;
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    throw error;
+  }
+};
+
+// Add this new function to get wedding images from storage
+export const getWeddingImages = async (weddingId: string): Promise<string[]> => {
+  try {
+    const storage = await getStorage();
+    const storageRef = ref(storage, `weddings/${weddingId}`);
+    const result = await listAll(storageRef);
+    
+    // Get download URLs for all images
+    const imageUrls = await Promise.all(
+      result.items.map(async (item) => {
+        const url = await getDownloadURL(item);
+        return url;
+      })
+    );
+    
+    return imageUrls;
+  } catch (error) {
+    console.error("Error getting wedding images:", error);
+    throw error;
   }
 }; 

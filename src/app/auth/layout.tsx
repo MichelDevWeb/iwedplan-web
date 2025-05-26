@@ -4,12 +4,25 @@ import AuthRedirect from '@/components/auth/AuthRedirect';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { translations, Language } from '@/lib/translations';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Globe } from 'lucide-react';
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [language, setLanguage] = useState<Language>('vi');
+  const t = translations[language];
+
   // Logo and brand header
   const renderBrandHeader = () => (
     <Link href="/" className="absolute top-4 left-4 z-50 flex items-center">
@@ -33,6 +46,33 @@ export default function AuthLayout({
     </Link>
   );
 
+  // Language selector component
+  const renderLanguageSelector = () => (
+    <div className="absolute top-4 right-4 z-50">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="text-pink-500 hover:bg-pink-100">
+            <Globe className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem 
+            onClick={() => setLanguage('en')}
+            className={language === 'en' ? 'bg-pink-50 text-pink-500' : ''}
+          >
+            English
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => setLanguage('vi')}
+            className={language === 'vi' ? 'bg-pink-50 text-pink-500' : ''}
+          >
+            Tiếng Việt
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
   return (
     <AuthRedirect requiredAuth={false}>
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex flex-col items-center justify-center relative overflow-hidden">
@@ -49,6 +89,7 @@ export default function AuthLayout({
         </div>
         
         {renderBrandHeader()}
+        {renderLanguageSelector()}
         
         {/* Content container */}
         <motion.div 
@@ -67,7 +108,7 @@ export default function AuthLayout({
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
         >
-          © {new Date().getFullYear()} iWedPlan • Your Dream Wedding Begins Here
+          © {new Date().getFullYear()} iWedPlan • {language === 'vi' ? 'Đám cưới trong mơ bắt đầu từ đây' : 'Your Dream Wedding Begins Here'}
         </motion.div>
       </div>
     </AuthRedirect>

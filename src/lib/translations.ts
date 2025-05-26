@@ -54,7 +54,7 @@ export const translations = {
     address: "123 ABC Street, District 1, HCMC",
     loginToGetStarted: "Login to get started",
     dashboard: "Dashboard",
-    settings: "Settings",
+    myWeddings: "My Weddings",
     logout: "Logout",
     companyDescription: "A platform for creating beautiful, professional, and easy-to-use wedding websites.",
     copyright: "All rights reserved.",
@@ -132,7 +132,7 @@ export const translations = {
     address: "123 Đường ABC, Quận 1, TP.HCM",
     loginToGetStarted: "Đăng nhập để bắt đầu",
     dashboard: "Trang quản lý",
-    settings: "Cài đặt",
+    myWeddings: "Lễ Cưới Của Tôi",
     logout: "Đăng xuất",
     companyDescription: "Nền tảng tạo website cưới đẹp mắt, chuyên nghiệp và dễ sử dụng.",
     copyright: "Bản quyền thuộc về Công ty TNHH iWedPlan.",
@@ -158,4 +158,12 @@ export const translations = {
 };
 
 export type Language = 'en' | 'vi';
-export type TranslationKey = keyof typeof translations.en; 
+export type TranslationKey = keyof typeof translations.en;
+
+// Get all available languages
+export const getAvailableLanguages = (): {code: Language, name: string}[] => {
+  return [
+    { code: 'en', name: 'English' },
+    { code: 'vi', name: 'Tiếng Việt' }
+  ];
+}; 

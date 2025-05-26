@@ -8,7 +8,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import CreateWeddingDialog from '@/components/dialogs/CreateWeddingDialog';
+import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import { Language, translations } from '@/lib/translations';
 import { motion } from 'framer-motion';
 
@@ -37,7 +37,7 @@ export default function PhoneAuthForm({ language }: PhoneAuthFormProps) {
         try {
           recaptchaVerifier = await initPhoneAuth('recaptcha-container');
         } catch (err: any) {
-          setError(err.message || 'Error initializing phone authentication');
+          setError(err.message || (language === 'vi' ? 'Lỗi khởi tạo xác thực điện thoại' : 'Error initializing phone authentication'));
         }
       }
     };
@@ -59,7 +59,7 @@ export default function PhoneAuthForm({ language }: PhoneAuthFormProps) {
 
     try {
       if (!recaptchaContainerRef.current) {
-        throw new Error('reCAPTCHA not initialized');
+        throw new Error(language === 'vi' ? 'reCAPTCHA chưa được khởi tạo' : 'reCAPTCHA not initialized');
       }
 
       // Format phone number with international format if not already
@@ -72,7 +72,7 @@ export default function PhoneAuthForm({ language }: PhoneAuthFormProps) {
       setVerificationId(verificationId);
       setStep(2);
     } catch (err: any) {
-      setError(err.message || 'Failed to send verification code');
+      setError(err.message || (language === 'vi' ? 'Không thể gửi mã xác thực' : 'Failed to send verification code'));
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function PhoneAuthForm({ language }: PhoneAuthFormProps) {
       // Open CreateWeddingDialog instead of redirecting
       setCreateDialogOpen(true);
     } catch (err: any) {
-      setError(err.message || 'Failed to verify code');
+      setError(err.message || (language === 'vi' ? 'Không thể xác thực mã' : 'Failed to verify code'));
     } finally {
       setLoading(false);
     }

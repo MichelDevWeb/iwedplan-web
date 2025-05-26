@@ -14,16 +14,16 @@ service cloud.firestore {
     
     // Users collection rules
     match /users/{userId} {
-      // Allow read access
+      // Allow read access to own user data or public read for certain fields
       allow read: if true;
       
-      // Allow create/write operations for authenticated users
+      // Allow create/write operations for authenticated users on their own documents
       allow create: if isAuthenticated() && request.auth.uid == userId;
       
       // Allow users to update their own documents
       allow update: if isAuthenticated() && request.auth.uid == userId;
       
-      // Allow deletion
+      // Allow deletion of own documents
       allow delete: if isAuthenticated() && request.auth.uid == userId;
       
       // Allow access to subcollections of users
@@ -34,28 +34,47 @@ service cloud.firestore {
     
     // Weddings collection rules
     match /weddings/{weddingId} {
-      // Allow read for all
-      allow read: if true;
+      // Allow read access for public weddings (no authentication required)
+      // OR if user is authenticated and is the owner
+      allow read: if resource.data.isPublic == true || 
+                     (isAuthenticated() && request.auth.uid == resource.data.ownerId);
       
-      // Allow write operations for authenticated users
+      // Allow list operations (needed for queries like getFeaturedWeddingWebsites)
+      // This allows unauthenticated users to query for public weddings
+      allow list: if true;
+      
+      // Allow create if user is authenticated
       allow create: if isAuthenticated();
       
-      // Allow update and delete for document owners
-      allow update, delete: if isAuthenticated() && 
-                             (resource.data.ownerId == request.auth.uid || 
-                              request.resource.data.ownerId == request.auth.uid);
-                              
+      // Allow update/delete if user is the owner
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.ownerId;
+      
       // Allow access to weddings subcollections
       match /{subcollection}/{document=**} {
         allow read: if true;
         allow write: if isAuthenticated() && 
                       (get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid);
       }
-    }
-    
-    // Allow public access to subdomain_checks collection
-    match /subdomain_checks/{docId} {
-      allow read, write: if true;
+      
+      // Specific rules for wishes subcollection
+      match /wishes/{wishId} {
+        // Allow reading all wishes if authenticated user is the wedding owner
+        // Otherwise only allow reading approved wishes
+        allow read: if resource.data.approved == true || 
+                     (isAuthenticated() && 
+                      get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid);
+        
+        // Allow creating wishes by anyone (they'll be marked as unapproved initially)
+        allow create: if request.resource.data.approved == false;
+        
+        // Only allow updating by the wedding owner
+        allow update: if isAuthenticated() && 
+                       get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+        
+        // Only allow deleting by the wedding owner
+        allow delete: if isAuthenticated() && 
+                       get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+      }
     }
     
     // Allow access to rsvps collection
@@ -63,9 +82,22 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
-    // Allow access to test collection for connection testing
-    match /test/{docId} {
-      allow read, write: if true;
+    // Attendances collection rules
+    match /attendances/{attendanceId} {
+      // Anyone can submit an attendance (for RSVP)
+      allow create: if true;
+      
+      // Only authenticated users can read attendance records of their weddings
+      allow read: if isAuthenticated() && (
+        // This should match how the wedding owner is determined in your app
+        // Either by the weddingId field in the attendance document
+        get(/databases/$(database)/documents/weddings/$(resource.data.weddingId)).data.ownerId == request.auth.uid
+      );
+      
+      // Only wedding owners can update attendances
+      allow update, delete: if isAuthenticated() && (
+        get(/databases/$(database)/documents/weddings/$(resource.data.weddingId)).data.ownerId == request.auth.uid
+      );
     }
     
     // Default deny

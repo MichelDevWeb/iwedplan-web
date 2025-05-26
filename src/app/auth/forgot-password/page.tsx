@@ -4,7 +4,6 @@ import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { translations, Language } from '@/lib/translations';
-import LanguageSelector from '@/components/common/LanguageSelector';
 
 export default function ForgotPasswordPage() {
   const [language, setLanguage] = useState<Language>('vi');
@@ -12,11 +11,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="w-full">
-      {/* Language selector */}
-      <div className="absolute top-6 right-6 z-20">
-        <LanguageSelector language={language} setLanguage={(lang) => setLanguage(lang as Language)} />
-      </div>
-      
       {/* Page header with subtle animation */}
       <motion.div 
         className="text-center mb-6"

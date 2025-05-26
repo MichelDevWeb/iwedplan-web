@@ -293,3 +293,8 @@
     animation-duration: 0.8s; /* Slightly faster animations */
   }
 }
+
+html, body {
+  width: 100vw;
+  overflow-x: hidden;
+}

@@ -12,7 +12,7 @@ import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/authService';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import CreateWeddingDialog from '@/components/dialogs/CreateWeddingDialog';
+import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import { Language, translations } from '@/lib/translations';
 
 interface LoginFormProps {
@@ -146,7 +146,7 @@ export default function LoginForm({ language }: LoginFormProps) {
             {language === 'vi' ? 'Chào mừng trở lại' : 'Welcome back'}
           </h1>
           <p className="text-gray-500 mt-1">
-            {language === 'vi' ? 'Đăng nhập để tiếp tục' : 'Sign in to continue'}
+            {t.auth.loginSubtitle}
           </p>
         </motion.div>
         
@@ -222,7 +222,7 @@ export default function LoginForm({ language }: LoginFormProps) {
                 ) : (
                   <ArrowRight className="mr-2 h-4 w-4" />
                 )}
-                {language === 'vi' ? 'Đăng nhập' : t.auth.signIn}
+                {t.auth.signIn}
               </Button>
             </motion.div>
           </motion.div>

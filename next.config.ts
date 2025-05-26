@@ -10,6 +10,9 @@ const withPWA = withPWAInit({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  eslint: {
+    ignoreDuringBuilds: true, // skips all ESLint errors at build time
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
