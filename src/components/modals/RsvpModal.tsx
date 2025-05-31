@@ -40,7 +40,7 @@ const rsvpFormSchema = z.object({
     .optional(),
   notes: z.string().max(200, "Ghi chú không được quá 200 ký tự.").optional(),
   phone: z.string().optional(),
-  email: z.string().email("Email không hợp lệ.").optional(),
+  email: z.string().optional(),
 }).refine(data => data.attending === 'no' || (data.attending === 'yes' && data.guests !== undefined && data.guests >= 0), {
   message: "Vui lòng nhập số lượng khách tham dự (bao gồm bạn).",
   path: ["guests"],

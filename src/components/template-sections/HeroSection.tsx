@@ -396,6 +396,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ weddingData, onSaveSettings }
                 Xác nhận tham dự
               </Button>
             }
+            weddingId={weddingData.id}
+            rsvpDeadline={weddingData.rsvpDeadline}
           />
           <Button
             variant="outline"

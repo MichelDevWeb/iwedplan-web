@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronLeft, ChevronRight, Sparkles, Gift } from "lucide-react";
-import { getWeddingWebsite, updateWeddingWebsite, uploadImage, getTemplateSections, updateTemplateSections, TemplateSection } from "@/lib/firebase/weddingService";
+import { ChevronLeft, ChevronRight, Sparkles, Gift, ArrowLeft, Home, Trash2 } from "lucide-react";
+import { getWeddingWebsite, updateWeddingWebsite, uploadImage, getTemplateSections, updateTemplateSections, TemplateSection, deleteWeddingWebsite } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
@@ -96,6 +96,11 @@ export default function TemplatePage({
   
   // Add new state for effects
   const [selectedEffect, setSelectedEffect] = useState("none");
+  
+  // Modal states
+  const [showNavigationWarning, setShowNavigationWarning] = useState(false);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   
   // Define tabs array for easy mapping
   const tabs = [
@@ -285,6 +290,60 @@ export default function TemplatePage({
     }
   };
   
+  // Handle navigation with warning
+  const handleNavigation = (path: string) => {
+    setPendingNavigation(path);
+    setShowNavigationWarning(true);
+  };
+  
+  // Confirm navigation
+  const confirmNavigation = () => {
+    if (pendingNavigation) {
+      router.push(pendingNavigation);
+    }
+    setShowNavigationWarning(false);
+    setPendingNavigation(null);
+  };
+  
+  // Cancel navigation
+  const cancelNavigation = () => {
+    setShowNavigationWarning(false);
+    setPendingNavigation(null);
+  };
+  
+  // Handle delete wedding template
+  const handleDeleteWedding = async () => {
+    try {
+      setSaving(true);
+      await deleteWeddingWebsite(userWedID);
+      toast.success("Đã xoá website cưới thành công");
+      router.push("/create/template");
+    } catch (error) {
+      console.error("Error deleting wedding:", error);
+      toast.error("Không thể xoá website cưới. Vui lòng thử lại.");
+    } finally {
+      setSaving(false);
+      setShowDeleteWarning(false);
+    }
+  };
+  
+  // Handle delete music file
+  const handleDeleteMusicFile = (index: number) => {
+    const newFiles = musicFiles.filter((_, i) => i !== index);
+    const newFileNames = musicFileNames.filter((_, i) => i !== index);
+    const newPreviewUrls = musicPreviewUrls.filter((_, i) => i !== index);
+    
+    setMusicFiles(newFiles);
+    setMusicFileNames(newFileNames);
+    setMusicPreviewUrls(newPreviewUrls);
+  };
+  
+  // Handle delete music link
+  const handleDeleteMusicLink = (index: number) => {
+    const newLinks = musicLinks.filter((_, i) => i !== index);
+    setMusicLinks(newLinks);
+  };
+  
   // Save settings and continue
   const handleSave = async () => {
     try {
@@ -454,6 +513,39 @@ export default function TemplatePage({
       
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="p-4 md:p-6 border-b">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleNavigation("/create/template")}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Quay lại
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleNavigation("/landing")}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                <Home className="h-4 w-4 mr-1" />
+                Trang chủ
+              </Button>
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDeleteWarning(true)}
+              className="text-red-600 hover:text-red-800 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Xoá website
+            </Button>
+          </div>
+          
           <h1 className="text-xl md:text-2xl font-bold">Tùy chỉnh Website Cưới</h1>
           <p className="text-gray-500 text-sm md:text-base">
             {weddingData?.groomName} & {weddingData?.brideName} - {weddingData?.subdomain}.iwedplan.com
@@ -579,6 +671,10 @@ export default function TemplatePage({
               decreaseMusicCount={decreaseMusicCount}
               validateMusicLink={validateMusicLink}
               VIP_PRICES={VIP_PRICES}
+              onDeleteMusicFile={handleDeleteMusicFile}
+              onDeleteMusicLink={handleDeleteMusicLink}
+              savedMusicUrls={weddingData?.musicUrls || []}
+              savedMusicFileNames={weddingData?.musicFileName ? [weddingData.musicFileName] : []}
             />
             {/* Hidden audio elements for preview */}
             {musicPreviewUrls.map((url, index) => (
@@ -612,17 +708,9 @@ export default function TemplatePage({
             </Button>
             
             {activeTab === tabs[tabs.length - 1].id ? (
-              <ConfirmationModal
-                onSave={handleSave}
-                userWedID={userWedID}
-                hasVipFeatures={hasVipFeatures().hasVip}
-                vipFeatures={hasVipFeatures().features}
-                trigger={
-                  <Button type="button" disabled={saving} className="text-sm md:text-base">
-                    Hoàn tất
-                  </Button>
-                }
-              />
+              <Button type="button" disabled={saving} className="text-sm md:text-base" onClick={handleSave}>
+                Hoàn tất
+              </Button>
             ) : (
               <Button type="button" onClick={nextTab} disabled={saving} className="text-sm md:text-base">
                 Tiếp tục <ChevronRight className="ml-1 md:ml-2 h-4 w-4" />
@@ -631,6 +719,32 @@ export default function TemplatePage({
           </div>
         </Tabs>
       </div>
+      
+      {/* Navigation Warning Modal */}
+      <ConfirmationModal
+        isOpen={showNavigationWarning}
+        onClose={cancelNavigation}
+        onConfirm={confirmNavigation}
+        title="Cảnh báo"
+        message="Bạn có muốn rời khỏi trang này không?"
+        confirmText="Rời khỏi"
+        cancelText="Hủy"
+        variant="default"
+      />
+      
+      {/* Delete Warning Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteWarning}
+        onClose={() => setShowDeleteWarning(false)}
+        onConfirm={handleDeleteWedding}
+        title="Xác nhận xoá"
+        message="Bạn có chắc chắn muốn xoá website cưới này không? Hành động này không thể hoàn tác."
+        confirmText="Xoá website"
+        cancelText="Hủy"
+        variant="destructive"
+        isLoading={saving}
+        loadingText="Đang xoá..."
+      />
     </div>
   );
 } 

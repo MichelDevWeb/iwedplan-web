@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, Trash2, MoreVertical } from 'lucide-react';
 import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
+import ConfirmationModal from '@/components/modals/ConfirmationModal';
 import { getUserWeddings } from '@/lib/firebase/userService';
+import { deleteWeddingWebsite } from '@/lib/firebase/weddingService';
 import LoadingScreen from '@/components/ui/loading-screen';
-import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function TemplatePage() {
   const router = useRouter();
@@ -16,8 +18,10 @@ export default function TemplatePage() {
   
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [weddings, setWeddings] = useState<{id: string, groomName: string, brideName: string}[]>([]);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   
   useEffect(() => {
     async function loadUserWeddings() {
@@ -49,6 +53,30 @@ export default function TemplatePage() {
       router.push(`/create/template/${weddingId}`);
     }, 300); // Small delay for loading animation
   };
+
+  const handleDeleteWedding = async () => {
+    if (!showDeleteModal) return;
+    
+    try {
+      setDeleting(showDeleteModal);
+      await deleteWeddingWebsite(showDeleteModal);
+      
+      // Remove from local state
+      setWeddings(prev => prev.filter(w => w.id !== showDeleteModal));
+      
+      toast.success('Đã xoá website cưới thành công');
+    } catch (error) {
+      console.error('Error deleting wedding:', error);
+      toast.error('Không thể xoá website cưới. Vui lòng thử lại.');
+    } finally {
+      setDeleting(null);
+      setShowDeleteModal(null);
+    }
+  };
+
+  const confirmDelete = (weddingId: string) => {
+    setShowDeleteModal(weddingId);
+  };
   
   if (loading) {
     return <LoadingScreen message="Đang tải dữ liệu đám cưới..." />;
@@ -73,10 +101,10 @@ export default function TemplatePage() {
           <div className="space-y-6 relative z-10">
             <h2 className="text-xl font-medium text-gray-700">Chọn đám cưới:</h2>
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Redirect to create/template button */}
+              {/* Create new wedding button */}
               <div 
                 className="border-2 border-dashed border-pink-300 rounded-lg p-4 flex flex-col items-center justify-center hover:bg-pink-50 transition-all duration-300 cursor-pointer group hover:border-pink-400"
-                onClick={() => router.push('/create/template')}
+                onClick={handleCreateWedding}
               >
                 <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 mb-3 group-hover:bg-pink-200 transition-colors">
                   <Plus className="w-6 h-6" />
@@ -88,22 +116,42 @@ export default function TemplatePage() {
               {weddings.map(wedding => (
                 <div 
                   key={wedding.id}
-                  className="border border-pink-100 rounded-lg p-4 hover:bg-pink-50 transition-all duration-300 cursor-pointer group hover:shadow-md"
-                  onClick={() => handleSelectWedding(wedding.id)}
+                  className="border border-pink-100 rounded-lg p-4 hover:bg-pink-50 transition-all duration-300 group hover:shadow-md relative"
                 >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 group-hover:bg-pink-200 transition-colors">
-                      <span className="text-lg">❤️</span>
-                    </div>
-                  <h3 className="font-medium text-lg text-pink-600">{wedding.groomName} & {wedding.brideName}</h3>
-                  </div>
-                  <p className="text-sm text-gray-500">ID: {wedding.id}</p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-3 w-full group-hover:bg-pink-50 group-hover:border-pink-200 transition-colors"
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      confirmDelete(wedding.id);
+                    }}
+                    disabled={deleting === wedding.id}
+                    className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors z-10"
                   >
-                    Chọn đám cưới này
-                  </Button>
+                    {deleting === wedding.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                  
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleSelectWedding(wedding.id)}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 group-hover:bg-pink-200 transition-colors">
+                        <span className="text-lg">❤️</span>
+                      </div>
+                      <h3 className="font-medium text-lg text-pink-600 pr-8">{wedding.groomName} & {wedding.brideName}</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">ID: {wedding.id}</p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full group-hover:bg-pink-50 group-hover:border-pink-200 transition-colors"
+                    >
+                      Chọn đám cưới này
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -130,6 +178,20 @@ export default function TemplatePage() {
       <CreateWeddingDialog 
         open={showCreateDialog} 
         onOpenChange={setShowCreateDialog} 
+      />
+      
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!showDeleteModal}
+        onClose={() => setShowDeleteModal(null)}
+        onConfirm={handleDeleteWedding}
+        title="Xác nhận xoá"
+        message="Bạn có chắc chắn muốn xoá website cưới này không? Hành động này không thể hoàn tác và sẽ xoá tất cả dữ liệu liên quan."
+        confirmText="Xoá website"
+        cancelText="Hủy"
+        variant="destructive"
+        isLoading={!!deleting}
+        loadingText="Đang xoá..."
       />
     </div>
   );

@@ -194,7 +194,7 @@ export default function LandingPage() {
       </section>
 
       {/* Download App Section */}
-      <section id="download-app" className="py-20 bg-pink-50">
+      {/* <section id="download-app" className="py-20 bg-pink-50">
         <div className="max-w-6xl mx-auto px-4">
           <motion.div 
             className="flex flex-col md:flex-row items-center gap-12"
@@ -267,7 +267,7 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
 
       {/* Public Wedding Websites Section */}
       <section id="websites" className="py-20 px-4">

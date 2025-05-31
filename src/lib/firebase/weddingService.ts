@@ -10,11 +10,12 @@ import {
   Timestamp,
   limit as firestoreLimit,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from '@firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from '@firebase/storage';
 import { WeddingData } from './models';
-import { addWeddingToUser } from './userService';
+import { addWeddingToUser, removeWeddingFromUser } from './userService';
 
 /**
  * Generate a wedding document ID from groom and bride names and date
@@ -426,5 +427,78 @@ export const getWeddingImages = async (weddingId: string): Promise<string[]> => 
   } catch (error) {
     console.error("Error getting wedding images:", error);
     throw error;
+  }
+};
+
+/**
+ * Delete a wedding website and all associated data
+ */
+export const deleteWeddingWebsite = async (weddingId: string): Promise<void> => {
+  try {
+    const db = await getFirestore();
+    const storage = await getStorage();
+    
+    // First, get the wedding document to get the owner ID
+    const weddingRef = doc(db, 'weddings', weddingId);
+    const weddingDoc = await getDoc(weddingRef);
+    
+    if (!weddingDoc.exists()) {
+      throw new Error('Wedding not found');
+    }
+    
+    const weddingData = weddingDoc.data() as WeddingData;
+    
+    try {
+      // Delete all files from storage
+      const storageRef = ref(storage, `weddings/${weddingId}`);
+      const result = await listAll(storageRef);
+      
+      // Delete all files in the wedding folder
+      const deletePromises = result.items.map(async (item) => {
+        try {
+          await deleteObject(item);
+        } catch (error) {
+          console.warn(`Failed to delete file: ${item.fullPath}`, error);
+        }
+      });
+      
+      await Promise.all(deletePromises);
+    } catch (storageError) {
+      console.warn('Some storage files could not be deleted:', storageError);
+    }
+    
+    // Delete all subcollections (wishes, etc.)
+    try {
+      const wishesRef = collection(db, 'weddings', weddingId, 'wishes');
+      const wishesSnap = await getDocs(wishesRef);
+      
+      const deleteWishPromises = wishesSnap.docs.map(async (wishDoc) => {
+        try {
+          await deleteDoc(wishDoc.ref);
+        } catch (error) {
+          console.warn(`Failed to delete wish: ${wishDoc.id}`, error);
+        }
+      });
+      
+      await Promise.all(deleteWishPromises);
+    } catch (subcollectionError) {
+      console.warn('Some subcollections could not be deleted:', subcollectionError);
+    }
+    
+    // Remove wedding from user's wedding list
+    if (weddingData.ownerId) {
+      try {
+        await removeWeddingFromUser(weddingData.ownerId, weddingId);
+      } catch (userError) {
+        console.warn('Failed to remove wedding from user:', userError);
+      }
+    }
+    
+    // Finally, delete the main wedding document
+    await deleteDoc(weddingRef);
+    
+  } catch (error) {
+    console.error('Error deleting wedding website:', error);
+    throw new Error('Không thể xoá website cưới. Vui lòng thử lại.');
   }
 }; 

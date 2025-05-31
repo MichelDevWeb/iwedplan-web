@@ -36,8 +36,7 @@ service cloud.firestore {
     match /weddings/{weddingId} {
       // Allow read access for public weddings (no authentication required)
       // OR if user is authenticated and is the owner
-      allow read: if resource.data.isPublic == true || 
-                     (isAuthenticated() && request.auth.uid == resource.data.ownerId);
+      allow read: if resource.data.isPublic == true || request.auth.uid == resource.data.ownerId;
       
       // Allow list operations (needed for queries like getFeaturedWeddingWebsites)
       // This allows unauthenticated users to query for public weddings

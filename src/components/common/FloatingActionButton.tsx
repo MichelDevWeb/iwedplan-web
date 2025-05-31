@@ -156,8 +156,10 @@ const FloatingActionButton = () => {
   return (
     <> { /* Use Fragment to return multiple root elements */}
       {/* Music Control Button */}
-      <MusicFloatingButton weddingId={weddingId} />
-      
+      {(isWeddingPage && weddingId || !isWeddingPage && !weddingId) && (
+        <MusicFloatingButton weddingId={weddingId} />
+      )}
+
       {isWeddingPage && (
         <>
           {/* Expanded Menu Items */}
