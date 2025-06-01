@@ -647,3 +647,29 @@ export const defaultStoryEvents = [
     image: "/images/story-4.jpg",
   },
 ];
+
+// Default sections configuration for template structure
+export const defaultSections = [
+  { id: "hero", name: "Ảnh bìa", enabled: true, order: 0 },
+  { id: "video", name: "Video cưới", enabled: true, order: 1 },
+  { id: "album", name: "Album ảnh", enabled: true, order: 2 },
+  { id: "calendar", name: "Lịch trình", enabled: true, order: 3 },
+  { id: "story", name: "Chuyện tình yêu", enabled: true, order: 4 },
+  { id: "bridegroom", name: "Cô dâu & Chú rể", enabled: true, order: 5 },
+  { id: "events", name: "Sự kiện", enabled: true, order: 6 },
+  { id: "wishes", name: "Sổ lưu bút", enabled: true, order: 7 },
+  { id: "gift", name: "Mừng cưới", enabled: true, order: 8 },
+];
+
+// Map of default icons for each section
+export const defaultIconMap = {
+  hero: 'Image',
+  video: 'Video', 
+  album: 'Album',
+  calendar: 'Calendar',
+  story: 'BookHeart',
+  bridegroom: 'Users',
+  events: 'Calendar',
+  wishes: 'MessageSquare',
+  gift: 'Gift',
+};

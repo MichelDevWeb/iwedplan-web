@@ -375,7 +375,6 @@ export default function ThemeCustomizer({
     };
     
     // Notify parent component of reset
-    console.log("resetData", resetData);
     onPreview(resetData);
     
     toast.success("Đã đặt lại tất cả cài đặt");

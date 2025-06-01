@@ -10,6 +10,9 @@ import CreateWeddingDialog from "@/components/modals/CreateWeddingModal";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/common/Header";
+import FloatingNotification from "@/components/common/FloatingNotification";
+import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 import { translations, Language } from "@/lib/translations";
 import { getFeaturedWeddingWebsites } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
@@ -27,6 +30,7 @@ export default function LandingPage() {
   const t = translations[language];
   const [featuredWeddings, setFeaturedWeddings] = useState<WeddingData[]>([]);
   const [loadingWeddings, setLoadingWeddings] = useState(true);
+  const [navigationLoading, setNavigationLoading] = useState(false);
 
   const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 0.5, 0]);
@@ -64,12 +68,35 @@ export default function LandingPage() {
     if (isAuthenticated) {
       setCreateDialogOpen(true);
     } else {
+      setNavigationLoading(true);
       router.push('/auth/login');
     }
   };
 
+  // Handle navigation with loading
+  const handleNavigation = (path: string) => {
+    setNavigationLoading(true);
+    router.push(path);
+  };
+
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isLoading={navigationLoading}
+        type="navigation"
+        message="Đang chuyển đến trang đăng nhập..."
+      />
+
+      {/* Header Notification Bar */}
+      <HeaderNotificationBar />
+
+      {/* Floating Notifications */}
+      <FloatingNotification 
+        position="top-right"
+        maxVisible={2}
+      />
+
       {/* Wedding Creation Dialog */}
       <CreateWeddingDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
 
@@ -377,7 +404,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-pink-50">
+      <section id="pricing" className="py-20 bg-pink-50">
         <div className="max-w-4xl mx-auto text-center px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -481,17 +508,17 @@ export default function LandingPage() {
               <h3 className="text-lg font-semibold mb-4">{t.legal}</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#" className="text-gray-300 hover:text-pink-400">
+                  <Link href="/terms-of-use" className="text-gray-300 hover:text-pink-400">
                     {t.termsOfUse}
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-300 hover:text-pink-400">
+                  <Link href="/privacy-policy" className="text-gray-300 hover:text-pink-400">
                     {t.privacyPolicy}
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-300 hover:text-pink-400">
+                  <Link href="/refund-policy" className="text-gray-300 hover:text-pink-400">
                     {t.refundPolicy}
                   </Link>
                 </li>
@@ -510,8 +537,8 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-pink-400" />
-                  <Link href="mailto:info@iwedplan.com" className="text-gray-300 hover:text-pink-400">
-                    info@iwedplan.com
+                  <Link href="mailto:micheldevweb2020@gmail.com" className="text-gray-300 hover:text-pink-400">
+                    micheldevweb2020@gmail.com
                   </Link>
                 </li>
                 <li className="flex items-center">

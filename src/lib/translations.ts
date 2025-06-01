@@ -129,7 +129,7 @@ export const translations = {
     termsOfUse: "Điều khoản sử dụng",
     privacyPolicy: "Chính sách bảo mật",
     refundPolicy: "Chính sách hoàn tiền",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
+    address: "Lái Thiêu, Thuận An, Bình Dương",
     loginToGetStarted: "Đăng nhập để bắt đầu",
     dashboard: "Trang quản lý",
     myWeddings: "Lễ Cưới Của Tôi",

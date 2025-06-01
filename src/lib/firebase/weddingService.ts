@@ -15,7 +15,7 @@ import {
 } from '@firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from '@firebase/storage';
 import { WeddingData } from './models';
-import { addWeddingToUser, removeWeddingFromUser } from './userService';
+import { addWeddingToUser, removeWeddingFromUser, isSuperUser } from './userService';
 
 /**
  * Generate a wedding document ID from groom and bride names and date
@@ -433,7 +433,7 @@ export const getWeddingImages = async (weddingId: string): Promise<string[]> => 
 /**
  * Delete a wedding website and all associated data
  */
-export const deleteWeddingWebsite = async (weddingId: string): Promise<void> => {
+export const deleteWeddingWebsite = async (weddingId: string, requestingUserId?: string): Promise<void> => {
   try {
     const db = await getFirestore();
     const storage = await getStorage();
@@ -447,6 +447,14 @@ export const deleteWeddingWebsite = async (weddingId: string): Promise<void> => 
     }
     
     const weddingData = weddingDoc.data() as WeddingData;
+    
+    // Check permissions: either owner or super user can delete
+    if (requestingUserId && weddingData.ownerId !== requestingUserId) {
+      const isSuper = await isSuperUser(requestingUserId);
+      if (!isSuper) {
+        throw new Error('Unauthorized: You can only delete your own weddings');
+      }
+    }
     
     try {
       // Delete all files from storage

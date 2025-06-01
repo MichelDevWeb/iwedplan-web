@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 import { 
   generateWeddingId, 
   isWeddingIdTaken, 
@@ -35,6 +36,7 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
   const [weddingMonth, setWeddingMonth] = useState("");
   const [weddingYear, setWeddingYear] = useState("");
   const [loading, setLoading] = useState(false);
+  const [navigationLoading, setNavigationLoading] = useState(false);
   const [error, setError] = useState("");
   const [weddingId, setWeddingId] = useState("");
   const [user, setUser] = useState<any>(null);
@@ -161,9 +163,10 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
       // Create wedding website in Firestore
       const finalWeddingId = await createWeddingWebsite(weddingData);
 
-      // Redirect to the template selection page
-      router.push(`/create/template/${finalWeddingId}`);
+      // Show navigation loading and redirect
+      setNavigationLoading(true);
       onOpenChange(false);
+      router.push(`/create/template/${finalWeddingId}`);
     } catch (err) {
       console.error("Error in wedding creation:", err);
       setError(err instanceof Error ? err.message : "Đã xảy ra lỗi. Vui lòng thử lại sau");
@@ -250,95 +253,104 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Tạo website cưới</DialogTitle>
-          <DialogDescription>
-            Nhập thông tin cơ bản để bắt đầu tạo website cưới của bạn.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      {/* Loading Overlay for navigation */}
+      <LoadingOverlay 
+        isLoading={navigationLoading}
+        type="navigation"
+        message="Đang chuyển đến trang tùy chỉnh..."
+      />
+      
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tạo website cưới</DialogTitle>
+            <DialogDescription>
+              Nhập thông tin cơ bản để bắt đầu tạo website cưới của bạn.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="groomName">Tên chú rể</Label>
-            <Input
-              id="groomName"
-              placeholder="Nguyễn Văn A"
-              value={groomName}
-              onChange={(e) => handleNameChange("groom", e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="brideName">Tên cô dâu</Label>
-            <Input
-              id="brideName"
-              placeholder="Nguyễn Thị B"
-              value={brideName}
-              onChange={(e) => handleNameChange("bride", e.target.value)}
-              disabled={loading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="weddingDate">Ngày cưới (tùy chọn)</Label>
-            <div className="flex gap-2">
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="groomName">Tên chú rể</Label>
               <Input
-                id="weddingDay"
-                placeholder="Ngày"
-                value={weddingDay}
-                onChange={(e) => setWeddingDay(e.target.value)}
+                id="groomName"
+                placeholder="Nguyễn Văn A"
+                value={groomName}
+                onChange={(e) => handleNameChange("groom", e.target.value)}
                 disabled={loading}
-                className="w-20"
-              />
-              <Input
-                id="weddingMonth"
-                placeholder="Tháng"
-                value={weddingMonth}
-                onChange={(e) => setWeddingMonth(e.target.value)}
-                disabled={loading}
-                className="w-20"
-              />
-              <Input
-                id="weddingYear"
-                placeholder="Năm"
-                value={weddingYear}
-                onChange={(e) => setWeddingYear(e.target.value)}
-                disabled={loading}
-                className="flex-1"
               />
             </div>
-            <p className="text-xs text-gray-500">
-              Ví dụ: 21 04 2025
-            </p>
+
+            <div className="space-y-2">
+              <Label htmlFor="brideName">Tên cô dâu</Label>
+              <Input
+                id="brideName"
+                placeholder="Nguyễn Thị B"
+                value={brideName}
+                onChange={(e) => handleNameChange("bride", e.target.value)}
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="weddingDate">Ngày cưới (tùy chọn)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="weddingDay"
+                  placeholder="Ngày"
+                  value={weddingDay}
+                  onChange={(e) => setWeddingDay(e.target.value)}
+                  disabled={loading}
+                  className="w-20"
+                />
+                <Input
+                  id="weddingMonth"
+                  placeholder="Tháng"
+                  value={weddingMonth}
+                  onChange={(e) => setWeddingMonth(e.target.value)}
+                  disabled={loading}
+                  className="w-20"
+                />
+                <Input
+                  id="weddingYear"
+                  placeholder="Năm"
+                  value={weddingYear}
+                  onChange={(e) => setWeddingYear(e.target.value)}
+                  disabled={loading}
+                  className="flex-1"
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Ví dụ: 21 04 2025
+              </p>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </div>
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button
-            type="button"
-            onClick={handleCreate}
-            disabled={loading || !groomName || !brideName}
-            className="w-full"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử lý
-              </>
-            ) : (
-              "Tiếp tục"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={handleCreate}
+              disabled={loading || !groomName || !brideName}
+              className="w-full"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Đang xử lý
+                </>
+              ) : (
+                "Tiếp tục"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 } 

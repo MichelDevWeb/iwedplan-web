@@ -12,63 +12,35 @@ import { isValidYoutubeUrl, getYoutubeThumbnail, getYoutubeVideoId } from "@/lib
 import { deleteImage } from "@/lib/firebase/weddingService";
 import { toast } from "sonner";
 
+interface MusicItem {
+  id: string;
+  name: string;
+  url: string;
+  type: 'file' | 'youtube';
+}
+
 interface MusicTabProps {
-  musicFiles: File[];
-  musicFileNames: string[];
-  musicPreviewUrls: string[];
-  musicLinks: string[];
+  musics: MusicItem[];
+  setMusics: (musics: MusicItem[]) => void;
   musicSource: "file" | "link";
   isPlaying: boolean;
   musicCount: number;
   setMusicSource: (source: "file" | "link") => void;
-  handleMusicFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  setMusicLinks: (links: string[]) => void;
-  toggleAudio: () => void;
   increaseMusicCount: () => void;
   decreaseMusicCount: () => void;
-  validateMusicLink: (link: string) => boolean;
   VIP_PRICES: Record<string, number>;
-  onDeleteMusicFile?: (index: number) => void;
-  onDeleteMusicLink?: (index: number) => void;
-  savedMusicUrls?: string[];
-  savedMusicFileNames?: string[];
-}
-
-// Add interfaces for music items
-interface MusicFileItem {
-  type: 'saved' | 'new';
-  name: string;
-  url: string;
-  index: number;
-  file?: File;
-}
-
-interface YoutubeLinkItem {
-  type: 'saved' | 'new';
-  url: string;
-  index: number;
 }
 
 export default function MusicTab({
-  musicFiles,
-  musicFileNames,
-  musicPreviewUrls,
-  musicLinks,
+  musics,
+  setMusics,
   musicSource,
   isPlaying,
   musicCount,
   setMusicSource,
-  handleMusicFileChange,
-  setMusicLinks,
-  toggleAudio,
   increaseMusicCount,
   decreaseMusicCount,
-  validateMusicLink,
-  VIP_PRICES,
-  onDeleteMusicFile,
-  onDeleteMusicLink,
-  savedMusicUrls = [],
-  savedMusicFileNames = []
+  VIP_PRICES
 }: MusicTabProps) {
   const [youtubeThumbnails, setYoutubeThumbnails] = useState<(string | null)[]>([]);
   const [youtubeVideoIds, setYoutubeVideoIds] = useState<(string | null)[]>([]);
@@ -76,37 +48,78 @@ export default function MusicTab({
   const [isYoutubePlaying, setIsYoutubePlaying] = useState(false);
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [playingType, setPlayingType] = useState<'file' | 'youtube' | null>(null);
+  const [musicLinks, setMusicLinks] = useState<string[]>([]);
   const iframeRefs = useRef<(HTMLIFrameElement | null)[]>([]);
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
-  // Effect to handle YouTube link changes
-  useEffect(() => {
-    if (musicSource === "link" && musicLinks.length > 0) {
-      const thumbnails: (string | null)[] = [];
-      const videoIds: (string | null)[] = [];
-      
-      musicLinks.forEach(link => {
-        if (isValidYoutubeUrl(link)) {
-          thumbnails.push(getYoutubeThumbnail(link));
-          videoIds.push(getYoutubeVideoId(link));
-        } else {
-          thumbnails.push(null);
-          videoIds.push(null);
+  // Generate unique ID
+  const generateId = () => `music_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // Handle music file upload
+  const handleMusicFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error("File nhạc không được vượt quá 10MB");
+          return false;
         }
+        return true;
       });
       
-      setYoutubeThumbnails(thumbnails);
-      setYoutubeVideoIds(videoIds);
-    } else {
-      setYoutubeThumbnails([]);
-      setYoutubeVideoIds([]);
+      const newMusics = validFiles.map(file => ({
+        id: generateId(),
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: 'file' as const
+      }));
+      
+      setMusics([...musics, ...newMusics]);
+      setMusicSource("file");
     }
-  }, [musicLinks, musicSource]);
+  };
+
+  // Handle YouTube link changes
+  const handleMusicLinkChange = async (index: number, value: string) => {
+    const newLinks = [...musicLinks];
+    while (newLinks.length <= index) {
+      newLinks.push("");
+    }
+    newLinks[index] = value;
+    setMusicLinks(newLinks);
+
+    // If it's a valid YouTube URL, create music item
+    if (isValidYoutubeUrl(value)) {
+      try {
+        const title = `YouTube Video ${index + 1}`;
+        const newMusic: MusicItem = {
+          id: generateId(),
+          name: title,
+          url: value,
+          type: 'youtube'
+        };
+        
+        // Replace or add the YouTube music at the current index
+        const youtubeMusics = musics.filter(m => m.type === 'youtube');
+        const updatedYoutubeMusics = [...youtubeMusics];
+        updatedYoutubeMusics[index] = newMusic;
+        
+        // Combine with file musics
+        const fileMusics = musics.filter(m => m.type === 'file');
+        setMusics([...fileMusics, ...updatedYoutubeMusics.filter(Boolean)]);
+      } catch (error) {
+        console.error('Error getting YouTube title:', error);
+      }
+    }
+  };
 
   // Toggle YouTube player audio
   const toggleYoutubeAudio = (index: number) => {
+    const music = getYoutubeMusics()[index];
+    if (!music) return;
+    
+    const videoId = getYoutubeVideoId(music.url);
     const iframe = iframeRefs.current[index];
-    const videoId = youtubeVideoIds[index];
     
     if (!iframe || !videoId) return;
     
@@ -117,14 +130,13 @@ export default function MusicTab({
         setPlayingIndex(null);
         setPlayingType(null);
       } else {
-        // Pause all other YouTube players
+        // Pause all other players
         iframeRefs.current.forEach((otherIframe, otherIndex) => {
           if (otherIframe && otherIndex !== index) {
             otherIframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
           }
         });
         
-        // Pause all audio players
         audioRefs.current.forEach(audio => {
           if (audio) {
             audio.pause();
@@ -153,14 +165,13 @@ export default function MusicTab({
         setPlayingIndex(null);
         setPlayingType(null);
       } else {
-        // Pause all other audio players
+        // Pause all other players
         audioRefs.current.forEach((otherAudio, otherIndex) => {
           if (otherAudio && otherIndex !== index) {
             otherAudio.pause();
           }
         });
         
-        // Pause YouTube players
         iframeRefs.current.forEach(iframe => {
           if (iframe) {
             iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
@@ -178,96 +189,51 @@ export default function MusicTab({
     }
   };
 
-  // Handle music link changes
-  const handleMusicLinkChange = (index: number, value: string) => {
-    const newLinks = [...musicLinks];
-    while (newLinks.length <= index) {
-      newLinks.push("");
-    }
-    newLinks[index] = value;
-    setMusicLinks(newLinks);
-  };
-
-  // Delete music link
-  const handleDeleteMusicLink = (index: number) => {
-    if (onDeleteMusicLink) {
-      onDeleteMusicLink(index);
-    } else {
-      const newLinks = musicLinks.filter((_, i) => i !== index);
-      setMusicLinks(newLinks);
-    }
-    toast.success("Đã xoá link nhạc");
-  };
-
-  // Delete music file
-  const handleDeleteMusicFile = async (index: number, isFromStorage: boolean = false) => {
+  // Delete music item
+  const handleDeleteMusic = async (musicId: string) => {
     try {
-      if (isFromStorage) {
-        // Delete from Firebase storage
-        const urlToDelete = savedMusicUrls[index];
-        if (urlToDelete) {
-          await deleteImage(urlToDelete);
-        }
+      const music = musics.find(m => m.id === musicId);
+      if (music && music.type === 'file' && music.url.startsWith('http')) {
+        // Delete from Firebase storage if it's a stored file
+        await deleteImage(music.url);
       }
       
-      if (onDeleteMusicFile) {
-        onDeleteMusicFile(index);
-      }
-      
-      toast.success("Đã xoá file nhạc");
+      setMusics(musics.filter(m => m.id !== musicId));
+      toast.success("Đã xoá nhạc thành công");
     } catch (error) {
-      console.error("Error deleting music file:", error);
-      toast.error("Không thể xoá file nhạc từ storage");
+      console.error("Error deleting music:", error);
+      toast.error("Không thể xoá nhạc từ storage");
     }
   };
 
-  // Get uploaded music files (both saved from storage and new uploads)
-  const getUploadedMusicFiles = (): MusicFileItem[] => {
-    const items: MusicFileItem[] = [];
-    
-    // Add saved music files from storage (non-YouTube URLs)
-    savedMusicUrls.forEach((url, index) => {
-      if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-        items.push({
-          type: 'saved',
-          name: savedMusicFileNames[index] || `Nhạc đã lưu ${index + 1}`,
-          url: url,
-          index: index
-        });
-      }
-    });
-    
-    // Add current uploaded files
-    musicFiles.forEach((file, index) => {
-      items.push({
-        type: 'new',
-        name: file.name,
-        file: file,
-        url: musicPreviewUrls[index],
-        index: index
-      });
-    });
-    
-    return items;
-  };
+  // Get musics by type
+  const getFileMusics = () => musics.filter(m => m.type === 'file');
+  const getYoutubeMusics = () => musics.filter(m => m.type === 'youtube');
 
-  // Get YouTube links (both current and saved)
-  const getSavedYoutubeLinks = (): YoutubeLinkItem[] => {
-    const items: YoutubeLinkItem[] = [];
-    
-    // Only add saved YouTube URLs
-    savedMusicUrls.forEach((url, index) => {
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        items.push({
-          type: 'saved',
-          url: url,
-          index: index
-        });
-      }
-    });
-    
-    return items;
-  };
+  // Effect to handle YouTube link changes
+  useEffect(() => {
+    const youtubeMusics = getYoutubeMusics();
+    if (musicSource === "link" && youtubeMusics.length > 0) {
+      const thumbnails: (string | null)[] = [];
+      const videoIds: (string | null)[] = [];
+      
+      youtubeMusics.forEach(music => {
+        if (isValidYoutubeUrl(music.url)) {
+          thumbnails.push(getYoutubeThumbnail(music.url));
+          videoIds.push(getYoutubeVideoId(music.url));
+        } else {
+          thumbnails.push(null);
+          videoIds.push(null);
+        }
+      });
+      
+      setYoutubeThumbnails(thumbnails);
+      setYoutubeVideoIds(videoIds);
+    } else {
+      setYoutubeThumbnails([]);
+      setYoutubeVideoIds([]);
+    }
+  }, [musics, musicSource]);
 
   return (
     <div>
@@ -383,96 +349,83 @@ export default function MusicTab({
             </div>
             
             {/* Display uploaded music files */}
-            {(getUploadedMusicFiles().length > 0) && (
+            {getFileMusics().length > 0 && (
               <div className="p-4 bg-pink-50 rounded-lg space-y-4">
                 <h4 className="text-sm font-medium text-gray-700">File nhạc đã tải lên</h4>
-                {getUploadedMusicFiles().map((item, index) => (
-                  <div key={`file-${item.type}-${index}`} className="flex flex-col space-y-3">
+                {getFileMusics().map((music, index) => (
+                  <div key={music.id} className="flex flex-col space-y-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <p className="text-sm font-medium">{item.name}</p>
-                        {item.type === 'saved' && (
-                          <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                            Đã lưu
-                          </span>
-                        )}
-                        {item.type === 'new' && (
-                          <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                            Mới
-                          </span>
-                        )}
+                        <p className="text-sm font-medium">{music.name}</p>
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                          File
+                        </span>
                       </div>
                       <Button
                         type="button"
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleDeleteMusicFile(item.index, item.type === 'saved')}
+                        onClick={() => handleDeleteMusic(music.id)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                     
-                    {item.url && (
-                      <div className="flex flex-col space-y-3">
-                        <div className="bg-white rounded-lg p-3 flex items-center justify-between shadow-sm">
-                          <div className="flex items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              playingIndex === index && playingType === 'file' ? 'bg-pink-100 text-pink-500' : 'bg-gray-100'
-                            }`}>
-                              {playingIndex === index && playingType === 'file' ? 
-                                <span className="animate-pulse">♪</span> : 
-                                <Music className="h-4 w-4" />
-                              }
-                            </div>
-                            <div className="ml-3 text-sm font-medium truncate max-w-[200px]">
-                              {item.name}
-                            </div>
+                    <div className="flex flex-col space-y-3">
+                      <div className="bg-white rounded-lg p-3 flex items-center justify-between shadow-sm">
+                        <div className="flex items-center">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            playingIndex === index && playingType === 'file' ? 'bg-pink-100 text-pink-500' : 'bg-gray-100'
+                          }`}>
+                            {playingIndex === index && playingType === 'file' ? 
+                              <span className="animate-pulse">♪</span> : 
+                              <Music className="h-4 w-4" />
+                            }
                           </div>
-                          
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => toggleAudioFile(index)}
-                            className={`flex items-center ${playingIndex === index && playingType === 'file' ? 'text-pink-500' : ''}`}
-                          >
-                            {playingIndex === index && playingType === 'file' ? (
-                              <Pause className="h-5 w-5" />
-                            ) : (
-                              <Play className="h-5 w-5" />
-                            )}
-                          </Button>
+                          <div className="ml-3 text-sm font-medium truncate max-w-[200px]">
+                            {music.name}
+                          </div>
                         </div>
                         
-                        {/* Hidden audio element */}
-                        <audio 
-                          ref={(el) => {
-                            audioRefs.current[index] = el;
-                          }}
-                          src={item.url}
-                          onPlay={() => {
-                            setPlayingIndex(index);
-                            setPlayingType('file');
-                          }}
-                          onPause={() => {
-                            setPlayingIndex(null);
-                            setPlayingType(null);
-                          }}
-                          onEnded={() => {
-                            setPlayingIndex(null);
-                            setPlayingType(null);
-                          }}
-                          style={{ display: 'none' }}
-                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggleAudioFile(index)}
+                          className={`flex items-center ${playingIndex === index && playingType === 'file' ? 'text-pink-500' : ''}`}
+                        >
+                          {playingIndex === index && playingType === 'file' ? (
+                            <Pause className="h-5 w-5" />
+                          ) : (
+                            <Play className="h-5 w-5" />
+                          )}
+                        </Button>
                       </div>
-                    )}
+                      
+                      {/* Hidden audio element */}
+                      <audio 
+                        ref={(el) => {
+                          audioRefs.current[index] = el;
+                        }}
+                        src={music.url}
+                        onPlay={() => {
+                          setPlayingIndex(index);
+                          setPlayingType('file');
+                        }}
+                        onPause={() => {
+                          setPlayingIndex(null);
+                          setPlayingType(null);
+                        }}
+                        onEnded={() => {
+                          setPlayingIndex(null);
+                          setPlayingType(null);
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                    </div>
                   </div>
                 ))}
-                
-                <div className="text-xs text-gray-500 text-center">
-                  Nhấn nút để nghe thử nhạc nền
-                </div>
               </div>
             )}
           </div>
@@ -494,17 +447,9 @@ export default function MusicTab({
                     onChange={(e) => handleMusicLinkChange(index, e.target.value)}
                     className="w-full"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={!isValidYoutubeUrl(musicLinks[index] || "")}
-                    className="whitespace-nowrap opacity-0"
-                  >
-                    <Youtube className="mr-2 h-4 w-4" /> Xem trước
-                  </Button>
                 </div>
                 
-                {youtubeVideoIds[index] && (
+                {youtubeVideoIds[index] && getYoutubeMusics()[index] && (
                   <div className="bg-white border border-pink-200 rounded-lg p-3 space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start">
@@ -517,7 +462,7 @@ export default function MusicTab({
                         </div>
                         <div className="ml-3 flex-1">
                           <div className="text-sm font-medium truncate">
-                            {musicLinks[index]}
+                            {getYoutubeMusics()[index]?.name}
                           </div>
                           <div className="text-xs text-gray-500">
                             YouTube Video
@@ -544,7 +489,7 @@ export default function MusicTab({
                           type="button"
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleDeleteMusicLink(index)}
+                          onClick={() => handleDeleteMusic(getYoutubeMusics()[index]?.id)}
                           className="text-red-500 hover:text-red-700"
                         >
                           <X className="h-4 w-4" />
@@ -552,7 +497,7 @@ export default function MusicTab({
                       </div>
                     </div>
                     
-                    {/* Hidden YouTube player with audio-only */}
+                    {/* Hidden YouTube player */}
                     <div className="relative w-full h-16 bg-gray-50 rounded overflow-hidden">
                       <div className="text-xs text-gray-500 absolute top-1 left-2">Xem trước nhạc nền</div>
                       <iframe
@@ -566,42 +511,10 @@ export default function MusicTab({
                         onLoad={() => setIsYoutubePlayerReady(true)}
                       ></iframe>
                     </div>
-                    
-                    <div className="text-xs text-gray-500 pt-1">
-                      Chú ý: Âm thanh sẽ phát khi khách ghé thăm website cưới của bạn, không hiển thị video.
-                    </div>
                   </div>
                 )}
               </div>
             ))}
-            
-            {/* Display saved YouTube links */}
-            {getSavedYoutubeLinks().length > 0 && (
-              <div className="p-4 bg-pink-50 rounded-lg space-y-4">
-                <h4 className="text-sm font-medium text-gray-700">Link YouTube đã lưu</h4>
-                {getSavedYoutubeLinks().map((item, index) => (
-                  <div key={`saved-youtube-${index}`} className="bg-white border border-pink-200 rounded-lg p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="text-sm font-medium truncate">{item.url}</div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                          Đã lưu
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteMusicLink(item.index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
             
             <div className="p-3 bg-pink-50 rounded-lg">
               <div className="flex items-center gap-2 text-sm text-pink-700">

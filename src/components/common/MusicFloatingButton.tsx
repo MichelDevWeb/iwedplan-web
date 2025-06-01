@@ -125,8 +125,10 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
                       event.target.playVideo();
                     }
                   } else {
-                    // Otherwise, move to next song
-                    handleNext();
+                    // Otherwise, move to next song automatically if there are multiple songs
+                    if (storedMusic.length > 1) {
+                      handleNext();
+                    }
                   }
                 }
               }
@@ -159,10 +161,17 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
             // Attempt to get wedding data from database
             const weddingData = await getWeddingWebsite(weddingId);
             
-            // If wedding data exists and has music URLs, use them
-            if (weddingData?.musicUrls && weddingData.musicUrls.length > 0) {
+            // Check for new musics structure first
+            if (weddingData?.musics && weddingData.musics.length > 0) {
+              musicList = weddingData.musics.map((music) => ({
+                url: music.url,
+                title: music.name || 'Untitled Song'
+              }));
+            }
+            // Fallback to old musicUrls structure  
+            else if (weddingData?.musicUrls && weddingData.musicUrls.length > 0) {
               // Process all music URLs
-              musicList = weddingData.musicUrls.map((url, index) => {
+              musicList = weddingData.musicUrls.map((url: string, index: number) => {
                 const processedMusic = processMusicUrl(url);
                 return {
                   url: processedMusic.url,
@@ -208,7 +217,10 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
                 audio.currentTime = 0;
                 audio.play().catch(console.error);
               } else {
-                handleNext();
+                // Auto-advance to next song if there are multiple songs
+                if (musicList.length > 1) {
+                  handleNext();
+                }
               }
             });
             
@@ -236,7 +248,10 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
                 audio.currentTime = 0;
                 audio.play().catch(console.error);
               } else {
-                handleNext();
+                // Auto-advance to next song if there are multiple songs
+                if (defaultMusic.length > 1) {
+                  handleNext();
+                }
               }
             });
             
@@ -344,7 +359,9 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
     
     if (!nextSong) return;
     
-    setIsPlaying(true);
+    // Update song title immediately
+    setCurrentSongTitle(nextSong.title);
+    
     if (isValidYoutubeUrl(nextSong.url)) {
       const videoId = getYoutubeVideoId(nextSong.url);
       if (videoId && youtubePlayer) {
@@ -366,7 +383,10 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
             newAudio.currentTime = 0;
             newAudio.play().catch(console.error);
           } else {
-            handleNext();
+            // Auto-advance to next song if there are multiple songs
+            if (storedMusic.length > 1) {
+              handleNext();
+            }
           }
         });
         
@@ -378,7 +398,6 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
         console.error('Error transitioning to next song:', error);
       }
     }
-    setCurrentSongTitle(nextSong.title);
   };
 
   const handlePrevious = async () => {
@@ -390,7 +409,9 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
     
     if (!prevSong) return;
     
-    setIsPlaying(true);
+    // Update song title immediately
+    setCurrentSongTitle(prevSong.title);
+    
     if (isValidYoutubeUrl(prevSong.url)) {
       const videoId = getYoutubeVideoId(prevSong.url);
       if (videoId && youtubePlayer) {
@@ -412,7 +433,10 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
             newAudio.currentTime = 0;
             newAudio.play().catch(console.error);
           } else {
-            handleNext();
+            // Auto-advance to next song if there are multiple songs
+            if (storedMusic.length > 1) {
+              handleNext();
+            }
           }
         });
         
@@ -424,7 +448,6 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
         console.error('Error transitioning to previous song:', error);
       }
     }
-    setCurrentSongTitle(prevSong.title);
   };
 
   const toggleRepeatOne = () => {
@@ -470,8 +493,8 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
           isMusicMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
         )}>
           {/* Current Song Title */}
-          <div className="text-center text-sm font-medium text-gray-700 truncate">
-            {currentSongTitle}
+          <div className="text-center text-sm font-medium text-gray-700 truncate" title={currentSongTitle}>
+            {currentSongTitle || 'No Song'}
           </div>
           
           {/* Controls */}
@@ -481,6 +504,7 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
               variant="ghost"
               className="w-8 h-8 hover:bg-pink-100"
               onClick={handlePrevious}
+              disabled={storedMusic.length <= 1}
             >
               <SkipBack className="h-4 w-4 text-pink-500" />
             </Button>
@@ -490,6 +514,7 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
               variant="ghost"
               className="w-10 h-10 hover:bg-pink-100"
               onClick={handlePlayPause}
+              disabled={storedMusic.length === 0}
             >
               {isPlaying ? (
                 <Pause className="h-5 w-5 text-pink-500" />
@@ -503,6 +528,7 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
               variant="ghost"
               className="w-8 h-8 hover:bg-pink-100"
               onClick={handleNext}
+              disabled={storedMusic.length <= 1}
             >
               <SkipForward className="h-4 w-4 text-pink-500" />
             </Button>

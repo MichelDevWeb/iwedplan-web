@@ -16,6 +16,7 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { navItems } from '@/config/templateConfig';
 import MusicFloatingButton from './MusicFloatingButton';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingOverlay from "@/components/ui/loading-overlay";
 
 // Map icons to nav items
 const navIcons = {
@@ -36,9 +37,9 @@ const FloatingActionButton = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const { isAuthenticated } = useAuth();
   const router = useRouter();
-  
   const pathname = usePathname() || '';
   const weddingId = pathname.split('/').pop();
+  const [navigationLoading, setNavigationLoading] = useState(false);
 
   // Check if we're on a wedding page
   const isWeddingPage = pathname.match(/^\/[^\/]+$/) && pathname !== '/landing';
@@ -66,6 +67,7 @@ const FloatingActionButton = () => {
   // Function to handle navigation
   const handleNavigation = (path: string) => {
     setIsMenuOpen(false);
+    // setNavigationLoading(true);
     router.push(path);
   };
 
@@ -155,8 +157,23 @@ const FloatingActionButton = () => {
 
   return (
     <> { /* Use Fragment to return multiple root elements */}
+      {/* Loading Overlay for navigation */}
+      <LoadingOverlay 
+        isLoading={navigationLoading}
+        type="navigation"
+        message="Đang chuyển trang..."
+      />
+
+      {/* Blur Overlay - only show when menu is open */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 transition-all duration-300"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
       {/* Music Control Button */}
-      {(isWeddingPage && weddingId || !isWeddingPage && !weddingId) && (
+      {((isWeddingPage && weddingId) || (!isWeddingPage && !weddingId)) && (
         <MusicFloatingButton weddingId={weddingId} />
       )}
 

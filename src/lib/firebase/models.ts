@@ -17,6 +17,7 @@ export interface UserData {
   subscriptionEnd?: Timestamp;
   paymentHistory?: PaymentRecord[];
   preferences?: UserPreferences;
+  role?: 'user' | 'super_user'; // Role for permissions
   [key: string]: any; // For additional fields
 }
 
@@ -106,8 +107,12 @@ export interface WeddingData {
   albumImages?: AlbumImage[];
   
   // Music settings
-  musicUrls?: string[];
-  musicFileName?: string;
+  musics?: {
+    id: string;
+    name: string;
+    url: string;
+    type: 'file' | 'youtube';
+  }[];
   musicCount?: number;
   
   // Story, Events and other sections

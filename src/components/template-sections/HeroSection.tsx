@@ -232,7 +232,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ weddingData, onSaveSettings }
     color: weddingData.color,
     customColor: weddingData.customColor,
     customEndColor: weddingData.customEndColor,
-    effect: weddingData.effect
+    effect: weddingData.effect,
+    isPublic: weddingData.isPublic,
   }), [weddingData]);
 
   // Handle theme customizer updates

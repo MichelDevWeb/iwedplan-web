@@ -18,6 +18,7 @@ import { CheckCircle, XCircle, Download, Phone, Mail } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 
 interface Attendance {
   id: string;
@@ -42,6 +43,7 @@ export default function AttendanceListModal({ trigger, weddingId }: AttendanceLi
   const { isAuthenticated, user } = useAuth();
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [exportLoading, setExportLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<'all' | 'attending' | 'notAttending'>('all');
   const [error, setError] = useState<string | null>(null);
@@ -118,49 +120,55 @@ export default function AttendanceListModal({ trigger, weddingId }: AttendanceLi
 
   // Export to CSV
   const exportToCSV = () => {
-    // Prepare CSV headers
-    const headers = [
-      'Tên', 
-      'Trạng thái tham dự', 
-      'Số khách', 
-      'Ghi chú', 
-      'Thời gian xác nhận', 
-      'Điện thoại', 
-      'Email'
-    ];
+    setExportLoading(true);
     
-    // Prepare CSV rows
-    const csvRows = filteredAttendances.map(a => {
-      const timestamp = a.timestamp?.toDate 
-        ? a.timestamp.toDate().toLocaleString('vi-VN') 
-        : '';
-      
-      return [
-        a.name,
-        a.attending === 'yes' ? 'Tham dự' : 'Không tham dự',
-        a.guests.toString(),
-        a.notes || '',
-        timestamp,
-        a.phone || '',
-        a.email || ''
+    try {
+      // Prepare CSV headers
+      const headers = [
+        'Tên', 
+        'Trạng thái tham dự', 
+        'Số khách', 
+        'Ghi chú', 
+        'Thời gian xác nhận', 
+        'Điện thoại', 
+        'Email'
       ];
-    });
-    
-    // Combine headers and rows
-    const csvContent = [
-      headers.join(','),
-      ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    // Create Blob and download link
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `danh-sach-tham-du-${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      
+      // Prepare CSV rows
+      const csvRows = filteredAttendances.map(a => {
+        const timestamp = a.timestamp?.toDate 
+          ? a.timestamp.toDate().toLocaleString('vi-VN') 
+          : '';
+        
+        return [
+          a.name,
+          a.attending === 'yes' ? 'Tham dự' : 'Không tham dự',
+          a.guests.toString(),
+          a.notes || '',
+          timestamp,
+          a.phone || '',
+          a.email || ''
+        ];
+      });
+      
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Create Blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `danh-sach-tham-du-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      setTimeout(() => setExportLoading(false), 500); // Brief delay for UX
+    }
   };
 
   // Calculate summary statistics
@@ -184,85 +192,100 @@ export default function AttendanceListModal({ trigger, weddingId }: AttendanceLi
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Danh sách tham dự</DialogTitle>
-          <DialogDescription>
-            Danh sách khách mời đã xác nhận tham dự đám cưới của bạn
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="py-4 space-y-4 flex-1 overflow-hidden flex flex-col">
-          {/* Summary statistics */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-green-700">{totalAttending}</div>
-              <div className="text-sm text-green-600">Tham dự</div>
-            </div>
-            <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-red-700">{totalNotAttending}</div>
-              <div className="text-sm text-red-600">Không tham dự</div>
-            </div>
-            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-blue-700">{totalGuests}</div>
-              <div className="text-sm text-blue-600">Tổng số khách</div>
-            </div>
-          </div>
+    <>
+      {/* Loading Overlays */}
+      <LoadingOverlay 
+        isLoading={isLoading && isOpen}
+        type="api"
+        message="Đang tải danh sách tham dự..."
+      />
+      
+      <LoadingOverlay 
+        isLoading={exportLoading}
+        type="save"
+        message="Đang xuất file CSV..."
+      />
+      
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Danh sách tham dự</DialogTitle>
+            <DialogDescription>
+              Danh sách khách mời đã xác nhận tham dự đám cưới của bạn
+            </DialogDescription>
+          </DialogHeader>
           
-          {/* Display error if any */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-          
-          {/* Tabs for filtering */}
-          <Tabs 
-            defaultValue="all" 
-            value={currentTab}
-            onValueChange={(value) => setCurrentTab(value as 'all' | 'attending' | 'notAttending')}
-            className="w-full"
-          >
-            <div className="flex justify-between items-center">
-              <TabsList>
-                <TabsTrigger value="all">Tất cả ({attendances.length})</TabsTrigger>
-                <TabsTrigger value="attending">Tham dự ({totalAttending})</TabsTrigger>
-                <TabsTrigger value="notAttending">Không tham dự ({totalNotAttending})</TabsTrigger>
-              </TabsList>
-              
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={exportToCSV}
-                disabled={attendances.length === 0 || !!error}
-                className="flex items-center gap-1"
-              >
-                <Download className="h-4 w-4" />
-                <span>Xuất CSV</span>
-              </Button>
+          <div className="py-4 space-y-4 flex-1 overflow-hidden flex flex-col">
+            {/* Summary statistics */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-green-700">{totalAttending}</div>
+                <div className="text-sm text-green-600">Tham dự</div>
+              </div>
+              <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-red-700">{totalNotAttending}</div>
+                <div className="text-sm text-red-600">Không tham dự</div>
+              </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-blue-700">{totalGuests}</div>
+                <div className="text-sm text-blue-600">Tổng số khách</div>
+              </div>
             </div>
             
-            <TabsContent value="all" className="mt-4 overflow-y-auto max-h-[50vh]">
-              {renderAttendanceList(filteredAttendances, isLoading)}
-            </TabsContent>
-            <TabsContent value="attending" className="mt-4 overflow-y-auto max-h-[50vh]">
-              {renderAttendanceList(filteredAttendances, isLoading)}
-            </TabsContent>
-            <TabsContent value="notAttending" className="mt-4 overflow-y-auto max-h-[50vh]">
-              {renderAttendanceList(filteredAttendances, isLoading)}
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        <div className="flex justify-end">
-          <DialogClose asChild>
-            <Button variant="outline">Đóng</Button>
-          </DialogClose>
-        </div>
-      </DialogContent>
-    </Dialog>
+            {/* Display error if any */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+            
+            {/* Tabs for filtering */}
+            <Tabs 
+              defaultValue="all" 
+              value={currentTab}
+              onValueChange={(value) => setCurrentTab(value as 'all' | 'attending' | 'notAttending')}
+              className="w-full"
+            >
+              <div className="flex justify-between items-center">
+                <TabsList>
+                  <TabsTrigger value="all">Tất cả ({attendances.length})</TabsTrigger>
+                  <TabsTrigger value="attending">Tham dự ({totalAttending})</TabsTrigger>
+                  <TabsTrigger value="notAttending">Không tham dự ({totalNotAttending})</TabsTrigger>
+                </TabsList>
+                
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={exportToCSV}
+                  disabled={attendances.length === 0 || !!error}
+                  className="flex items-center gap-1"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Xuất CSV</span>
+                </Button>
+              </div>
+              
+              <TabsContent value="all" className="mt-4 overflow-y-auto max-h-[50vh]">
+                {renderAttendanceList(filteredAttendances, isLoading)}
+              </TabsContent>
+              <TabsContent value="attending" className="mt-4 overflow-y-auto max-h-[50vh]">
+                {renderAttendanceList(filteredAttendances, isLoading)}
+              </TabsContent>
+              <TabsContent value="notAttending" className="mt-4 overflow-y-auto max-h-[50vh]">
+                {renderAttendanceList(filteredAttendances, isLoading)}
+              </TabsContent>
+            </Tabs>
+          </div>
+          
+          <div className="flex justify-end">
+            <DialogClose asChild>
+              <Button variant="outline">Đóng</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 
   // Helper function to render attendance list
