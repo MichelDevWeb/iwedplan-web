@@ -10,7 +10,7 @@ import CreateWeddingDialog from "@/components/modals/CreateWeddingModal";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/common/Header";
-import FloatingNotification from "@/components/common/FloatingNotification";
+// import FloatingNotification from "@/components/common/FloatingNotification";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { translations, Language } from "@/lib/translations";
@@ -90,12 +90,6 @@ export default function LandingPage() {
 
       {/* Header Notification Bar */}
       <HeaderNotificationBar />
-
-      {/* Floating Notifications */}
-      <FloatingNotification 
-        position="top-right"
-        maxVisible={2}
-      />
 
       {/* Wedding Creation Dialog */}
       <CreateWeddingDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />

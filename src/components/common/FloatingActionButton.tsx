@@ -42,7 +42,8 @@ const FloatingActionButton = () => {
   const [navigationLoading, setNavigationLoading] = useState(false);
 
   // Check if we're on a wedding page
-  const isWeddingPage = pathname.match(/^\/[^\/]+$/) && pathname !== '/landing';
+  const isWeddingPage = pathname.match(/^\/[^\/]+$/) && pathname !== '/landing' && pathname !== '/admin';
+
 
   // Function to handle scrolling to a section (no navbar offset needed now)
   const scrollToSection = (sectionId: string) => {

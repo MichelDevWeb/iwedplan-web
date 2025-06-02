@@ -304,4 +304,65 @@ export interface AlbumImage {
   id: string;
   url: string;
   alt?: string;
+}
+
+// Admin Notifications
+export interface NotificationData {
+  id: string;
+  type: 'sale' | 'voucher' | 'system' | 'info' | 'warning';
+  notificationType: 'header' | 'floating'; // New field for notification display type
+  title: string;
+  message: string;
+  ctaText?: string;
+  ctaLink?: string;
+  dismissible: boolean;
+  expiresAt?: Timestamp;
+  priority: 'low' | 'medium' | 'high';
+  backgroundColor?: string;
+  textColor?: string;
+  isActive: boolean;
+  visibility: 'guest' | 'user' | 'admin'; // Updated visibility options
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: string; // admin user ID
+}
+
+// Template Configuration Items
+export interface TemplateConfigItem {
+  id: string;
+  type: 'template' | 'flowerFrame' | 'color' | 'effect';
+  name: string;
+  displayName: string;
+  description?: string;
+  imageUrl?: string;
+  previewUrl?: string;
+  isVip: boolean;
+  price: number; // VIP price in VND
+  isActive: boolean;
+  order: number; // display order
+  config?: Record<string, any>; // additional configuration data
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: string; // admin user ID
+}
+
+// Color specific config
+export interface ColorConfig extends TemplateConfigItem {
+  type: 'color';
+  colorCode: string; // hex color code
+  gradientColors?: string[]; // for gradient colors
+}
+
+// Effect specific config
+export interface EffectConfig extends TemplateConfigItem {
+  type: 'effect';
+  effectType: 'particles' | 'animation' | 'background';
+  cssClass?: string; // CSS class to apply
+}
+
+// Flower frame specific config
+export interface FlowerFrameConfig extends TemplateConfigItem {
+  type: 'flowerFrame';
+  frameImageUrl: string;
+  frameStyle: Record<string, any>; // CSS styles for positioning
 } 

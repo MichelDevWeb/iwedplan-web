@@ -13,7 +13,6 @@ import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import PaymentModal from "@/components/modals/PaymentModal";
 import LoadingScreen from "@/components/ui/loading-screen";
-import FloatingNotification, { NotificationData } from "@/components/common/FloatingNotification";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
 import { toast } from "sonner";
 
@@ -36,29 +35,6 @@ import {
 // No longer need this since flowerFrameOptions now includes the positioning
 // Define frame options with specific image positioning for previewing
 const flowerFramesWithPositioning = flowerFrameOptions;
-
-// Custom notifications for template creation
-const templateNotifications: NotificationData[] = [
-  {
-    id: 'template-tips',
-    type: 'info',
-    title: 'Mẹo tạo website cưới',
-    message: 'Hãy chọn template phù hợp với phong cách cưới của bạn và tùy chỉnh màu sắc để tạo ra website độc đáo!',
-    dismissible: true,
-    duration: 8000,
-    priority: 'low'
-  },
-  {
-    id: 'vip-features',
-    type: 'voucher',
-    title: 'Nâng cấp VIP để có thêm tính năng',
-    message: 'Unlock template độc quyền, khung hoa đẹp, và nhiều hiệu ứng tuyệt vời với gói VIP!',
-    ctaText: 'Xem chi tiết',
-    dismissible: true,
-    duration: 0,
-    priority: 'medium'
-  }
-];
 
 // Add CSS for animation
 const pulseAnimation = `
@@ -519,13 +495,6 @@ export default function TemplatePage({
             display: none;
           }
         `}</style>
-        
-        {/* Floating Notifications */}
-        <FloatingNotification 
-          notifications={templateNotifications}
-          position="top-left"
-          maxVisible={1}
-        />
         
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-4 md:p-6 border-b">
