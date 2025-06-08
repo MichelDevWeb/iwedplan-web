@@ -327,11 +327,11 @@ export const frameSuggestions: Record<string, string[]> = {
 
 // Update vip price constants
 export const VIP_PRICES = {
-  TEMPLATE: 150000, // 150,000 VND
-  FLOWER_FRAME: 100000, // 100,000 VND
-  COLOR: 50000, // 50,000 VND
-  MUSIC: 200000, // 200,000 VND per song
-  EFFECT: 120000, // 120,000 VND for special effects
+  TEMPLATE: 0, // 150,000 VND
+  FLOWER_FRAME: 0, // 100,000 VND
+  COLOR: 0, // 50,000 VND
+  MUSIC: 0, // 200,000 VND per song
+  EFFECT: 0, // 120,000 VND for special effects
 };
 
 // Helper functions for template display

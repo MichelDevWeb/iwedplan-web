@@ -214,18 +214,6 @@ export default function TemplatePage({
     }
   };
   
-  // Validate music link
-  const validateMusicLink = (link: string) => {
-    // Basic validation for common music platforms
-    const validDomains = ['youtube.com', 'youtu.be', 'soundcloud.com', 'spotify.com'];
-    try {
-      const url = new URL(link);
-      return validDomains.some(domain => url.hostname.includes(domain));
-    } catch (e) {
-      return false;
-    }
-  };
-  
   // Upload music file to Firebase Storage
   const uploadMusicFileToStorage = async (file: File): Promise<string> => {
     try {

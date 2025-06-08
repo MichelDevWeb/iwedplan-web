@@ -282,7 +282,7 @@ export default function DesignTab({
                           style: 'currency', 
                           currency: 'VND',
                           maximumFractionDigits: 0 
-                        }).format(VIP_PRICES.EFFECT || 150000)}
+                        }).format(VIP_PRICES.EFFECT)}
                       </div>
                     )}
                   </CardContent>

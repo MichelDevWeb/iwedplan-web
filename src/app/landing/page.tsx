@@ -451,18 +451,15 @@ export default function LandingPage() {
                 {t.companyDescription}
               </p>
               <div className="flex space-x-4">
-                <Link href="#" className="text-gray-300 hover:text-pink-400">
+                <Link href="https://www.facebook.com/profile.php?id=61576777425612" target="_blank" className="text-gray-300 hover:text-pink-400">
                   <Facebook className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="text-gray-300 hover:text-pink-400">
+                {/* <Link href="#" className="text-gray-300 hover:text-pink-400">
                   <Twitter className="h-5 w-5" />
                 </Link>
                 <Link href="#" className="text-gray-300 hover:text-pink-400">
                   <Instagram className="h-5 w-5" />
-                </Link>
-                <Link href="#" className="text-gray-300 hover:text-pink-400">
-                  <Github className="h-5 w-5" />
-                </Link>
+                </Link> */}
               </div>
             </div>
 
