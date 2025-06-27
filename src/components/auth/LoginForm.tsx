@@ -12,7 +12,6 @@ import { signInWithEmail, signInWithGoogle } from '@/lib/firebase/authService';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import { Language, translations } from '@/lib/translations';
 
 interface LoginFormProps {
@@ -25,7 +24,6 @@ export default function LoginForm({ language }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const t = translations[language];
@@ -33,9 +31,9 @@ export default function LoginForm({ language }: LoginFormProps) {
   // Check if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      setCreateDialogOpen(true);
+      router.push('/landing');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   // Form submission handler
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,8 +43,8 @@ export default function LoginForm({ language }: LoginFormProps) {
 
     try {
       await signInWithEmail(email, password);
-      // Open create wedding dialog instead of redirecting
-      setCreateDialogOpen(true);
+      // Redirect to landing page
+      router.push('/landing');
     } catch (err: any) {
       let errorMessage = language === 'vi' ? 'Đăng nhập không thành công' : 'Login failed';
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
@@ -68,8 +66,8 @@ export default function LoginForm({ language }: LoginFormProps) {
     setLoading(true);
     try {
       await signInWithGoogle();
-      // Open create wedding dialog instead of redirecting
-      setCreateDialogOpen(true);
+      // Redirect to landing page
+      router.push('/landing');
     } catch (err) {
       setError(language === 'vi' ? 'Đăng nhập với Google không thành công' : 'Google login failed');
       console.error(err);
@@ -266,11 +264,6 @@ export default function LoginForm({ language }: LoginFormProps) {
           </Link>
         </motion.p>
       </motion.div>
-
-      <CreateWeddingDialog 
-        open={createDialogOpen} 
-        onOpenChange={setCreateDialogOpen} 
-      />
     </motion.div>
   );
 } 

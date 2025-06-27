@@ -9,7 +9,6 @@ import { Heart, MessageSquare, Send, Clock, CheckCircle, XCircle } from 'lucide-
 import { motion, AnimatePresence } from 'framer-motion';
 import { addWeddingWish, getWeddingWishes } from '@/lib/firebase/wishService';
 import { WeddingWish } from '@/lib/firebase/models';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   Form, 
   FormControl, 
@@ -39,6 +38,7 @@ interface WishesSectionProps {
   title?: string;
   description?: string;
   wishesEnabled?: boolean;
+  isOwner?: boolean;
   onSaveSettings?: (settings: Record<string, any>) => void;
 }
 
@@ -47,9 +47,9 @@ const WishesSection: React.FC<WishesSectionProps> = ({
   title = "Lời Chúc",
   description = "Gửi lời chúc mừng đến cô dâu và chú rể.",
   wishesEnabled = true,
+  isOwner = false,
   onSaveSettings,
 }) => {
-  const { isAuthenticated } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'success' | 'error' | null>(null);
   const [wishes, setWishes] = useState<Wish[]>([]);
@@ -468,7 +468,7 @@ const WishesSection: React.FC<WishesSectionProps> = ({
       </motion.div>
 
       {/* Customizer */}
-      {isAuthenticated && weddingId && (
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <WishesCustomizer
             weddingId={weddingId}

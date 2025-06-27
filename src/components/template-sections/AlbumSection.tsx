@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image'; // Use Next.js Image component for optimization
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Download, Heart } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { useAuth } from '@/contexts/AuthContext';
 import AlbumCustomizer from '@/components/wedding/AlbumCustomizer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -22,6 +21,7 @@ interface AlbumSectionProps {
   title?: string;
   description?: string;
   images?: AlbumImage[] | string[];
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     images?: AlbumImage[];
     title?: string;
@@ -35,9 +35,9 @@ const AlbumSection: React.FC<AlbumSectionProps> = ({
   title = "Album Ảnh",
   description = "Mỗi bức ảnh là một kỷ niệm, mỗi khoảnh khắc là một câu chuyện.",
   images = [],
+  isOwner = false,
   onSaveSettings
 }) => {
-  const { isAuthenticated } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -216,8 +216,8 @@ const AlbumSection: React.FC<AlbumSectionProps> = ({
         />
       </div>
 
-      {/* Album Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* Album Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <AlbumCustomizer
             weddingId={weddingId}

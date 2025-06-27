@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
 import VideoCustomizer from '@/components/wedding/VideoCustomizer';
 
 interface VideoSectionProps {
@@ -10,6 +9,7 @@ interface VideoSectionProps {
   title?: string;
   description?: string;
   videoUrl?: string;
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     videoUrl?: string;
     title?: string;
@@ -23,9 +23,9 @@ const VideoSection: React.FC<VideoSectionProps> = ({
   title = "Video Cưới",
   description = "Tình yêu không làm cho thế giới quay tròn. Tình yêu là những gì làm cho chuyến đi đáng giá.",
   videoUrl = "https://www.youtube.com/embed/stLjM9fqH1A?si=HnsgmGwLNw-2grmR",
+  isOwner = false,
   onSaveSettings
 }) => {
-  const { isAuthenticated } = useAuth();
   // State for play animation effect when section comes into view
   const [isVisible, setIsVisible] = useState(false);
   
@@ -143,8 +143,8 @@ const VideoSection: React.FC<VideoSectionProps> = ({
         />
       </div>
 
-      {/* Video Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* Video Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-[50%] right-4 z-20">
           <VideoCustomizer
             weddingId={weddingId}

@@ -365,4 +365,61 @@ export interface FlowerFrameConfig extends TemplateConfigItem {
   type: 'flowerFrame';
   frameImageUrl: string;
   frameStyle: Record<string, any>; // CSS styles for positioning
+}
+
+/**
+ * Task trong Smart Todo List (tasks subcollection)
+ */
+export interface TodoTask {
+  id: string;
+  weddingId: string;
+  title: string;
+  description?: string;
+  category: string;
+  milestone: string; // Mốc thời gian, ví dụ "12 tháng trước", "6 tháng trước"
+  dueDate: Timestamp; // Ngày hạn chót tự động tính dựa trên ngày cưới và milestone
+  status: 'pending' | 'in-progress' | 'completed' | 'skipped';
+  assignedTo?: string; // ID của người được giao nhiệm vụ (bride/groom/planner)
+  assigneeName?: string; // Tên người được giao nhiệm vụ
+  notes?: string;
+  isDefault: boolean; // Đây là task mặc định từ hệ thống hay task tùy chỉnh của người dùng
+  priority: 'low' | 'medium' | 'high';
+  reminderSent: boolean; // Đã gửi nhắc nhở chưa
+  advertisementIds?: string[]; // Danh sách các quảng cáo được gợi ý cho task này
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  completedAt?: Timestamp;
+}
+
+/**
+ * Default Task Template trong hệ thống
+ */
+export interface DefaultTaskTemplate {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  milestone: string;
+  daysBeforeWedding: number; // Số ngày trước đám cưới
+  priority: 'low' | 'medium' | 'high';
+  suggestedAssignee: 'bride' | 'groom' | 'planner' | 'both';
+  advertisementCategories?: string[]; // Các danh mục quảng cáo liên quan
+}
+
+/**
+ * Advertisement cho các task
+ */
+export interface TaskAdvertisement {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  linkUrl: string;
+  categories: string[]; // Các danh mục quảng cáo, ví dụ: "wedding-venue", "photography"
+  priority: number; // Số càng cao càng ưu tiên hiển thị
+  isActive: boolean;
+  startDate: Timestamp;
+  endDate: Timestamp;
+  clickCount: number;
+  viewCount: number;
 } 

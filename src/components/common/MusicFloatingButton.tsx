@@ -69,9 +69,13 @@ type YTPlayerState = {
 
 interface MusicFloatingButtonProps {
   weddingId?: string;
+  position?: 'top-left' | 'bottom-left' | 'top-right' | 'bottom-right';
 }
 
-const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) => {
+const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ 
+  weddingId, 
+  position = 'top-left' 
+}) => {
   const [isMusicMenuOpen, setIsMusicMenuOpen] = useState(false);
   const [currentMusicIndex, setCurrentMusicIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,6 +90,22 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
   const [youtubePlayer, setYoutubePlayer] = useState<YTPlayer | null>(null);
   const youtubePlayerRef = useRef<HTMLDivElement>(null);
   const currentVideoId = useRef<string>('');
+
+  // Position styles
+  const getPositionStyles = () => {
+    switch (position) {
+      case 'top-left':
+        return 'top-14 left-2';
+      case 'bottom-left':
+        return 'bottom-14 left-2';
+      case 'top-right':
+        return 'top-14 right-2';
+      case 'bottom-right':
+        return 'bottom-14 right-2';
+      default:
+        return 'top-14 left-2';
+    }
+  };
 
   // Initialize YouTube API
   useEffect(() => {
@@ -155,14 +175,15 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
       try {
         let musicList: Array<{ url: string; title: string }> = [];
 
-        // Only try to get wedding music if weddingId is provided
+        // If weddingId is provided, try to get wedding music
         if (weddingId) {
           try {
-            // Attempt to get wedding data from database
+            console.log('Loading music for wedding:', weddingId);
             const weddingData = await getWeddingWebsite(weddingId);
             
             // Check for new musics structure first
             if (weddingData?.musics && weddingData.musics.length > 0) {
+              console.log('Found wedding musics:', weddingData.musics);
               musicList = weddingData.musics.map((music) => ({
                 url: music.url,
                 title: music.name || 'Untitled Song'
@@ -170,7 +191,7 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
             }
             // Fallback to old musicUrls structure  
             else if (weddingData?.musicUrls && weddingData.musicUrls.length > 0) {
-              // Process all music URLs
+              console.log('Found wedding musicUrls:', weddingData.musicUrls);
               musicList = weddingData.musicUrls.map((url: string, index: number) => {
                 const processedMusic = processMusicUrl(url);
                 return {
@@ -180,13 +201,13 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
               });
             }
           } catch (weddingError) {
-            // Log the error but don't fail - will fall back to default music
-            console.warn('Could not load wedding music, using default:', weddingError);
+            console.warn('Could not load wedding music:', weddingError);
           }
         }
 
-        // If no wedding music found or no weddingId, use default music
+        // If no wedding music found (either no weddingId or no music in wedding), use default music
         if (musicList.length === 0) {
+          console.log('Using default music');
           musicList = [...defaultMusic];
         }
 
@@ -476,7 +497,7 @@ const MusicFloatingButton: React.FC<MusicFloatingButtonProps> = ({ weddingId }) 
   };
 
   return (
-    <div className="fixed top-14 left-2 z-50">
+    <div className={`fixed ${getPositionStyles()} z-50`}>
       <div className="relative group">
         <Button
           size="icon"

@@ -11,7 +11,8 @@ import {
   limit as firestoreLimit,
   serverTimestamp,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  orderBy
 } from '@firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from '@firebase/storage';
 import { WeddingData } from './models';
@@ -508,5 +509,30 @@ export const deleteWeddingWebsite = async (weddingId: string, requestingUserId?:
   } catch (error) {
     console.error('Error deleting wedding website:', error);
     throw new Error('Không thể xoá website cưới. Vui lòng thử lại.');
+  }
+};
+
+/**
+ * Get wedding websites created by a specific user
+ */
+export const getUserWeddingWebsites = async (userId: string): Promise<WeddingData[]> => {
+  try {
+    const db = await getFirestore();
+    const weddingsRef = collection(db, 'weddings');
+    const q = query(weddingsRef, where('ownerId', '==', userId), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    
+    const weddings: WeddingData[] = [];
+    querySnapshot.forEach((doc) => {
+      weddings.push({
+        id: doc.id,
+        ...doc.data()
+      } as WeddingData);
+    });
+    
+    return weddings;
+  } catch (error) {
+    console.error('Error fetching user wedding websites:', error);
+    return [];
   }
 }; 

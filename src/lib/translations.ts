@@ -82,10 +82,10 @@ export const translations = {
     downloadApp: "Tải ứng dụng",
     pricing: "Báo giá",
     heroTitle: "iWedPlan",
-    heroSubtitle: "Tạo website cưới đẹp mắt và chuyên nghiệp trong vài phút",
+    heroSubtitle: "Lập kế hoạch đám cưới hoàn hảo của bạn",
     getStarted: "Bắt đầu tạo website cưới",
     loading: "Đang kiểm tra...",
-    loginToStart: "Đăng nhập để tạo website",
+    loginToStart: "Đăng nhập để lập kế hoạch",
     featuresTitle: "Tính năng nổi bật",
     featuresList: [
       {

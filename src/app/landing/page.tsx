@@ -14,8 +14,9 @@ import Header from "@/components/common/Header";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { translations, Language } from "@/lib/translations";
-import { getFeaturedWeddingWebsites } from "@/lib/firebase/weddingService";
+import { getFeaturedWeddingWebsites, getUserWeddingWebsites } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
+import { getFeatureIcon } from "@/lib/utils/uiHelpers";
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,11 +27,13 @@ export default function LandingPage() {
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('vi');
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const t = translations[language];
   const [featuredWeddings, setFeaturedWeddings] = useState<WeddingData[]>([]);
   const [loadingWeddings, setLoadingWeddings] = useState(true);
   const [navigationLoading, setNavigationLoading] = useState(false);
+  const [userWeddings, setUserWeddings] = useState<WeddingData[]>([]);
+  const [loadingUserWeddings, setLoadingUserWeddings] = useState(false);
 
   const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 0.5, 0]);
@@ -54,6 +57,27 @@ export default function LandingPage() {
     fetchFeaturedWeddings();
   }, []);
 
+  // Fetch user's weddings if authenticated
+  useEffect(() => {
+    const fetchUserWeddings = async () => {
+      if (!isAuthenticated || !user) return;
+      
+      try {
+        setLoadingUserWeddings(true);
+        const weddings = await getUserWeddingWebsites(user.uid);
+        setUserWeddings(weddings);
+      } catch (error) {
+        console.error("Error fetching user weddings:", error);
+      } finally {
+        setLoadingUserWeddings(false);
+      }
+    };
+
+    if (isAuthenticated && user) {
+      fetchUserWeddings();
+    }
+  }, [isAuthenticated, user]);
+
   // Transform wedding data to display format
   const transformedWeddings = featuredWeddings.map(wedding => ({
     id: wedding.id,
@@ -61,7 +85,7 @@ export default function LandingPage() {
     description: wedding.description || t.websitesTitle,
     image: wedding.heroImageUrl || '/images/weddings/default-wedding.jpg',
     rating: "4.9",
-    url: `/${wedding.id}`
+    url: `/${wedding.id}/template`
   }));
 
   const handleCreateClick = () => {
@@ -77,6 +101,19 @@ export default function LandingPage() {
   const handleNavigation = (path: string) => {
     setNavigationLoading(true);
     router.push(path);
+  };
+
+  // Handle dashboard navigation - go to dashboard or create new
+  const handleDashboardNavigation = () => {
+    if (loadingUserWeddings) return;
+    
+    if (userWeddings && userWeddings.length > 0) {
+      // Navigate to the dashboard
+      handleNavigation('/dashboard');
+    } else {
+      // No weddings yet, open create dialog
+      setCreateDialogOpen(true);
+    }
   };
 
   return (
@@ -151,10 +188,10 @@ export default function LandingPage() {
             <Button
               size="lg"
               className="bg-pink-500 hover:bg-pink-600 text-white text-lg px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={handleCreateClick}
-              disabled={loading}
+              onClick={isAuthenticated ? handleDashboardNavigation : handleCreateClick}
+              disabled={loading || loadingUserWeddings}
             >
-              {loading ? (
+              {loading || loadingUserWeddings ? (
                 <>{t.loading}</>
               ) : isAuthenticated ? (
                 <>{t.getStarted} <ArrowRight className="ml-2" /></>
@@ -549,18 +586,4 @@ export default function LandingPage() {
       </footer>
     </div>
   );
-}
-
-// Helper function to get the appropriate feature icon
-function getFeatureIcon(index: number) {
-  const icons = [
-    <Heart key={0} className="w-8 h-8 text-pink-500" />,
-    <Calendar key={1} className="w-8 h-8 text-pink-500" />,
-    <ImageIcon key={2} className="w-8 h-8 text-pink-500" />,
-    <Video key={3} className="w-8 h-8 text-pink-500" />,
-    <Users key={4} className="w-8 h-8 text-pink-500" />,
-    <MessageSquare key={5} className="w-8 h-8 text-pink-500" />
-  ];
-  
-  return icons[index % icons.length];
 } 

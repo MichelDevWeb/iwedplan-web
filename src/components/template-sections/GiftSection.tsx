@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
-import { Copy, Check, ExternalLink, QrCode, Heart } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
+import { Copy, Check, QrCode, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import GiftCustomizer from '@/components/wedding/GiftCustomizer';
 import { defaultAccounts } from '@/config/templateConfig';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -24,6 +23,7 @@ interface GiftSectionProps {
   title?: string;
   description?: string;
   bankAccounts?: BankAccount[];
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     bankAccounts?: BankAccount[];
     title?: string;
@@ -37,9 +37,9 @@ const GiftSection: React.FC<GiftSectionProps> = ({
   title = "Mừng Cưới",
   description = "Sự hiện diện của bạn là món quà quý giá nhất đối với chúng tôi.",
   bankAccounts = [],
+  isOwner = false,
   onSaveSettings
 }) => {
-  const { isAuthenticated } = useAuth();
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
   const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   const [currentQrCode, setCurrentQrCode] = useState<string | null>(null);
@@ -216,8 +216,8 @@ const GiftSection: React.FC<GiftSectionProps> = ({
         />
       </div>
 
-      {/* Gift Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* Gift Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <GiftCustomizer
             weddingId={weddingId}

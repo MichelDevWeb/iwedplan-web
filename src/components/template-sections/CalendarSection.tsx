@@ -6,7 +6,6 @@ import { motion, useAnimation } from 'framer-motion';
 import { format, differenceInDays } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Clock, Calendar as CalendarIcon, Heart } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import CalendarCustomizer from '@/components/wedding/CalendarCustomizer';
 
 interface CalendarSectionProps {
@@ -14,6 +13,7 @@ interface CalendarSectionProps {
   title?: string;
   description?: string;
   date?: Date | null;
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     title?: string;
     description?: string;
@@ -26,10 +26,10 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({
   title: initialTitle = "Kỷ niệm",
   description: initialDescription = "Đếm từng khoảnh khắc đến ngày hạnh phúc của chúng tôi.",
   date: initialDate = new Date(2023, 11, 4),
+  isOwner = false,
   onSaveSettings
 }) => {
   const controls = useAnimation();
-  const { isAuthenticated } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   
   // Cache initialData for reset capability
@@ -250,8 +250,8 @@ const CalendarSection: React.FC<CalendarSectionProps> = ({
         <CalendarIcon size={80} strokeWidth={1} />
       </motion.div>
       
-      {/* Calendar Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* Calendar Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-4 right-4 z-20">
           <CalendarCustomizer
             weddingId={weddingId}

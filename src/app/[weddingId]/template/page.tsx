@@ -18,8 +18,10 @@ import LoadingOverlay from "@/components/ui/loading-overlay";
 import { getWeddingWebsite } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
+import MusicFloatingButton from "@/components/common/MusicFloatingButton";
 import { QRCodeSVG } from "qrcode.react";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   saveTemplateSectionSettings,
   processTemplateData,
@@ -28,10 +30,12 @@ import {
 export default function WeddingPage() {
   const router = useRouter();
   const params = useParams<{ weddingId: string }>();
+  const { user } = useAuth();
   const [weddingData, setWeddingData] = useState<WeddingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [navigationLoading, setNavigationLoading] = useState(false);
   const [baseUrl, setBaseUrl] = useState("");
+  const [isOwner, setIsOwner] = useState(false);
 
   // Set the base URL once when component mounts
   useEffect(() => {
@@ -48,6 +52,12 @@ export default function WeddingPage() {
         const data = await getWeddingWebsite(weddingId);
         if (data) {
           setWeddingData(data);
+          // Check if current user is the owner of this wedding
+          if (user && data.ownerId === user.uid) {
+            setIsOwner(true);
+          } else {
+            setIsOwner(false);
+          }
         } else {
           // Wedding not found, redirect to landing
           setNavigationLoading(true);
@@ -61,7 +71,7 @@ export default function WeddingPage() {
         setLoading(false);
       }
     },
-    [router]
+    [router, user]
   );
 
   // Load wedding data on initial render and when weddingId changes
@@ -120,6 +130,7 @@ export default function WeddingPage() {
             <HeroSection
               key="hero"
               weddingData={weddingData}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("hero", settings)
               }
@@ -133,6 +144,7 @@ export default function WeddingPage() {
               title={templateData.video.title}
               description={templateData.video.description}
               videoUrl={templateData.video.videoUrl}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("video", settings)
               }
@@ -146,6 +158,7 @@ export default function WeddingPage() {
               title={templateData.album.title}
               description={templateData.album.description}
               images={templateData.album.images}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("album", settings)
               }
@@ -159,6 +172,7 @@ export default function WeddingPage() {
               title={templateData.calendar.title}
               description={templateData.calendar.description}
               date={templateData.calendar.date}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("calendar", settings)
               }
@@ -172,6 +186,7 @@ export default function WeddingPage() {
               title={templateData.story.title}
               description={templateData.story.description}
               events={templateData.story.storyEvents}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("story", settings)
               }
@@ -186,6 +201,7 @@ export default function WeddingPage() {
               description={templateData.brideGroom.description}
               groom={templateData.brideGroom.groom}
               bride={templateData.brideGroom.bride}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("brideGroom", settings)
               }
@@ -199,6 +215,7 @@ export default function WeddingPage() {
               title={templateData.events.title}
               description={templateData.events.description}
               eventsList={templateData.events.eventsList}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("events", settings)
               }
@@ -211,6 +228,7 @@ export default function WeddingPage() {
               key="wishes"
               title={templateData.wishes.title}
               description={templateData.wishes.description}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("wishes", settings)
               }
@@ -224,6 +242,7 @@ export default function WeddingPage() {
               title={templateData.gift.title}
               description={templateData.gift.description}
               bankAccounts={templateData.gift.bankAccounts}
+              isOwner={isOwner}
               onSaveSettings={(settings) =>
                 handleSaveSettings("gift", settings)
               }
@@ -428,7 +447,8 @@ export default function WeddingPage() {
           </section>
         </main>
         <Footer />
-        <FloatingActionButton />
+        <FloatingActionButton page="wedding" weddingId={weddingData.id} />
+        <MusicFloatingButton weddingId={weddingData.id} position="top-left" />
       </div>
     </>
   );

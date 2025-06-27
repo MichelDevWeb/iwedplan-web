@@ -406,6 +406,7 @@ export const navItems = [
   { id: 'story', label: 'Chuyện Tình Yêu' },
   { id: 'bridegroom', label: 'Cô Dâu & Chú Rể' },
   { id: 'events', label: 'Sự Kiện' },
+  { id: 'todo', label: 'Kế Hoạch Công Việc' },
   { id: 'rsvp', label: 'Xác Nhận Tham Dự' },
   { id: 'wishes', label: 'Sổ Lưu Bút' },
   { id: 'gift', label: 'Mừng Cưới' }

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, Trash2, Home, Crown, User } from 'lucide-react';
+import { Loader2, Plus, Trash2, Home, Crown, User, FileText } from 'lucide-react';
 import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import ConfirmationModal from '@/components/modals/ConfirmationModal';
 import HeaderNotificationBar from '@/components/common/HeaderNotificationBar';
@@ -174,16 +174,16 @@ export default function TemplatePage() {
                 className="bg-pink-500 hover:bg-pink-600 transition-colors duration-300 shadow-md hover:shadow-lg"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Tạo website mới
+                Tạo thiệp mới
               </Button>
             </div>
             
             <div className="text-center relative z-10">
               <h1 className="text-3xl font-bold mb-2 text-pink-600">
-                Quản lý Website Cưới
+                Quản lý Thiệp mời
               </h1>
               <p className="text-gray-600">
-                {isSuper ? 'Tạo và quản lý tất cả website cưới trong hệ thống' : 'Tạo và quản lý các website cưới của bạn'}
+                {isSuper ? 'Tạo và quản lý tất cả thiệp mời trong hệ thống' : 'Tạo và quản lý thiệp mời điện tử của bạn'}
               </p>
             </div>
           </div>
@@ -191,9 +191,12 @@ export default function TemplatePage() {
           {/* Wedding Templates Section */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {isSuper ? `Tất cả website cưới (${weddings.length})` : `Website cưới của bạn (${weddings.length})`}
-              </h2>
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-pink-500" />
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {isSuper ? `Tất cả thiệp mời (${weddings.length})` : `Thiệp mời của bạn (${weddings.length})`}
+                </h2>
+              </div>
               {weddings.length === 0 && (
                 <Button 
                   onClick={handleCreateWedding}
@@ -201,7 +204,7 @@ export default function TemplatePage() {
                   className="text-pink-600 border-pink-300 hover:bg-pink-50"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Tạo website đầu tiên
+                  Tạo thiệp đầu tiên
                 </Button>
               )}
             </div>
@@ -235,7 +238,7 @@ export default function TemplatePage() {
                     >
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 group-hover:bg-pink-200 transition-colors">
-                          <span className="text-lg">❤️</span>
+                          <FileText className="h-5 w-5" />
                         </div>
                         <div className="flex-1 pr-8">
                           <h3 className="font-medium text-lg text-pink-600 truncate">
@@ -267,7 +270,7 @@ export default function TemplatePage() {
                           size="sm"
                           className="flex-1 group-hover:bg-pink-50 group-hover:border-pink-200 transition-colors"
                         >
-                          Chỉnh sửa
+                          Chỉnh sửa thiệp
                         </Button>
                         <Button 
                           variant="ghost" 
@@ -288,13 +291,13 @@ export default function TemplatePage() {
             ) : (
               <div className="text-center py-12">
                 <div className="w-20 h-20 mx-auto bg-pink-100 rounded-full flex items-center justify-center text-pink-600 mb-4">
-                  <span className="text-3xl">❤️</span>
+                  <FileText className="h-10 w-10" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {isSuper ? 'Chưa có website cưới nào trong hệ thống' : 'Chưa có website cưới nào'}
+                  {isSuper ? 'Chưa có thiệp mời nào trong hệ thống' : 'Bạn chưa có thiệp mời nào'}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {isSuper ? 'Hệ thống chưa có website cưới nào được tạo.' : 'Hãy tạo website cưới đầu tiên của bạn để bắt đầu.'}
+                  {isSuper ? 'Hệ thống chưa có thiệp mời nào được tạo.' : 'Hãy tạo thiệp mời đầu tiên của bạn để bắt đầu.'}
                 </p>
                 <Button 
                   size="lg" 
@@ -302,7 +305,7 @@ export default function TemplatePage() {
                   onClick={handleCreateWedding}
                 >
                   <Plus className="w-5 h-5 mr-2" />
-                  Tạo website cưới
+                  Tạo thiệp mời
                 </Button>
               </div>
             )}
@@ -321,8 +324,8 @@ export default function TemplatePage() {
         onClose={() => setShowDeleteModal(null)}
         onConfirm={handleDeleteWedding}
         title="Xác nhận xoá"
-        message="Bạn có chắc chắn muốn xoá website cưới này không? Hành động này không thể hoàn tác và sẽ xoá tất cả dữ liệu liên quan."
-        confirmText="Xoá website"
+        message="Bạn có chắc chắn muốn xoá thiệp mời này không? Hành động này không thể hoàn tác và sẽ xoá tất cả dữ liệu liên quan."
+        confirmText="Xoá thiệp"
         cancelText="Hủy"
         variant="destructive"
         isLoading={!!deleting}

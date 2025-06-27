@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Timeline } from "@/components/ui/timeline";
-import { useAuth } from "@/contexts/AuthContext";
 import StoryCustomizer from "@/components/wedding/StoryCustomizer";
 import { defaultStoryEvents } from "@/config/templateConfig";
 // Make sure this interface matches the one in StoryCustomizer
@@ -21,6 +20,7 @@ interface StorySectionProps {
   title?: string;
   description?: string;
   events?: StoryEvent[];
+  isOwner?: boolean;
   onSaveSettings?: (settings: Record<string, any>) => void;
 }
 
@@ -29,6 +29,7 @@ const StorySection: React.FC<StorySectionProps> = ({
   title = "Câu Chuyện Tình Yêu",
   description = "Hành trình tình yêu của chúng tôi.",
   events = defaultStoryEvents,
+  isOwner = false,
   onSaveSettings,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -44,8 +45,6 @@ const StorySection: React.FC<StorySectionProps> = ({
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentDescription, setCurrentDescription] = useState(description);
   const [storyEvents, setStoryEvents] = useState<StoryEvent[]>(events);
-  
-  const { isAuthenticated } = useAuth();
 
   // Monitor when section scrolls into view
   useEffect(() => {
@@ -166,7 +165,7 @@ const StorySection: React.FC<StorySectionProps> = ({
       </div>
 
       {/* Customizer */}
-      {isAuthenticated && weddingId && (
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <StoryCustomizer
             weddingId={weddingId}

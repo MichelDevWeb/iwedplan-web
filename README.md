@@ -17,6 +17,17 @@ Beautiful and customizable wedding website built with Next.js and Tailwind CSS.
 - 🎬 Video integration
 - 💝 Gift registry/money transfer options
 - 🗺️ Maps and event location details
+- 📝 Todo List Management: Quản lý công việc chuẩn bị đám cưới
+  - Danh sách công việc được phân loại theo thời gian và mức độ ưu tiên
+  - Theo dõi tiến độ hoàn thành công việc
+  - Gán công việc cho các thành viên trong gia đình
+  - Thông báo nhắc nhở khi đến hạn
+  - Gợi ý quảng cáo thông minh cho từng loại công việc
+- 🎨 Wedding Template Creator: Tạo thiệp mời điện tử
+  - Nhiều mẫu thiệp đẹp mắt, dễ dàng tùy chỉnh
+  - Tích hợp thông tin đám cưới tự động
+  - Chia sẻ thiệp mời qua mạng xã hội hoặc tin nhắn
+  - Theo dõi số lượng khách xác nhận tham dự
 
 ## Getting Started
 
@@ -80,11 +91,16 @@ iwedplan-web/
 ├── public/           # Static assets (images, fonts, etc.)
 ├── src/
 │   ├── app/          # Next.js app router
+│   │   └── [weddingId]/   # Wedding routes
+│   │       ├── template/  # Wedding template pages
+│   │       └── todo/      # Smart To-do List pages
 │   ├── components/   # React components
 │   │   ├── common/   # Shared components (header, footer, etc.)
 │   │   ├── sections/ # Main page sections
+│   │   ├── todo/     # Todo list components
 │   │   └── ui/       # UI components (buttons, cards, etc.)
 │   └── lib/          # Utility functions
+│       └── firebase/ # Firebase services
 └── tailwind.config.js # Tailwind configuration
 ```
 

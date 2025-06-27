@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { Calendar, Clock, MapPin, ExternalLink, Camera } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import EventsCustomizer from '@/components/wedding/EventsCustomizer';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -31,6 +30,7 @@ interface EventsSectionProps {
   eventDate?: Date | null;
   address?: string;
   mapUrl?: string;
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     eventsList?: EventItem[];
     title?: string;
@@ -50,9 +50,9 @@ const EventsSection: React.FC<EventsSectionProps> = ({
   eventDate = new Date(2023, 11, 4),
   address = "Khách sạn Mường Thanh, 78 Đường Hùng Vương, Phường 1, Tp. Vĩnh Long, Vĩnh Long",
   mapUrl = "https://maps.google.com/maps?q=Khách+sạn+Mường+Thanh+Vĩnh+Long&t=&z=13&ie=UTF8&iwloc=&output=embed",
+  isOwner = false,
   onSaveSettings
 }) => {
-  const { isAuthenticated } = useAuth();
   
   // Cache initial data for reset capability
   const cachedInitialData = useMemo(() => ({
@@ -254,8 +254,8 @@ const EventsSection: React.FC<EventsSectionProps> = ({
         />
       </div>
 
-      {/* Events Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* Events Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <EventsCustomizer
             weddingId={weddingId}

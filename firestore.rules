@@ -12,6 +12,18 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Check if user is the owner of a wedding
+    function isWeddingOwner(weddingId) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+    }
+    
+    // Check if user is a super user
+    function isSuperUser() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_user';
+    }
+    
     // Users collection rules
     match /users/{userId} {
       // Allow read access to own user data or public read for certain fields
@@ -51,29 +63,60 @@ service cloud.firestore {
       // Allow access to weddings subcollections
       match /{subcollection}/{document=**} {
         allow read: if true;
-        allow write: if isAuthenticated() && 
-                      (get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid);
+        allow write: if isWeddingOwner(weddingId);
+      }
+      
+      // Todo items subcollection
+      match /tasks/{taskId} {
+        // Allow reading todos if authenticated user is the wedding owner or for any authenticated user
+        allow read: if isAuthenticated();
+        
+        // Allow creating/updating/deleting todos if authenticated user is the wedding owner
+        allow create, update, delete: if isWeddingOwner(weddingId);
       }
       
       // Specific rules for wishes subcollection
       match /wishes/{wishId} {
         // Allow reading all wishes if authenticated user is the wedding owner
         // Otherwise only allow reading approved wishes
-        allow read: if resource.data.approved == true || 
-                     (isAuthenticated() && 
-                      get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid);
+        allow read: if resource.data.approved == true || isWeddingOwner(weddingId);
         
         // Allow creating wishes by anyone (they'll be marked as unapproved initially)
         allow create: if request.resource.data.approved == false;
         
         // Only allow updating by the wedding owner
-        allow update: if isAuthenticated() && 
-                       get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+        allow update: if isWeddingOwner(weddingId);
         
         // Only allow deleting by the wedding owner
-        allow delete: if isAuthenticated() && 
-                       get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+        allow delete: if isWeddingOwner(weddingId);
       }
+      
+      // Guest list subcollection
+      match /guests/{guestId} {
+        // Allow reading guests if authenticated user is the wedding owner
+        allow read: if isWeddingOwner(weddingId);
+        
+        // Allow creating/updating/deleting guests if authenticated user is the wedding owner
+        allow create, update, delete: if isWeddingOwner(weddingId);
+      }
+      
+      // Money tracking subcollection
+      match /transactions/{transactionId} {
+        // Allow reading transactions if authenticated user is the wedding owner
+        allow read: if isWeddingOwner(weddingId);
+        
+        // Allow creating/updating/deleting transactions if authenticated user is the wedding owner
+        allow create, update, delete: if isWeddingOwner(weddingId);
+      }
+    }
+    
+    // Advertisements collection
+    match /advertisements/{adId} {
+      // Allow reading advertisements for everyone
+      allow read: if true;
+      
+      // Only super users can write advertisements
+      allow write: if isSuperUser();
     }
     
     // Notifications collection
@@ -88,12 +131,10 @@ service cloud.firestore {
                      resource.data.visibility in ['guest', 'user'];
       
       // Admin read access for all notifications
-      allow read: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_user';
+      allow read: if isSuperUser();
       
       // Only super users can write notifications
-      allow write: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_user';
+      allow write: if isSuperUser();
     }
     
     // Template configurations collection
@@ -102,12 +143,10 @@ service cloud.firestore {
       allow read: if resource.data.isActive == true;
       
       // Admin read access for all configurations
-      allow read: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_user';
+      allow read: if isSuperUser();
       
       // Only super users can write configurations
-      allow write: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_user';
+      allow write: if isSuperUser();
     }
     
     // RSVP responses
@@ -123,7 +162,6 @@ service cloud.firestore {
       // Only authenticated users can read attendance records of their weddings
       allow read: if isAuthenticated() && (
         // This should match how the wedding owner is determined in your app
-        // Either by the weddingId field in the attendance document
         get(/databases/$(database)/documents/weddings/$(resource.data.weddingId)).data.ownerId == request.auth.uid
       );
       

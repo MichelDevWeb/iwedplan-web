@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { Instagram, Facebook, Twitter } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 import BrideGroomCustomizer from '@/components/wedding/BrideGroomCustomizer';
 import { toast } from 'sonner';
 
@@ -25,6 +24,7 @@ interface BrideGroomSectionProps {
   description?: string;
   groom?: PersonInfo;
   bride?: PersonInfo;
+  isOwner?: boolean;
   onSaveSettings?: (settings: {
     groom?: {
       bio?: string;
@@ -64,9 +64,9 @@ const BrideGroomSection: React.FC<BrideGroomSectionProps> = ({
       twitter: "#"
     }
   },
+  isOwner = false,
   onSaveSettings
 }) => {
-  const { isAuthenticated } = useAuth();
   
   // Cache initial data for reset capability
   const cachedInitialData = useMemo(() => ({
@@ -199,8 +199,8 @@ const BrideGroomSection: React.FC<BrideGroomSectionProps> = ({
         />
       </div>
 
-      {/* BrideGroom Customizer - Only visible to authenticated users */}
-      {isAuthenticated && weddingId && (
+      {/* BrideGroom Customizer - Only visible to wedding owner */}
+      {isOwner && weddingId && (
         <div className="absolute top-1 right-1 z-20">
           <BrideGroomCustomizer
             weddingId={weddingId}

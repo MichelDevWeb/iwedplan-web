@@ -61,28 +61,19 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
     }
   }, [open]);
 
-  // Update wedding ID when inputs change
-  const updateWeddingId = async () => {
-    if (groomName && brideName) {
-      // No need to pass a date - function will use current date automatically
-      const newWeddingId = await generateWeddingId(groomName, brideName);
-      setWeddingId(newWeddingId);
-    }
-  };
-
-  // Handle name changes
-  const handleNameChange = (type: "groom" | "bride", value: string) => {
-    if (type === "groom") {
-      setGroomName(value);
-    } else {
-      setBrideName(value);
-    }
+  // Generate wedding ID when names change
+  useEffect(() => {
+    const generateId = async () => {
+      if (groomName && brideName) {
+        const newWeddingId = await generateWeddingId(groomName, brideName);
+        setWeddingId(newWeddingId);
+      }
+    };
     
-    // Update wedding ID if both names are filled
-    if ((type === "groom" && value && brideName) || (type === "bride" && value && groomName)) {
-      setTimeout(updateWeddingId, 0);
+    if (groomName && brideName) {
+      generateId();
     }
-  };
+  }, [groomName, brideName]);
 
   // Handle login with Google
   const handleLogin = async () => {
@@ -115,13 +106,6 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
       // Validate inputs
       if (!groomName || !brideName) {
         throw new Error("Vui lòng nhập tên cô dâu và chú rể");
-      }
-
-      // Generate wedding ID if not already set
-      if (!weddingId) {
-        // Function will use current date automatically
-        const newWeddingId = await generateWeddingId(groomName, brideName);
-        setWeddingId(newWeddingId);
       }
 
       // Check if wedding ID is already taken
@@ -161,12 +145,12 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
       }
 
       // Create wedding website in Firestore
-      const finalWeddingId = await createWeddingWebsite(weddingData);
+      const createdWeddingId = await createWeddingWebsite(weddingData);
 
-      // Show navigation loading and redirect
+      // Show navigation loading and redirect to dashboard instead of template page
       setNavigationLoading(true);
       onOpenChange(false);
-      router.push(`/create/template/${finalWeddingId}`);
+      router.push(`/dashboard`);
     } catch (err) {
       console.error("Error in wedding creation:", err);
       setError(err instanceof Error ? err.message : "Đã xảy ra lỗi. Vui lòng thử lại sau");
@@ -258,15 +242,15 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
       <LoadingOverlay 
         isLoading={navigationLoading}
         type="navigation"
-        message="Đang chuyển đến trang tùy chỉnh..."
+        message="Đang chuyển đến trang điều khiển..."
       />
       
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Tạo website cưới</DialogTitle>
+            <DialogTitle>Lập kế hoạch đám cưới</DialogTitle>
             <DialogDescription>
-              Nhập thông tin cơ bản để bắt đầu tạo website cưới của bạn.
+              Nhập thông tin cơ bản để bắt đầu lập kế hoạch cho đám cưới của bạn.
             </DialogDescription>
           </DialogHeader>
 
@@ -277,7 +261,7 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
                 id="groomName"
                 placeholder="Nguyễn Văn A"
                 value={groomName}
-                onChange={(e) => handleNameChange("groom", e.target.value)}
+                onChange={(e) => setGroomName(e.target.value)}
                 disabled={loading}
               />
             </div>
@@ -288,7 +272,7 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
                 id="brideName"
                 placeholder="Nguyễn Thị B"
                 value={brideName}
-                onChange={(e) => handleNameChange("bride", e.target.value)}
+                onChange={(e) => setBrideName(e.target.value)}
                 disabled={loading}
               />
             </div>

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import RsvpModal from '@/components/modals/RsvpModal';
 import Image from 'next/image';
 import { WeddingData } from '@/lib/firebase/models';
-import { useAuth } from '@/contexts/AuthContext';
 import { cn } from "@/lib/utils";
 import { 
   flowerFrames, 
@@ -18,11 +17,11 @@ import ThemeCustomizer from '@/components/wedding/ThemeCustomizer';
 
 interface HeroSectionProps {
   weddingData: WeddingData;
+  isOwner?: boolean;
   onSaveSettings?: (settings: any) => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ weddingData, onSaveSettings }) => {
-  const { isAuthenticated } = useAuth();
+const HeroSection: React.FC<HeroSectionProps> = ({ weddingData, isOwner = false, onSaveSettings }) => {
   const [groomName, setGroomName] = useState(weddingData.groomName || "Chú Rể");
   const [brideName, setBrideName] = useState(weddingData.brideName || "Cô Dâu");
   const [weddingDate, setWeddingDate] = useState<string>("");
@@ -312,8 +311,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ weddingData, onSaveSettings }
         </div>
       ))}
       
-      {/* Theme Customizer - Only show if user is authenticated */}
-      {isAuthenticated && (
+      {/* Theme Customizer - Only show if user is owner */}
+      {isOwner && (
         <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
           <ThemeCustomizer 
             weddingId={weddingData.id}

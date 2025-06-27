@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Great_Vibes } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import FloatingActionButton from "@/components/common/FloatingActionButton";
+import BackToTopButton from "@/components/common/BackToTopButton";
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
@@ -46,7 +46,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <Toaster richColors position="top-center" />
-          <FloatingActionButton />
+          <BackToTopButton />
         </AuthProvider>
       </body>
     </html>
