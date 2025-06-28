@@ -112,8 +112,8 @@ service cloud.firestore {
     
     // Advertisements collection
     match /advertisements/{adId} {
-      // Allow reading advertisements for everyone
-      allow read: if true;
+      // Allow reading advertisements for everyone (including list operations)
+      allow read, list: if true;
       
       // Only super users can write advertisements
       allow write: if isSuperUser();

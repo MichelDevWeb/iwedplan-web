@@ -7,18 +7,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { CheckCheck, Filter, Tag, User, ChevronDown } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DEFAULT_TASK_CATEGORIES } from "@/lib/firebase/todoService";
+import { CheckCheck, Tag, User, ChevronDown } from "lucide-react";
 
 export interface FilterOptions {
   status: string;
@@ -47,14 +36,22 @@ const TaskFilters = ({ onFilterChange, filterOptions, isMobileView = false }: Ta
   };
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className={`${isMobileView ? 'flex gap-2 justify-center' : 'flex flex-wrap gap-2 items-center'}`}>
       {/* Status filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 border-pink-200 hover:bg-pink-50">
-            <CheckCheck className="h-4 w-4 mr-1 md:mr-2" />
-            <span className={isMobileView ? "text-xs md:text-sm" : ""}>Trạng thái</span>
-            <ChevronDown className="h-3 w-3 ml-1 md:ml-2" />
+          <Button 
+            variant="outline" 
+            size={isMobileView ? "sm" : "sm"} 
+            className={`${isMobileView ? 'w-10 h-10 p-0' : 'h-9'} border-pink-200 hover:bg-pink-50`}
+          >
+            <CheckCheck className="h-4 w-4" />
+            {!isMobileView && (
+              <>
+                <span className="ml-2">Trạng thái</span>
+                <ChevronDown className="h-3 w-3 ml-2" />
+              </>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -88,10 +85,18 @@ const TaskFilters = ({ onFilterChange, filterOptions, isMobileView = false }: Ta
       {/* Category filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 border-pink-200 hover:bg-pink-50">
-            <Tag className="h-4 w-4 mr-1 md:mr-2" />
-            <span className={isMobileView ? "text-xs md:text-sm" : ""}>Danh mục</span>
-            <ChevronDown className="h-3 w-3 ml-1 md:ml-2" />
+          <Button 
+            variant="outline" 
+            size={isMobileView ? "sm" : "sm"} 
+            className={`${isMobileView ? 'w-10 h-10 p-0' : 'h-9'} border-pink-200 hover:bg-pink-50`}
+          >
+            <Tag className="h-4 w-4" />
+            {!isMobileView && (
+              <>
+                <span className="ml-2">Danh mục</span>
+                <ChevronDown className="h-3 w-3 ml-2" />
+              </>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -149,12 +154,18 @@ const TaskFilters = ({ onFilterChange, filterOptions, isMobileView = false }: Ta
       {/* Assignee filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-9 border-pink-200 hover:bg-pink-50">
-            <User className="h-4 w-4 mr-1 md:mr-2" />
-            <span className={isMobileView ? "text-xs md:text-sm" : ""}>
-              {isMobileView ? "Người làm" : "Người thực hiện"}
-            </span>
-            <ChevronDown className="h-3 w-3 ml-1 md:ml-2" />
+          <Button 
+            variant="outline" 
+            size={isMobileView ? "sm" : "sm"} 
+            className={`${isMobileView ? 'w-10 h-10 p-0' : 'h-9'} border-pink-200 hover:bg-pink-50`}
+          >
+            <User className="h-4 w-4" />
+            {!isMobileView && (
+              <>
+                <span className="ml-2">Người thực hiện</span>
+                <ChevronDown className="h-3 w-3 ml-2" />
+              </>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

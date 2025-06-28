@@ -230,6 +230,20 @@ export default function TodoPage() {
     }
   };
 
+  // Xử lý khi người dùng xóa nhiều task
+  const handleDeleteMultipleTasks = async (taskIds: string[]) => {
+    try {
+      // Xóa từng task một cách tuần tự để đảm bảo tính nhất quán
+      await Promise.all(taskIds.map(taskId => deleteTask(weddingId, taskId)));
+      
+      // Cập nhật state để loại bỏ các task đã xóa
+      setTasks(prevTasks => prevTasks.filter(task => !taskIds.includes(task.id)));
+    } catch (error) {
+      console.error('Error deleting multiple tasks:', error);
+      throw error;
+    }
+  };
+
   // Xử lý khi người dùng muốn tạo tự động các task mặc định
   const handleGenerateDefaultTasks = async () => {
     try {
@@ -248,9 +262,9 @@ export default function TodoPage() {
     }));
   };
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  // if (isLoading) {
+  //   return <LoadingScreen />;
+  // }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-100">
@@ -497,6 +511,7 @@ export default function TodoPage() {
             setIsDetailsOpen(true);
           }}
           onStatusChange={handleUpdateTask}
+          onDeleteMultiple={handleDeleteMultipleTasks}
           isMobileView={isMobileView}
         />
       </div>

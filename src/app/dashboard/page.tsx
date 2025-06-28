@@ -6,12 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Heart, PlusCircle, CalendarDays, Settings, ArrowLeft, AlertCircle, Trash2,
-  CheckSquare, FileText, Users, CircleDollarSign
+  CheckSquare, FileText, Users, CircleDollarSign, Sparkles
 } from "lucide-react";
-import Link from "next/link";
 import { getUserWeddingWebsites, deleteWeddingWebsite } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
-import Header from "@/components/common/Header";
 import LoadingOverlay from "@/components/ui/loading-overlay";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -30,6 +28,8 @@ import { formatDate } from "@/lib/utils/dateUtils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
 import MusicFloatingButton from "@/components/common/MusicFloatingButton";
+import WeddingPlannerAgent from "@/components/dashboard/WeddingPlannerAgent";
+import GuestManagement from "@/components/dashboard/GuestManagement";
 
 export default function Dashboard() {
   const [weddings, setWeddings] = useState<WeddingData[]>([]);
@@ -225,9 +225,6 @@ export default function Dashboard() {
         </AlertDialogContent>
       </AlertDialog>
       
-      {/* Header */}
-      <Header setLanguage={() => {}} language="vi" />
-      
       {/* Dashboard Content */}
       <div className="container px-4 py-6 mx-auto max-w-6xl">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -361,108 +358,110 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  {/* Tính năng chính */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Quản lý công việc */}
-                    <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-pink-200 hover:border-pink-300">
-                      <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                          <CheckSquare className="h-5 w-5 text-pink-600" /> Công việc
-                        </CardTitle>
-                        <CardDescription>
-                          Lập kế hoạch chuẩn bị
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4">
-                        <p className="mb-4 text-sm md:text-base text-gray-600">
-                          Theo dõi tiến độ chuẩn bị đám cưới
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button 
-                          onClick={() => handleNavigation(`/${selectedWedding.id}/todo`)}
-                          className="w-full bg-pink-500 hover:bg-pink-600 transition-all shadow-md"
-                        >
-                          Quản lý
-                        </Button>
-                      </CardFooter>
-                    </Card>
+                  {/* Tính năng chính với Tabs */}
+                  <Tabs defaultValue="planner" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 mb-6">
+                      <TabsTrigger value="planner" className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" />
+                        AI Planner
+                      </TabsTrigger>
+                      <TabsTrigger value="tools" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Công cụ
+                      </TabsTrigger>
+                      <TabsTrigger value="guests" className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Khách mời
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="planner">
+                      <WeddingPlannerAgent selectedWedding={selectedWedding} />
+                    </TabsContent>
+                    
+                    <TabsContent value="tools">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Quản lý công việc */}
+                        <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-pink-200 hover:border-pink-300">
+                          <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
+                            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                              <CheckSquare className="h-5 w-5 text-pink-600" /> Công việc
+                            </CardTitle>
+                            <CardDescription>
+                              Lập kế hoạch chuẩn bị
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-4">
+                            <p className="mb-4 text-sm md:text-base text-gray-600">
+                              Theo dõi tiến độ chuẩn bị đám cưới
+                            </p>
+                          </CardContent>
+                          <CardFooter>
+                            <Button 
+                              onClick={() => handleNavigation(`/${selectedWedding.id}/todo`)}
+                              className="w-full bg-pink-500 hover:bg-pink-600 transition-all shadow-md"
+                            >
+                              Quản lý
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                        
+                        {/* Thiệp mời điện tử */}
+                        <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-purple-200 hover:border-purple-300">
+                          <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100">
+                            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                              <FileText className="h-5 w-5 text-purple-600" /> Thiệp mời
+                            </CardTitle>
+                            <CardDescription>
+                              Tạo thiệp điện tử
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-4">
+                            <p className="mb-4 text-sm md:text-base text-gray-600">
+                              Thiết kế thiệp mời đẹp mắt
+                            </p>
+                          </CardContent>
+                          <CardFooter>
+                            <Button 
+                              onClick={() => handleNavigation(`/create/template/${selectedWedding.id}`)}
+                              className="w-full bg-purple-500 hover:bg-purple-600 transition-all shadow-md"
+                            >
+                              Thiết kế
+                            </Button>
+                          </CardFooter>
+                        </Card>
 
-                    {/* Thiệp mời điện tử */}
-                    <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-pink-200 hover:border-pink-300">
-                      <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50 border-b border-pink-100">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                          <FileText className="h-5 w-5 text-pink-600" /> Thiệp mời
-                        </CardTitle>
-                        <CardDescription>
-                          Tạo thiệp điện tử
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4">
-                        <p className="mb-4 text-sm md:text-base text-gray-600">
-                          Thiết kế thiệp mời đẹp mắt
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button 
-                          onClick={() => handleNavigation(`/create/template/${selectedWedding.id}`)}
-                          className="w-full bg-pink-500 hover:bg-pink-600 transition-all shadow-md"
-                        >
-                          Thiết kế
-                        </Button>
-                      </CardFooter>
-                    </Card>
-
-                    {/* Quản lý khách mời */}
-                    <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-gray-200">
-                      <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-100">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                          <Users className="h-5 w-5 text-gray-500" /> Khách mời
-                        </CardTitle>
-                        <CardDescription>
-                          Danh sách khách
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4">
-                        <p className="mb-4 text-sm md:text-base text-gray-600">
-                          Sắp ra mắt
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button 
-                          className="w-full bg-gray-400 cursor-not-allowed"
-                          disabled
-                        >
-                          Sắp có
-                        </Button>
-                      </CardFooter>
-                    </Card>
-
-                    {/* Quản lý thu chi */}
-                    <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-gray-200">
-                      <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-100">
-                        <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                          <CircleDollarSign className="h-5 w-5 text-gray-500" /> Thu chi
-                        </CardTitle>
-                        <CardDescription>
-                          Theo dõi chi phí
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-4">
-                        <p className="mb-4 text-sm md:text-base text-gray-600">
-                          Sắp ra mắt
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button 
-                          className="w-full bg-gray-400 cursor-not-allowed"
-                          disabled
-                        >
-                          Sắp có
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </div>
+                        {/* Quản lý thu chi */}
+                        <Card className="hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-gray-200">
+                          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-100">
+                            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                              <CircleDollarSign className="h-5 w-5 text-gray-500" /> Thu chi
+                            </CardTitle>
+                            <CardDescription>
+                              Theo dõi chi phí
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-4">
+                            <p className="mb-4 text-sm md:text-base text-gray-600">
+                              Sắp ra mắt
+                            </p>
+                          </CardContent>
+                          <CardFooter>
+                            <Button 
+                              className="w-full bg-gray-400 cursor-not-allowed"
+                              disabled
+                            >
+                              Sắp có
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="guests">
+                      <GuestManagement selectedWedding={selectedWedding} />
+                    </TabsContent>
+                  </Tabs>
                 </>
               ) : (
                 <div className="text-center py-12 md:py-16 bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-pink-100">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TodoTask } from "@/lib/firebase/models";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Table, 
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Calendar, Tag, Clock, AlertTriangle, User } from "lucide-react";
+import { Calendar, Tag, Clock, AlertTriangle, User, Trash2, CheckSquare, Square } from "lucide-react";
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -20,6 +21,7 @@ interface TaskListViewProps {
   tasks: TodoTask[];
   onTaskClick: (task: TodoTask) => void;
   onStatusChange: (task: TodoTask) => Promise<TodoTask>;
+  onDeleteMultiple?: (taskIds: string[]) => Promise<void>;
   isMobileView?: boolean;
 }
 
@@ -27,9 +29,12 @@ export default function TaskListView({
   tasks,
   onTaskClick,
   onStatusChange,
+  onDeleteMultiple,
   isMobileView = false
 }: TaskListViewProps) {
   const [loadingTaskIds, setLoadingTaskIds] = useState<Set<string>>(new Set());
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Hiển thị màu sắc tương ứng với priority
   const getPriorityColor = (priority: string) => {
@@ -80,30 +85,114 @@ export default function TaskListView({
     }
   };
 
+  // Xử lý chọn/bỏ chọn một task
+  const handleTaskSelection = (taskId: string, checked: boolean) => {
+    setSelectedTaskIds(prev => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(taskId);
+      } else {
+        newSet.delete(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  // Xử lý chọn/bỏ chọn tất cả task
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedTaskIds(new Set(tasks.map(task => task.id)));
+    } else {
+      setSelectedTaskIds(new Set());
+    }
+  };
+
+  // Xử lý xóa nhiều task
+  const handleDeleteSelected = async () => {
+    if (!onDeleteMultiple || selectedTaskIds.size === 0) return;
+    
+    try {
+      setIsDeleting(true);
+      await onDeleteMultiple(Array.from(selectedTaskIds));
+      setSelectedTaskIds(new Set());
+    } catch (error) {
+      console.error("Error deleting tasks:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const allSelected = tasks.length > 0 && selectedTaskIds.size === tasks.length;
+  const hasSelection = selectedTaskIds.size > 0;
+
   // Hiển thị giao diện mobile
   if (isMobileView) {
     return (
-      <div className="space-y-3 p-4">
-        {tasks.map((task) => (
-          <Card 
-            key={task.id} 
-            className={`cursor-pointer transition-all duration-200 border ${
-              task.status === 'completed' 
-                ? 'bg-pink-50/50 border-pink-200 shadow-sm' 
-                : 'bg-white border-gray-200 hover:border-pink-300 hover:shadow-md'
-            }`}
-            onClick={() => onTaskClick(task)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="pt-1 flex-shrink-0" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={task.status === 'completed'}
-                    disabled={loadingTaskIds.has(task.id)}
-                    onCheckedChange={() => handleStatusChange(task)}
-                    className="data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
-                  />
-                </div>
+      <div className="space-y-3">
+        {/* Selection Toolbar - Mobile */}
+        {onDeleteMultiple && (
+          <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleSelectAll(!allSelected)}
+                className="p-1 h-8 w-8"
+              >
+                {allSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+              </Button>
+              <span className="text-sm font-medium">
+                {hasSelection ? `Đã chọn ${selectedTaskIds.size}` : 'Chọn tất cả'}
+              </span>
+            </div>
+            {hasSelection && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                disabled={isDeleting}
+                className="h-8"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                {isDeleting ? 'Đang xóa...' : 'Xóa'}
+              </Button>
+            )}
+          </div>
+        )}
+
+          <div className="space-y-3 p-4">
+            {tasks.map((task) => (
+              <Card 
+                key={task.id} 
+                className={`cursor-pointer transition-all duration-200 border ${
+                  task.status === 'completed' 
+                    ? 'bg-pink-50/50 border-pink-200 shadow-sm' 
+                    : 'bg-white border-gray-200 hover:border-pink-300 hover:shadow-md'
+                }`}
+                onClick={() => onTaskClick(task)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    {/* Selection checkbox */}
+                    {onDeleteMultiple && (
+                      <div className="pt-1 flex-shrink-0" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedTaskIds.has(task.id)}
+                          onCheckedChange={(checked) => handleTaskSelection(task.id, !!checked)}
+                          className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Status checkbox */}
+                    <div className="pt-1 flex-shrink-0" onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={task.status === 'completed'}
+                        disabled={loadingTaskIds.has(task.id)}
+                        onCheckedChange={() => handleStatusChange(task)}
+                        className="data-[state=checked]:bg-pink-500 data-[state=checked]:border-pink-500"
+                      />
+                    </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className={`font-medium text-sm leading-5 ${
@@ -166,25 +255,54 @@ export default function TaskListView({
             </CardContent>
           </Card>
         ))}
+        </div>
       </div>
     );
   }
 
   // Hiển thị giao diện desktop
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-pink-50/50">
-            <TableHead className="w-[50px]"></TableHead>
-            <TableHead className="font-medium text-gray-700">Công việc</TableHead>
-            <TableHead className="font-medium text-gray-700">Mốc thời gian</TableHead>
-            <TableHead className="font-medium text-gray-700">Ngày đến hạn</TableHead>
-            <TableHead className="font-medium text-gray-700">Danh mục</TableHead>
-            <TableHead className="font-medium text-gray-700">Trạng thái</TableHead>
-            <TableHead className="font-medium text-gray-700">Người thực hiện</TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="space-y-4">
+      {/* Selection Toolbar - Desktop */}
+      {onDeleteMultiple && hasSelection && (
+        <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+          <span className="text-sm font-medium">
+            Đã chọn {selectedTaskIds.size} công việc
+          </span>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDeleteSelected}
+            disabled={isDeleting}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {isDeleting ? 'Đang xóa...' : 'Xóa đã chọn'}
+          </Button>
+        </div>
+      )}
+      
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-pink-50/50">
+              {onDeleteMultiple && (
+                <TableHead className="w-[50px]">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={handleSelectAll}
+                    className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                  />
+                </TableHead>
+              )}
+              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="font-medium text-gray-700">Công việc</TableHead>
+              <TableHead className="font-medium text-gray-700">Mốc thời gian</TableHead>
+              <TableHead className="font-medium text-gray-700">Ngày đến hạn</TableHead>
+              <TableHead className="font-medium text-gray-700">Danh mục</TableHead>
+              <TableHead className="font-medium text-gray-700">Trạng thái</TableHead>
+              <TableHead className="font-medium text-gray-700">Người thực hiện</TableHead>
+            </TableRow>
+          </TableHeader>
         <TableBody>
           {tasks.map((task) => (
             <TableRow 
@@ -196,6 +314,15 @@ export default function TaskListView({
               }`}
               onClick={() => onTaskClick(task)}
             >
+              {onDeleteMultiple && (
+                <TableCell onClick={(e: React.MouseEvent) => e.stopPropagation()} className="p-2">
+                  <Checkbox
+                    checked={selectedTaskIds.has(task.id)}
+                    onCheckedChange={(checked) => handleTaskSelection(task.id, !!checked)}
+                    className="data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500"
+                  />
+                </TableCell>
+              )}
               <TableCell onClick={(e: React.MouseEvent) => e.stopPropagation()} className="p-2">
                 <Checkbox
                   checked={task.status === 'completed'}
@@ -251,5 +378,6 @@ export default function TaskListView({
         </TableBody>
       </Table>
     </div>
+  </div>
   );
 } 

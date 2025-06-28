@@ -101,7 +101,7 @@ export default function NewTaskDialog({
 
       // Xác định tên người được giao nhiệm vụ
       let assigneeName = '';
-      if (values.assignedTo) {
+      if (values.assignedTo && values.assignedTo !== 'unassigned') {
         switch (values.assignedTo) {
           case 'bride':
             assigneeName = 'Cô dâu';
@@ -124,7 +124,7 @@ export default function NewTaskDialog({
         milestone: values.milestone,
         dueDate: Timestamp.fromDate(values.dueDate),
         status: 'pending',
-        assignedTo: values.assignedTo || '',
+        assignedTo: values.assignedTo === 'unassigned' ? '' : values.assignedTo || '',
         assigneeName,
         notes: values.notes || '',
         isDefault: false,
@@ -368,7 +368,7 @@ export default function NewTaskDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Chưa phân công</SelectItem>
+                        <SelectItem value="unassigned">Chưa phân công</SelectItem>
                         <SelectItem value="bride">Cô dâu</SelectItem>
                         <SelectItem value="groom">Chú rể</SelectItem>
                         <SelectItem value="planner">Wedding Planner</SelectItem>
