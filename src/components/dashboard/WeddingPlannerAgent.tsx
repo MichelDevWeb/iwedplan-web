@@ -3,23 +3,19 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Sparkles, Calendar, MapPin, Users, DollarSign, 
-  MessageSquare, CheckSquare, Lightbulb, Search,
-  Bot, ArrowRight, Clock, Star, Heart
+  Sparkles, Calendar, Users, DollarSign, 
+  Bot, Clock, Heart, Target, CheckCircle, 
+  AlertTriangle, TrendingUp, Zap, Brain
 } from "lucide-react";
-import { WeddingData, TodoTask, TaskAdvertisement } from "@/lib/firebase/models";
-import { generateDefaultTasks, createTask } from "@/lib/firebase/todoService";
-import { getTaskAdvertisements } from "@/lib/firebase/todoService";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import { WeddingData, TodoTask } from "@/lib/firebase/models";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { formatDate } from "@/lib/utils/dateUtils";
-import { Timestamp } from "firebase/firestore";
-import { addDays, subMonths, subWeeks } from "date-fns";
+import AIChatTab from "@/components/dashboard/AIChatTab";
+import weddingPlannerConfig from "@/config/weddingPlannerConfig.json";
 
 interface WeddingPlannerAgentProps {
   selectedWedding: WeddingData | null;
@@ -36,926 +32,430 @@ interface PlanningStep {
   suggestedVendors: string[];
   estimatedCost: string;
   tips: string[];
+  status?: 'pending' | 'in-progress' | 'completed';
 }
 
-interface ChatMessage {
+interface SmartAction {
   id: string;
-  type: 'user' | 'agent';
-  content: string;
-  timestamp: Date;
-  actions?: {
-    type: 'create_tasks' | 'suggest_vendors' | 'set_budget';
-    data?: any;
-  }[];
-  advertisements?: TaskAdvertisement[];
+  label: string;
+  description: string;
+  icon: string;
+  prompt: string;
+  category: string;
 }
-
-// Thủ tục pháp lý đám cưới tại Việt Nam
-const VIETNAM_WEDDING_PROCEDURES = [
-  {
-    id: 'registration',
-    title: 'Đăng ký kết hôn',
-    description: 'Thủ tục pháp lý bắt buộc để kết hôn hợp pháp tại Việt Nam',
-    category: 'legal',
-    timeframe: '1-2 tháng trước',
-    priority: 'high' as const,
-    requirements: [
-      'Giấy khai sinh (bản chính hoặc bản sao có chứng thực)',
-      'Chứng minh nhân dân/Căn cước công dân',
-      'Giấy xác nhận tình trạng hôn nhân (nếu từng kết hôn)',
-      'Giấy khám sức khỏe tiền hôn nhân',
-      'Đơn đăng ký kết hôn'
-    ],
-    tasks: [
-      'Chuẩn bị hồ sơ đăng ký kết hôn',
-      'Khám sức khỏe tiền hôn nhân',
-      'Nộp hồ sơ tại UBND phường/xã',
-      'Nhận giấy chứng nhận kết hôn'
-    ]
-  },
-  {
-    id: 'traditional_ceremonies',
-    title: 'Nghi lễ truyền thống',
-    description: 'Các nghi lễ theo phong tục Việt Nam',
-    category: 'other',
-    timeframe: '3-6 tháng trước',
-    priority: 'medium' as const,
-    ceremonies: [
-      {
-        name: 'Lễ dạm ngõ',
-        description: 'Gia đình chú rể tới tìm hiểu và xin phép gia đình cô dâu',
-        timing: '6 tháng trước'
-      },
-      {
-        name: 'Lễ hỏi cưới (Nạp tài)',
-        description: 'Gia đình chú rể chính thức xin cưới và trao lễ vật',
-        timing: '3-4 tháng trước'
-      },
-      {
-        name: 'Lễ rước dâu',
-        description: 'Nghi lễ đón dâu về nhà chú rể',
-        timing: 'Ngày cưới'
-      },
-      {
-        name: 'Lễ thành hôn',
-        description: 'Nghi lễ chính thức thành hôn',
-        timing: 'Ngày cưới'
-      }
-    ],
-    tasks: [
-      'Chọn ngày tốt theo lịch âm',
-      'Chuẩn bị lễ vật cho lễ hỏi cưới',
-      'Thuê xe hoa rước dâu',
-      'Chuẩn bị trang phục truyền thống'
-    ]
-  }
-];
-
-// Danh sách vendors và dịch vụ phổ biến tại VN
-const VIETNAM_WEDDING_VENDORS = {
-  venue: [
-    'Trung tâm tiệc cưới Sen Hồng',
-    'Khách sạn Grand Palace',
-    'Resort Sài Gòn Đại Nam',
-    'Nhà hàng La Fourchette'
-  ],
-  photography: [
-    'Studio Olivia',
-    'Ngọc Huy Wedding',
-    'Studio Ao Cưới Mỹ Lan',
-    'Ảnh cưới Ánh Dương'
-  ],
-  attire: [
-    'Thế Giới Áo Cưới',
-    'Camile Bridal',
-    'Áo cưới Meera Meera',
-    'Studio Dressme'
-  ],
-  catering: [
-    'Buffet Bassac',
-    'Cơm Âm Phủ Bà Năm',
-    'Nhà hàng Ngọc Mai',
-    'Catering Sen Vàng'
-  ]
-};
 
 export default function WeddingPlannerAgent({ selectedWedding, onTasksCreated }: WeddingPlannerAgentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'chat' | 'timeline'>('overview');
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
   const [planningSteps, setPlanningSteps] = useState<PlanningStep[]>([]);
-  const [generatedTasks, setGeneratedTasks] = useState<TodoTask[]>([]);
   const [planningProgress, setPlanningProgress] = useState(0);
+  const [smartActions, setSmartActions] = useState<SmartAction[]>([]);
 
-  // Khởi tạo tin nhắn chào mừng
-  useEffect(() => {
-    const welcomeMessage: ChatMessage = {
-      id: 'welcome',
-      type: 'agent',
-      content: `Xin chào! Tôi là Wedding AI Assistant - trợ lý AI chuyên về lập kế hoạch đám cưới. 
-
-Tôi có thể giúp bạn:
-🎯 Tạo kế hoạch chi tiết từ A-Z cho đám cưới
-📝 Tự động tạo danh sách công việc cần làm
-🏪 Gợi ý nhà cung cấp dịch vụ phù hợp
-💰 Ước tính ngân sách cho từng hạng mục
-⏰ Sắp xếp timeline thực hiện hợp lý
-
-Hãy cho tôi biết về đám cưới của bạn để tôi có thể tư vấn tốt nhất!`,
-      timestamp: new Date(),
-      actions: [
-        {
-          type: 'create_tasks',
-          data: { message: 'Tạo kế hoạch cơ bản' }
-        }
-      ]
-    };
-
-    setChatMessages([welcomeMessage]);
-  }, []);
-
-  // Tính toán progress dựa trên selected wedding
+  // Calculate planning progress
   useEffect(() => {
     if (selectedWedding) {
-      // Simulate progress calculation based on wedding data
       let progress = 0;
-      if (selectedWedding.eventDate) progress += 20;
-      if (selectedWedding.venue) progress += 20;
-      if (selectedWedding.brideName && selectedWedding.groomName) progress += 10;
-      // Add more conditions as needed
+      const checks = [
+        { condition: selectedWedding.eventDate, points: 20 },
+        { condition: selectedWedding.venue, points: 25 },
+        { condition: selectedWedding.brideName && selectedWedding.groomName, points: 15 },
+        { condition: selectedWedding.groomPhone || selectedWedding.bridePhone, points: 10 },
+        { condition: selectedWedding.templateId, points: 20 },
+        { condition: selectedWedding.budgetRange, points: 10 }
+      ];
+
+      checks.forEach(check => {
+        if (check.condition) progress += check.points;
+      });
+
       setPlanningProgress(Math.min(progress, 100));
     }
   }, [selectedWedding]);
 
-  // Tạo tasks cụ thể cho đám cưới Việt Nam
-  const createVietnameseWeddingTasks = async (weddingId: string, weddingDate: Date) => {
-    const tasks: Omit<TodoTask, 'id'>[] = [];
-    
-    // Tasks cho đăng ký kết hôn
-    const legalTasks = [
-      {
-        title: 'Chuẩn bị hồ sơ đăng ký kết hôn',
-        description: 'Thu thập đầy đủ giấy tờ: giấy khai sinh, CMND/CCCD, giấy xác nhận tình trạng hôn nhân',
-        category: 'legal',
-        milestone: '2 tháng trước',
-        dueDate: Timestamp.fromDate(subMonths(weddingDate, 2)),
-        priority: 'high' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Liên hệ UBND phường/xã để biết thêm yêu cầu cụ thể'
-      },
-      {
-        title: 'Khám sức khỏe tiền hôn nhân',
-        description: 'Đăng ký khám tại trung tâm y tế có thẩm quyền',
-        category: 'legal',
-        milestone: '6 tuần trước',
-        dueDate: Timestamp.fromDate(subWeeks(weddingDate, 6)),
-        priority: 'high' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Giấy khám có hiệu lực 6 tháng'
-      }
-    ];
-
-    // Tasks cho nghi lễ truyền thống
-    const traditionalTasks = [
-      {
-        title: 'Chọn ngày tốt theo lịch âm',
-        description: 'Tham khảo lịch âm và phong thủy để chọn ngày tốt cho lễ hỏi và ngày cưới',
-        category: 'other',
-        milestone: '4 tháng trước',
-        dueDate: Timestamp.fromDate(subMonths(weddingDate, 4)),
-        priority: 'high' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Thống nhất với cả hai gia đình'
-      },
-      {
-        title: 'Chuẩn bị lễ vật hỏi cưới',
-        description: 'Mua sắm và chuẩn bị lễ vật theo phong tục: trầu cau, rượu, bánh, hoa quả...',
-        category: 'other',
-        milestone: '1 tuần trước lễ hỏi',
-        dueDate: Timestamp.fromDate(subMonths(weddingDate, 3)),
-        priority: 'medium' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Số lượng lẻ, tráng số chẵn theo phong tục'
-      }
-    ];
-
-    // Tasks cơ bản khác
-    const basicTasks = [
-      {
-        title: 'Đặt địa điểm tổ chức tiệc cưới',
-        description: 'Tìm hiểu và book địa điểm phù hợp với ngân sách và số lượng khách',
-        category: 'venue',
-        milestone: '6 tháng trước',
-        dueDate: Timestamp.fromDate(subMonths(weddingDate, 6)),
-        priority: 'high' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Nên đặt cọc sớm để có giá tốt'
-      },
-      {
-        title: 'Thuê dịch vụ chụp ảnh cưới',
-        description: 'Chọn studio ảnh cưới và photographer cho ngày cưới',
-        category: 'photography',
-        milestone: '4 tháng trước',
-        dueDate: Timestamp.fromDate(subMonths(weddingDate, 4)),
-        priority: 'high' as const,
-        assignedTo: '',
-        assigneeName: '',
-        notes: 'Nên chụp ảnh cưới trước 2-3 tháng'
-      }
-    ];
-
-    // Kết hợp tất cả tasks
-    const allTasks = [...legalTasks, ...traditionalTasks, ...basicTasks];
-    
-    // Tạo tasks trong Firebase
-    const createdTasks: TodoTask[] = [];
-    for (const taskData of allTasks) {
-      try {
-        const task = await createTask({
-          ...taskData,
-          weddingId,
-          status: 'pending',
-          isDefault: true,
-          reminderSent: false,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        });
-        createdTasks.push(task);
-      } catch (error) {
-        console.error('Error creating task:', error);
-      }
+  // Generate smart actions based on wedding context
+  useEffect(() => {
+    if (selectedWedding) {
+      generateSmartActions();
+      generatePlanningSteps();
     }
-    
-    return createdTasks;
-  };
+  }, [selectedWedding]);
 
-  // Lấy ads liên quan đến các category
-  const getRelevantAdvertisements = async (categories: string[]): Promise<TaskAdvertisement[]> => {
-    try {
-      const allAds: TaskAdvertisement[] = [];
-      
-      for (const category of categories) {
-        const ads = await getTaskAdvertisements([category]);
-        allAds.push(...ads);
-      }
-      
-      // Lấy tối đa 3 ads ngẫu nhiên
-      const shuffled = allAds.sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, 3);
-    } catch (error) {
-      console.error('Error getting advertisements:', error);
-      return [];
-    }
-  };
-
-  // Tạo kế hoạch cơ bản tự động theo thủ tục Việt Nam
-  const generateBasicPlan = async () => {
+  const generateSmartActions = () => {
     if (!selectedWedding) return;
 
-    setIsLoading(true);
-    try {
-      const weddingDate = selectedWedding.eventDate?.toDate();
-      
-      // Tạo các bước kế hoạch dựa trên thủ tục Việt Nam và thông tin đám cưới
-      const steps: PlanningStep[] = [
-        // Thủ tục pháp lý bắt buộc
-        {
-          id: 'legal_registration',
-          title: 'Đăng ký kết hôn (Bắt buộc)',
-          description: 'Thủ tục pháp lý để kết hôn hợp pháp tại Việt Nam',
-          category: 'legal',
-          timeframe: '1-2 tháng trước',
-          priority: 'high',
-          suggestedVendors: ['UBND phường/xã', 'Trung tâm y tế'],
-          estimatedCost: '500,000 - 1,000,000 VNĐ',
-          tips: [
-            'Chuẩn bị đầy đủ giấy tờ theo quy định',
-            'Khám sức khỏe tiền hôn nhân sớm',
-            'Nộp hồ sơ trước 15 ngày làm việc'
-          ]
-        },
-        // Nghi lễ truyền thống
-        {
-          id: 'traditional_ceremony',
-          title: 'Lễ hỏi cưới truyền thống',
-          description: 'Nghi lễ xin cưới theo phong tục Việt Nam',
-          category: 'other',
-          timeframe: '3-4 tháng trước',
-          priority: 'high',
-          suggestedVendors: ['Cửa hàng lễ vật', 'Thầy cúng', 'Xe hoa'],
-          estimatedCost: '10-30 triệu VNĐ',
-          tips: [
-            'Chọn ngày tốt theo lịch âm',
-            'Chuẩn bị lễ vật theo phong tục',
-            'Thống nhất nghi thức với hai gia đình'
-          ]
-        },
-        // Địa điểm tổ chức
-        {
-          id: 'venue',
-          title: 'Chọn địa điểm tổ chức',
-          description: 'Tìm và book địa điểm phù hợp với ngân sách và số lượng khách',
-          category: 'venue',
-          timeframe: '6-8 tháng trước',
-          priority: 'high',
-          suggestedVendors: VIETNAM_WEDDING_VENDORS.venue,
-          estimatedCost: '80-300 triệu VNĐ',
-          tips: [
-            'Book sớm để có giá tốt và nhiều lựa chọn',
-            'Kiểm tra menu và dịch vụ',
-            'Đặt cọc để giữ chỗ'
-          ]
-        },
-        // Nhiếp ảnh
-        {
-          id: 'photography',
-          title: 'Chụp ảnh cưới & ngày cưới',
-          description: 'Thuê photographer chuyên nghiệp',
-          category: 'photography',
-          timeframe: '4-6 tháng trước',
-          priority: 'high',
-          suggestedVendors: VIETNAM_WEDDING_VENDORS.photography,
-          estimatedCost: '20-80 triệu VNĐ',
-          tips: [
-            'Xem portfolio và style ảnh',
-            'Chụp thử ảnh cưới trước',
-            'Thỏa thuận về bản quyền ảnh'
-          ]
-        },
-        // Trang phục
-        {
-          id: 'attire',
-          title: 'Trang phục cưới',
-          description: 'Váy cưới, vest và áo dài truyền thống',
-          category: 'attire',
-          timeframe: '3-5 tháng trước',
-          priority: 'medium',
-          suggestedVendors: VIETNAM_WEDDING_VENDORS.attire,
-          estimatedCost: '15-60 triệu VNĐ',
-          tips: [
-            'Thuê hoặc mua tùy ngân sách',
-            'Chuẩn bị áo dài cho lễ vu quy',
-            'Đặt trước thời gian may sửa'
-          ]
-        },
-        // Ẩm thực
-        {
-          id: 'catering',
-          title: 'Menu tiệc cưới',
-          description: 'Lên menu phù hợp với khẩu vị Việt Nam',
-          category: 'catering',
-          timeframe: '2-3 tháng trước',
-          priority: 'medium',
-          suggestedVendors: VIETNAM_WEDDING_VENDORS.catering,
-          estimatedCost: '800,000 - 1,500,000 VNĐ/bàn',
-          tips: [
-            'Cân bằng món mặn, ngọt, chay',
-            'Chuẩn bị rượu cần, bánh cưới',
-            'Tính thêm 10% số lượng khách'
-          ]
-        }
-      ];
+    const timeLeft = selectedWedding.eventDate 
+      ? Math.ceil((selectedWedding.eventDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
 
-      setPlanningSteps(steps);
+    const actions: SmartAction[] = [];
 
-      // Tạo tasks tự động dựa trên thủ tục VN
-      if (selectedWedding.id && weddingDate) {
-        const vietnamTasks = await createVietnameseWeddingTasks(selectedWedding.id, weddingDate);
-        setGeneratedTasks(vietnamTasks);
-        onTasksCreated?.(vietnamTasks);
-      }
-
-      // Lấy ads liên quan
-      const ads = await getRelevantAdvertisements(['legal', 'venue', 'photography', 'attire']);
-
-      // Thêm tin nhắn phản hồi với ads
-      const responseMessage: ChatMessage = {
-        id: Date.now().toString(),
-        type: 'agent',
-        content: `🎉 Tôi đã tạo kế hoạch cưới theo phong tục Việt Nam cho ${selectedWedding.brideName} & ${selectedWedding.groomName}!
-
-📅 Ngày cưới: ${selectedWedding.eventDate ? formatDate(selectedWedding.eventDate.toDate()) : 'Chưa xác định'}
-
-🎯 **Kế hoạch bao gồm:**
-• ${steps.length} bước kế hoạch chính
-• Thủ tục đăng ký kết hôn hợp pháp
-• Nghi lễ truyền thống Việt Nam
-• ${generatedTasks.length} công việc cụ thể
-
-✨ **Đặc biệt:** Tôi đã tích hợp đầy đủ thủ tục pháp lý và phong tục truyền thống của Việt Nam để đảm bảo đám cưới của bạn vừa ý nghĩa, vừa hợp pháp!
-
-Xem chi tiết trong tab **Kế hoạch** và các công việc đã được thêm vào **Todo list**.`,
-        timestamp: new Date(),
-        advertisements: ads
-      };
-
-      setChatMessages(prev => [...prev, responseMessage]);
-
-    } catch (error) {
-      console.error('Error generating plan:', error);
-    } finally {
-      setIsLoading(false);
+    // Time-based actions
+    if (timeLeft && timeLeft > 0) {
+      actions.push({
+        id: 'analyze_timeline',
+        label: 'Phân tích timeline',
+        description: `Còn ${timeLeft} ngày - tạo kế hoạch ưu tiên`,
+        icon: 'clock',
+        prompt: `Còn ${timeLeft} ngày đến ngày cưới, hãy phân tích và đưa ra kế hoạch ưu tiên cho tôi`,
+        category: 'timeline'
+      });
     }
+
+    // Budget-based actions
+    if (!selectedWedding.budgetRange || planningProgress < 50) {
+      actions.push({
+        id: 'budget_calculator',
+        label: 'Tính toán ngân sách',
+        description: 'Lập kế hoạch ngân sách thông minh',
+        icon: 'calculator',
+        prompt: 'Giúp tôi lập kế hoạch ngân sách chi tiết và hợp lý cho đám cưới',
+        category: 'budget'
+      });
+    }
+
+    // Vendor-based actions
+    if (!selectedWedding.venue) {
+      actions.push({
+        id: 'vendor_matcher',
+        label: 'Tìm nhà cung cấp',
+        description: 'AI gợi ý vendors phù hợp',
+        icon: 'users',
+        prompt: 'Gợi ý cho tôi các nhà cung cấp dịch vụ đám cưới phù hợp với ngân sách và phong cách',
+        category: 'vendors'
+      });
+    }
+
+    // Emergency planning for urgent cases
+    if (timeLeft && timeLeft < 60) {
+      actions.push({
+        id: 'emergency_planning',
+        label: 'Kế hoạch khẩn cấp',
+        description: 'Hướng dẫn chuẩn bị nhanh',
+        icon: 'zap',
+        prompt: 'Tôi cần tổ chức đám cưới gấp, hãy đưa ra kế hoạch ưu tiên nhất',
+        category: 'emergency'
+      });
+    }
+
+    setSmartActions(actions.slice(0, 6));
   };
 
-  // Xử lý gửi tin nhắn chat
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+  const generatePlanningSteps = () => {
+    if (!selectedWedding) return;
 
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    };
+    const timeLeft = selectedWedding.eventDate 
+      ? Math.ceil((selectedWedding.eventDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
 
-    setChatMessages(prev => [...prev, userMessage]);
-    const currentMessage = inputMessage;
-    setInputMessage('');
-    
-    // Generate AI response
-    try {
-      const responseContent = await generateAIResponse(currentMessage);
-      const agentResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'agent',
-        content: responseContent,
-        timestamp: new Date()
-      };
-      setChatMessages(prev => [...prev, agentResponse]);
-    } catch (error) {
-      console.error('Error generating AI response:', error);
-      const errorResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'agent',
-        content: 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu. Vui lòng thử lại!',
-        timestamp: new Date()
-      };
-      setChatMessages(prev => [...prev, errorResponse]);
-    }
+    const steps: PlanningStep[] = [
+      {
+        id: 'legal_registration',
+        title: 'Đăng ký kết hôn',
+        description: 'Hoàn tất thủ tục pháp lý bắt buộc',
+        category: 'legal',
+        timeframe: timeLeft && timeLeft < 30 ? 'KHẨN CẤP' : '1-2 tháng trước',
+        priority: 'high',
+        suggestedVendors: ['UBND phường/xã', 'Trung tâm y tế'],
+        estimatedCost: '500K - 1tr',
+        tips: ['Chuẩn bị giấy tờ đầy đủ', 'Đặt lịch khám sức khỏe sớm'],
+        status: 'pending'
+      },
+      {
+        id: 'venue_booking',
+        title: 'Đặt địa điểm tổ chức',
+        description: selectedWedding.venue ? 'Đã có venue: ' + selectedWedding.venue : 'Chọn và đặt venue phù hợp',
+        category: 'venue',
+        timeframe: timeLeft && timeLeft < 180 ? 'GẤP' : '6-9 tháng trước',
+        priority: selectedWedding.venue ? 'low' : 'high',
+        suggestedVendors: weddingPlannerConfig.vendors.venue.slice(0, 3),
+        estimatedCost: '80-300tr',
+        tips: ['Book sớm giá tốt', 'Thử menu trước', 'Đọc kỹ hợp đồng'],
+        status: selectedWedding.venue ? 'completed' : 'pending'
+      },
+      {
+        id: 'photography',
+        title: 'Nhiếp ảnh & Video',
+        description: 'Chọn photographer phù hợp với style',
+        category: 'photography',
+        timeframe: '4-6 tháng trước',
+        priority: 'medium',
+        suggestedVendors: weddingPlannerConfig.vendors.photography.slice(0, 3),
+        estimatedCost: '20-80tr',
+        tips: ['Xem portfolio kỹ', 'Gặp photographer trước', 'Thỏa thuận bản quyền'],
+        status: 'pending'
+      },
+      {
+        id: 'attire',
+        title: 'Trang phục cưới',
+        description: 'Áo cưới và vest cho cặp đôi',
+        category: 'attire',
+        timeframe: '3-4 tháng trước',
+        priority: 'medium',
+        suggestedVendors: weddingPlannerConfig.vendors.attire.slice(0, 3),
+        estimatedCost: '20-50tr',
+        tips: ['Thử và đặt may sớm', 'Chuẩn bị nhiều lựa chọn'],
+        status: 'pending'
+      }
+    ];
+
+    setPlanningSteps(steps);
   };
 
-  // Tạo phản hồi AI thông minh với khả năng tạo tasks và ads
-  const generateAIResponse = async (message: string): Promise<string> => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('ngân sách') || lowerMessage.includes('chi phí')) {
-      // Tạo task về lập ngân sách nếu chưa có
-      if (selectedWedding?.id) {
-        try {
-          await createTask({
-            weddingId: selectedWedding.id,
-            title: 'Lập bảng ngân sách chi tiết đám cưới',
-            description: 'Phân bổ ngân sách theo các hạng mục: venue (40-50%), photo (10-15%), attire (10-15%), decoration (8-10%), music (5-8%), invitation (2-3%), khác (10-15%)',
-            category: 'other',
-            milestone: '6 tháng trước',
-            dueDate: Timestamp.fromDate(selectedWedding.eventDate ? subMonths(selectedWedding.eventDate.toDate(), 6) : addDays(new Date(), 30)),
-            status: 'pending',
-            priority: 'high',
-            assignedTo: '',
-            assigneeName: '',
-            notes: 'Nên dành 10-20% ngân sách dự phòng cho các chi phí phát sinh',
-            isDefault: false,
-            reminderSent: false,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-          });
-        } catch (error) {
-          console.error('Error creating budget task:', error);
-        }
+  const handleSmartAction = (action: SmartAction) => {
+    setActiveTab('chat');
+    // This will automatically send the prompt to the chat
+    setTimeout(() => {
+      const chatTab = document.querySelector('[data-state="active"] .ai-chat-input') as HTMLInputElement;
+      if (chatTab) {
+        chatTab.value = action.prompt;
+        chatTab.dispatchEvent(new Event('input', { bubbles: true }));
       }
-
-      return `💰 **Hướng dẫn phân bổ ngân sách đám cưới tại Việt Nam:**
-
-📊 **Tỷ lệ khuyến nghị:**
-• Địa điểm và tiệc cưới: 40-50% (80-200 triệu)
-• Nhiếp ảnh/quay phim: 10-15% (20-60 triệu)
-• Trang phục cưới: 10-15% (20-50 triệu) 
-• Trang trí hoa: 8-10% (15-40 triệu)
-• Nhạc và MC: 5-8% (10-30 triệu)
-• Thiệp mời: 2-3% (5-12 triệu)
-• Thủ tục pháp lý: 1-2% (2-5 triệu)
-• Dự phòng: 10-15%
-
-✅ **Tôi đã tạo task "Lập bảng ngân sách chi tiết" vào Todo list của bạn!**
-
-💡 **Mẹo tiết kiệm:** Tổ chức vào mùa thấp điểm (tháng 3-5, 9-11), book sớm để có giá tốt, và cân nhắc package deal.`;
-    }
-    
-    if (lowerMessage.includes('địa điểm') || lowerMessage.includes('venue') || lowerMessage.includes('nhà hàng')) {
-      // Tạo task về tìm venue
-      if (selectedWedding?.id) {
-        try {
-          await createTask({
-            weddingId: selectedWedding.id,
-            title: 'Khảo sát và đặt địa điểm tổ chức',
-            description: 'Tìm hiểu ít nhất 3-5 địa điểm, so sánh giá cả, menu, dịch vụ và đặt cọc địa điểm ưng ý nhất',
-            category: 'venue',
-            milestone: '6 tháng trước',
-            dueDate: Timestamp.fromDate(selectedWedding.eventDate ? subMonths(selectedWedding.eventDate.toDate(), 6) : addDays(new Date(), 60)),
-            status: 'pending',
-            priority: 'high',
-            assignedTo: '',
-            assigneeName: '',
-            notes: 'Kiểm tra availability, menu tasting, policy hủy bỏ',
-            isDefault: false,
-            reminderSent: false,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-          });
-        } catch (error) {
-          console.error('Error creating venue task:', error);
-        }
-      }
-
-      return `🏛️ **Gợi ý địa điểm tổ chức đám cưới tại Việt Nam:**
-
-🌟 **Theo loại hình:**
-• **Khách sạn 5 sao:** Sang trọng, dịch vụ chuyên nghiệp (1.2-2M/bàn)
-• **Trung tâm tiệc cưới:** Chuyên biệt, giá hợp lý (800K-1.5M/bàn)
-• **Resort/Villa:** Không gian riêng tư, chụp ảnh đẹp (1-1.8M/bàn)
-• **Nhà hàng:** Linh hoạt, menu đa dạng (700K-1.2M/bàn)
-
-📋 **Checklist khi chọn venue:**
-✓ Sức chứa phù hợp với số khách
-✓ Menu thử và chất lượng món ăn  
-✓ Âm thanh, ánh sáng, trang trí
-✓ Bãi đậu xe, vị trí thuận tiện
-✓ Policy và điều khoản hợp đồng
-
-✅ **Đã tạo task "Khảo sát địa điểm" vào Todo list!**
-
-🎯 Bạn dự kiến bao nhiêu khách và ngân sách venue khoảng bao nhiêu?`;
-    }
-
-    if (lowerMessage.includes('thủ tục') || lowerMessage.includes('pháp lý') || lowerMessage.includes('đăng ký')) {
-      // Tạo task về thủ tục pháp lý
-      if (selectedWedding?.id) {
-        try {
-          const legalTasks = [
-            {
-              title: 'Chuẩn bị hồ sơ đăng ký kết hôn',
-              description: 'Giấy khai sinh, CMND/CCCD, giấy xác nhận độc thân, đơn đăng ký kết hôn',
-              category: 'legal',
-              milestone: '2 tháng trước',
-              dueDate: Timestamp.fromDate(selectedWedding.eventDate ? subMonths(selectedWedding.eventDate.toDate(), 2) : addDays(new Date(), 60)),
-              priority: 'high' as const
-            },
-            {
-              title: 'Khám sức khỏe tiền hôn nhân',
-              description: 'Đăng ký khám tại trung tâm y tế, giấy khám có hiệu lực 6 tháng',
-              category: 'legal', 
-              milestone: '6 tuần trước',
-              dueDate: Timestamp.fromDate(selectedWedding.eventDate ? subWeeks(selectedWedding.eventDate.toDate(), 6) : addDays(new Date(), 30)),
-              priority: 'high' as const
-            }
-          ];
-
-          for (const taskData of legalTasks) {
-            await createTask({
-              ...taskData,
-              weddingId: selectedWedding.id,
-              status: 'pending',
-              assignedTo: '',
-              assigneeName: '',
-              notes: '',
-              isDefault: false,
-              reminderSent: false,
-              createdAt: Timestamp.now(),
-              updatedAt: Timestamp.now(),
-            });
-          }
-        } catch (error) {
-          console.error('Error creating legal tasks:', error);
-        }
-      }
-
-      return `📋 **Thủ tục pháp lý đăng ký kết hôn tại Việt Nam:**
-
-📝 **Hồ sơ cần thiết:**
-• Giấy khai sinh (bản chính hoặc sao y)
-• CMND/CCCD (bản chính)
-• Giấy xác nhận tình trạng hôn nhân 
-• Giấy khám sức khỏe tiền hôn nhân
-• Đơn đăng ký kết hôn (tại UBND)
-
-⏰ **Quy trình và thời gian:**
-1. **Chuẩn bị hồ sơ** (2 tháng trước)
-2. **Khám sức khỏe** (6 tuần trước) 
-3. **Nộp hồ sơ** tại UBND (15 ngày trước)
-4. **Nhận giấy kết hôn** (trong 15 ngày)
-
-⚠️ **Lưu ý quan trọng:**
-• Giấy khám có hiệu lực 6 tháng
-• Phải đăng ký tại nơi thường trú của một bên
-• Mang theo 2 nhân chứng khi làm thủ tục
-
-✅ **Đã tạo 2 tasks về thủ tục pháp lý vào Todo list!**`;
-    }
-
-    if (lowerMessage.includes('truyền thống') || lowerMessage.includes('phong tục') || lowerMessage.includes('lễ hỏi')) {
-      return `🏮 **Nghi lễ đám cưới truyền thống Việt Nam:**
-
-🎭 **Các nghi lễ chính:**
-1. **Lễ dạm ngõ** (6 tháng trước): Tìm hiểu, xin phép
-2. **Lễ hỏi cưới** (3-4 tháng trước): Chính thức xin cưới  
-3. **Lễ rước dâu** (ngày cưới): Đón dâu về nhà chú rể
-4. **Lễ thành hôn** (ngày cưới): Nghi thức kết hôn
-
-🎁 **Lễ vật hỏi cưới (số lẻ):**
-• Trầu cau (1 khay)
-• Rượu cần (1 bình) 
-• Bánh phu thê (1 đôi)
-• Hoa quả (5-7 loại)
-• Trang sức vàng
-• Tiền mừng (phong bì đỏ)
-
-📅 **Chọn ngày tốt:**
-• Tham khảo lịch âm
-• Tránh tháng cô hồn (tháng 7 âm)
-• Thống nhất với cả hai gia đình
-
-💡 **Mẹo quan trọng:** Thảo luận trước nghi thức với đại diện hai gia đình để tránh hiểu lầm!`;
-    }
-
-    // Default response
-    return `🤖 Cảm ơn bạn đã chia sẻ! Tôi hiểu bạn quan tâm về "${message}". 
-
-📋 **Để tư vấn chính xác nhất, bạn có thể cho tôi biết:**
-• Số lượng khách mời dự kiến
-• Ngân sách tổng thể
-• Phong cách đám cưới mong muốn  
-• Khu vực tổ chức
-• Những ưu tiên hàng đầu
-
-💬 **Hoặc hỏi tôi về:**
-• "Ngân sách" - Phân bổ chi phí hợp lý
-• "Địa điểm" - Gợi ý venue phù hợp
-• "Thủ tục pháp lý" - Đăng ký kết hôn
-• "Truyền thống" - Nghi lễ Việt Nam
-• "Lịch trình" - Timeline chuẩn bị
-
-🎯 Tôi sẽ tự động tạo tasks và gợi ý dịch vụ phù hợp cho bạn!`;
+    }, 100);
   };
 
-  // Render overview tab
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {selectedWedding ? (
-        <>
-          {/* Wedding Info Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-pink-500" />
-                Thông tin đám cưới
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Cô dâu & Chú rể</p>
-                  <p className="font-medium">{selectedWedding.brideName} & {selectedWedding.groomName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Ngày cưới</p>
-                  <p className="font-medium">
-                    {selectedWedding.eventDate ? formatDate(selectedWedding.eventDate.toDate()) : 'Chưa xác định'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Địa điểm</p>
-                  <p className="font-medium">{selectedWedding.venue || 'Chưa chọn'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Tiến độ lập kế hoạch</p>
-                  <div className="flex items-center gap-2">
-                    <Progress value={planningProgress} className="flex-1" />
-                    <span className="text-sm text-gray-600">{planningProgress}%</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+  const getProgressColor = (progress: number) => {
+    if (progress >= 80) return 'bg-green-500';
+    if (progress >= 60) return 'bg-blue-500';
+    if (progress >= 40) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                Hành động nhanh
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button 
-                  onClick={generateBasicPlan}
-                  disabled={isLoading}
-                  className="h-auto p-4 justify-start"
-                  variant="outline"
-                >
-                  <div className="text-left">
-                    <div className="font-medium">Tạo kế hoạch tự động</div>
-                    <div className="text-sm text-gray-600">Tạo todo list và timeline chi tiết</div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 ml-auto" />
-                </Button>
+  const getTimeLeftInfo = () => {
+    if (!selectedWedding?.eventDate) return null;
+    
+    const timeLeft = Math.ceil((selectedWedding.eventDate.toDate().getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    
+    if (timeLeft < 0) return { text: 'Đã kết thúc', color: 'text-gray-500', urgency: 'completed' };
+    if (timeLeft === 0) return { text: 'Hôm nay!', color: 'text-green-600', urgency: 'today' };
+    if (timeLeft <= 7) return { text: `${timeLeft} ngày nữa`, color: 'text-red-600', urgency: 'urgent' };
+    if (timeLeft <= 30) return { text: `${timeLeft} ngày nữa`, color: 'text-orange-600', urgency: 'soon' };
+    if (timeLeft <= 90) return { text: `${timeLeft} ngày nữa`, color: 'text-blue-600', urgency: 'normal' };
+    return { text: `${timeLeft} ngày nữa`, color: 'text-green-600', urgency: 'plenty' };
+  };
 
-                <Button 
-                  className="h-auto p-4 justify-start"
-                  variant="outline"
-                  onClick={() => setActiveTab('chat')}
-                >
-                  <div className="text-left">
-                    <div className="font-medium">Tư vấn với AI</div>
-                    <div className="text-sm text-gray-600">Hỏi đáp về lập kế hoạch đám cưới</div>
-                  </div>
-                  <MessageSquare className="h-4 w-4 ml-auto" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      ) : (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-gray-600">Vui lòng chọn một đám cưới để bắt đầu lập kế hoạch.</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
+  const renderOverview = () => {
+    const timeInfo = getTimeLeftInfo();
 
-  // Render chat tab
-  const renderChat = () => (
-    <div className="space-y-4">
-      {/* Chat messages */}
-      <div className="border rounded-lg p-4 h-96 overflow-y-auto space-y-4">
-        {chatMessages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
-              <div
-                className={`p-3 rounded-lg whitespace-pre-line ${
-                  message.type === 'user'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 border'
-                }`}
-              >
-                {message.content}
-              </div>
-              
-              {/* Action buttons */}
-              {message.actions && (
-                <div className="mt-2 space-y-2">
-                  {message.actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (action.type === 'create_tasks') {
-                          generateBasicPlan();
-                        }
-                      }}
-                    >
-                      {action.data?.message || 'Thực hiện'}
-                    </Button>
-                  ))}
-                </div>
-              )}
-
-              {/* Advertisement section */}
-              {message.advertisements && message.advertisements.length > 0 && (
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <h4 className="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
-                    <Lightbulb className="h-3 w-3 mr-1" />
-                    Dịch vụ được đề xuất
-                  </h4>
-                                     <div className="space-y-2">
-                     {message.advertisements.map((ad) => (
-                       <div key={ad.id} className="text-xs text-yellow-700 p-2 bg-white rounded border">
-                         <div className="font-medium">{ad.title}</div>
-                         <div className="text-yellow-600">{ad.description}</div>
-                         <div className="mt-1">
-                           <Button
-                             size="sm"
-                             variant="outline"
-                             className="text-xs"
-                             onClick={() => window.open(ad.linkUrl, '_blank')}
-                           >
-                             Xem chi tiết
-                           </Button>
-                         </div>
-                       </div>
-                     ))}
-                   </div>
-                </div>
-              )}
-            </div>
-            <div className={`flex-shrink-0 ${message.type === 'user' ? 'order-1' : 'order-2'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                message.type === 'user' ? 'bg-blue-500' : 'bg-purple-500'
-              }`}>
-                {message.type === 'user' ? (
-                  <Users className="h-4 w-4 text-white" />
-                ) : (
-                  <Bot className="h-4 w-4 text-white" />
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Chat input */}
-      <div className="flex gap-2">
-        <Input
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Hỏi AI về lập kế hoạch đám cưới..."
-          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-        />
-        <Button onClick={handleSendMessage} disabled={!inputMessage.trim()}>
-          Gửi
-        </Button>
-      </div>
-    </div>
-  );
-
-  // Render timeline tab
-  const renderTimeline = () => (
-    <div className="space-y-4">
-      {planningSteps.length > 0 ? (
-        planningSteps.map((step, index) => (
-          <Card key={step.id}>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <span className="text-sm font-medium text-purple-600">{index + 1}</span>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium">{step.title}</h3>
-                    <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'}>
-                      {step.priority === 'high' ? 'Ưu tiên cao' : 'Ưu tiên thường'}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600">{step.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {step.timeframe}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      {step.estimatedCost}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Gợi ý nhà cung cấp:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {step.suggestedVendors.map((vendor) => (
-                        <Badge key={vendor} variant="outline" className="text-xs">
-                          {vendor}
-                        </Badge>
-                      ))}
+    return (
+      <div className="space-y-6">
+        {selectedWedding ? (
+          <>
+            {/* Wedding Status Card */}
+            <Card className="relative overflow-hidden border-0 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50"></div>
+              <CardContent className="relative z-10 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
+                      <Heart className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                        {selectedWedding.brideName} & {selectedWedding.groomName}
+                      </h2>
+                      <p className="text-gray-600">
+                        {selectedWedding.eventDate ? formatDate(selectedWedding.eventDate.toDate()) : 'Chưa xác định ngày'}
+                      </p>
                     </div>
                   </div>
-                  {step.tips.length > 0 && (
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium flex items-center gap-1">
-                        <Lightbulb className="h-3 w-3" />
-                        Mẹo hay:
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-gray-600 space-y-1">
-                        {step.tips.map((tip, tipIndex) => (
-                          <li key={tipIndex}>{tip}</li>
-                        ))}
-                      </ul>
+                  {timeInfo && (
+                    <div className="text-right">
+                      <p className={`text-lg font-bold ${timeInfo.color}`}>{timeInfo.text}</p>
+                      <p className="text-sm text-gray-500">đến ngày cưới</p>
                     </div>
                   )}
                 </div>
-              </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Tiến độ chuẩn bị</span>
+                    <span className="text-sm font-bold text-gray-800">{planningProgress}%</span>
+                  </div>
+                  <div className="relative">
+                    <Progress value={planningProgress} className="h-3" />
+                    <div className={`absolute top-0 left-0 h-3 rounded-full transition-all duration-500 ${getProgressColor(planningProgress)}`} 
+                         style={{ width: `${planningProgress}%` }}></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Bắt đầu</span>
+                    <span>Hoàn thành</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Smart Actions */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-purple-500" />
+                  Hành động thông minh
+                </CardTitle>
+                <CardDescription>
+                  AI đề xuất các hành động ưu tiên dựa trên tình hình hiện tại
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {smartActions.map((action) => (
+                    <Card key={action.id} className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-purple-400">
+                      <CardContent className="p-4" onClick={() => handleSmartAction(action)}>
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                            {action.icon === 'clock' && <Clock className="h-5 w-5 text-purple-600" />}
+                            {action.icon === 'calculator' && <DollarSign className="h-5 w-5 text-purple-600" />}
+                            {action.icon === 'users' && <Users className="h-5 w-5 text-purple-600" />}
+                            {action.icon === 'zap' && <Zap className="h-5 w-5 text-purple-600" />}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-sm">{action.label}</h3>
+                            <p className="text-xs text-gray-600 mt-1">{action.description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-green-600">{Math.round(planningProgress)}%</p>
+                  <p className="text-sm text-gray-600">Đã hoàn thành</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-blue-600">{planningSteps.filter(s => s.status === 'pending').length}</p>
+                  <p className="text-sm text-gray-600">Công việc còn lại</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="text-center">
+                <CardContent className="p-4">
+                  <AlertTriangle className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                  <p className="text-2xl font-bold text-orange-600">{planningSteps.filter(s => s.priority === 'high' && s.status === 'pending').length}</p>
+                  <p className="text-sm text-gray-600">Ưu tiên cao</p>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Bot className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-600 mb-2">Chưa có đám cưới nào được chọn</h3>
+              <p className="text-gray-500">Vui lòng chọn một đám cưới để bắt đầu sử dụng AI Assistant.</p>
             </CardContent>
           </Card>
-        ))
+        )}
+      </div>
+    );
+  };
+
+  const renderTimeline = () => (
+    <div className="space-y-4">
+      {planningSteps.length > 0 ? (
+        <div className="space-y-4">
+          {planningSteps.map((step, index) => (
+            <Card key={step.id} className={`relative overflow-hidden transition-all duration-300 hover:shadow-md ${
+              step.status === 'completed' ? 'bg-green-50 border-green-200' : 
+              step.priority === 'high' ? 'border-l-4 border-l-red-400' : 
+              'border-l-4 border-l-blue-400'
+            }`}>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                      step.status === 'completed' ? 'bg-green-500' :
+                      step.priority === 'high' ? 'bg-red-500' :
+                      'bg-blue-500'
+                    }`}>
+                      {step.status === 'completed' ? <CheckCircle className="h-5 w-5" /> : index + 1}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="text-lg font-bold text-gray-800">{step.title}</h3>
+                      <Badge variant={
+                        step.priority === 'high' ? 'destructive' : 
+                        step.priority === 'medium' ? 'default' : 
+                        'secondary'
+                      }>
+                        {step.priority === 'high' ? 'Ưu tiên cao' : 
+                         step.priority === 'medium' ? 'Ưu tiên vừa' : 
+                         'Ưu tiên thấp'}
+                      </Badge>
+                      {step.status === 'completed' && (
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          Hoàn thành
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <p className="text-gray-600">{step.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span className="font-medium">Thời gian: {step.timeframe}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-gray-500" />
+                          <span className="font-medium">Chi phí: {step.estimatedCost}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {step.suggestedVendors.length > 0 && (
+                          <div>
+                            <span className="font-medium text-gray-700 text-xs">Gợi ý:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {step.suggestedVendors.slice(0, 2).map((vendor) => (
+                                <Badge key={vendor} variant="outline" className="text-xs">
+                                  {vendor}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {step.tips.length > 0 && (
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <span className="font-medium text-blue-800 text-sm flex items-center gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          Mẹo hay:
+                        </span>
+                        <ul className="list-disc list-inside text-xs text-blue-700 mt-1 space-y-1">
+                          {step.tips.slice(0, 2).map((tip, tipIndex) => (
+                            <li key={tipIndex}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <Card>
-          <CardContent className="text-center py-8">
-            <Bot className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">Chưa có kế hoạch nào được tạo.</p>
-            <Button onClick={generateBasicPlan} disabled={!selectedWedding}>
+          <CardContent className="text-center py-12">
+            <Clock className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">Chưa có kế hoạch nào</h3>
+            <p className="text-gray-500 mb-4">Sử dụng AI để tạo kế hoạch chi tiết cho đám cưới của bạn.</p>
+            <Button onClick={generatePlanningSteps} disabled={!selectedWedding}>
               Tạo kế hoạch tự động
             </Button>
           </CardContent>
@@ -966,35 +466,60 @@ Xem chi tiết trong tab **Kế hoạch** và các công việc đã được th
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} type="api" message="Đang tạo kế hoạch..." />
+      {isLoading && (
+        <LoadingScreen 
+          message="Đang xử lý..." 
+          size="lg"
+          fullScreen={false}
+        />
+      )}
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-6 w-6 text-purple-500" />
-            Wedding AI Assistant
+      <Card className="w-full shadow-lg">
+        <CardHeader className="pb-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Bot className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Wedding AI Assistant
+              </span>
+              <p className="text-sm font-normal text-gray-600 mt-1">
+                Trợ lý AI thông minh cho đám cưới hoàn hảo
+              </p>
+            </div>
           </CardTitle>
-          <CardDescription>
-            Trợ lý AI giúp bạn lập kế hoạch đám cưới hoàn hảo
-          </CardDescription>
         </CardHeader>
-        <CardContent>
+        
+        <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Tổng quan</TabsTrigger>
-              <TabsTrigger value="chat">Tư vấn AI</TabsTrigger>
-              <TabsTrigger value="timeline">Kế hoạch</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Tổng quan
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500">
+                <Bot className="h-4 w-4 mr-2" />
+                Tư vấn AI
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500">
+                <Calendar className="h-4 w-4 mr-2" />
+                Kế hoạch
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="overview" className="mt-6">
+            <TabsContent value="overview">
               {renderOverview()}
             </TabsContent>
             
-            <TabsContent value="chat" className="mt-6">
-              {renderChat()}
+            <TabsContent value="chat">
+              <AIChatTab 
+                selectedWedding={selectedWedding} 
+                onTasksCreated={onTasksCreated}
+              />
             </TabsContent>
             
-            <TabsContent value="timeline" className="mt-6">
+            <TabsContent value="timeline">
               {renderTimeline()}
             </TabsContent>
           </Tabs>

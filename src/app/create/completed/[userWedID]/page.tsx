@@ -11,7 +11,6 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
-import LoadingOverlay from "@/components/ui/loading-overlay";
 import LoadingScreen from "@/components/ui/loading-screen";
 import { getTemplateName, getColorName, getFrameName } from "@/config/templateConfig";
 
@@ -113,12 +112,12 @@ export default function CompletedPage({
       {/* Header Notification Bar */}
       <HeaderNotificationBar />
       
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển trang..."
-      />
+      {/* Loading Screen */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển trang..."
+        />
+      )}
       
       <motion.div 
         className="flex items-center justify-center p-4 relative overflow-hidden min-h-screen"

@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/common/Header";
 // import FloatingNotification from "@/components/common/FloatingNotification";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { translations, Language } from "@/lib/translations";
 import { getFeaturedWeddingWebsites, getUserWeddingWebsites } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
@@ -118,12 +118,12 @@ export default function LandingPage() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển đến trang đăng nhập..."
-      />
+      {/* Loading Screen */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển đến trang đăng nhập..."
+        />
+      )}
 
       {/* Header Notification Bar */}
       <HeaderNotificationBar />

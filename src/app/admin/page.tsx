@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Bell, Palette, Settings, Users, BarChart3, Home } from 'lucide-react';
 import { isUserAdmin } from '@/lib/firebase/adminService';
 import LoadingScreen from '@/components/ui/loading-screen';
-import LoadingOverlay from '@/components/ui/loading-overlay';
 import { toast } from 'sonner';
 import HeaderNotificationBar from '@/components/common/HeaderNotificationBar';
 
@@ -73,12 +72,12 @@ export default function AdminDashboard() {
       {/* Header Notification Bar */}
       <HeaderNotificationBar />
       
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển trang..."
-      />
+      {/* Loading Screen */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển trang..."
+        />
+      )}
       
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto space-y-8">

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { getUserWeddingWebsites, deleteWeddingWebsite } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import CreateWeddingDialog from "@/components/modals/CreateWeddingModal";
@@ -171,7 +171,7 @@ export default function Dashboard() {
   };
 
   if (loading || authLoading) {
-    return <LoadingOverlay isLoading={true} type="default" message="Đang tải..." />;
+    return <LoadingScreen message="Đang tải..." />;
   }
 
   if (error) {
@@ -191,11 +191,11 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-100">
       {/* Navigation Loading */}
-      <LoadingOverlay 
-        isLoading={navigationLoading} 
-        type="navigation"
-        message="Đang chuyển hướng..."
-      />
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển hướng..."
+        />
+      )}
       
       {/* Create Wedding Dialog */}
       <CreateWeddingDialog 
@@ -340,7 +340,7 @@ export default function Dashboard() {
                         variant="outline" 
                         size="sm"
                         className="border-pink-200 hover:bg-pink-50"
-                        onClick={() => handleNavigation(`/${selectedWedding.id}`)}
+                        onClick={() => handleNavigation(`/${selectedWedding.id}/template`)}
                       >
                         Xem website
                       </Button>

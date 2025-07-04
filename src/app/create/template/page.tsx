@@ -8,10 +8,9 @@ import { Loader2, Plus, Trash2, Home, Crown, User, FileText } from 'lucide-react
 import CreateWeddingDialog from '@/components/modals/CreateWeddingModal';
 import ConfirmationModal from '@/components/modals/ConfirmationModal';
 import HeaderNotificationBar from '@/components/common/HeaderNotificationBar';
-import LoadingOverlay from '@/components/ui/loading-overlay';
+import LoadingScreen from '@/components/ui/loading-screen';
 import { getUserWeddings, isSuperUser } from '@/lib/firebase/userService';
 import { deleteWeddingWebsite } from '@/lib/firebase/weddingService';
-import LoadingScreen from '@/components/ui/loading-screen';
 import { toast } from 'sonner';
 
 interface WeddingItem {
@@ -127,18 +126,18 @@ export default function TemplatePage() {
       {/* Header Notification Bar */}
       <HeaderNotificationBar />
       
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển về trang chủ..."
-      />
+      {/* Loading Screens */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển về trang chủ..."
+        />
+      )}
       
-      <LoadingOverlay 
-        isLoading={deleting !== null}
-        type="delete"
-        message="Đang xoá website cưới..."
-      />
+      {deleting !== null && (
+        <LoadingScreen 
+          message="Đang xoá website cưới..."
+        />
+      )}
       
       <div className="py-8 px-4">
         <div className="max-w-4xl mx-auto space-y-8">

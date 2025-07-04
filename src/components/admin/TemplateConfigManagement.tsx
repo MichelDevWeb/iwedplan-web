@@ -9,9 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Plus, Edit, Trash2, Eye, EyeOff, Star, Crown, Palette, 
+  Edit, Trash2, Eye, EyeOff, Star, Crown, Palette, 
   Wand2, Image, DollarSign, ArrowUpDown
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,7 +24,7 @@ import {
 import { TemplateConfigItem } from '@/lib/firebase/models';
 import { toast } from 'sonner';
 import ConfirmationModal from '@/components/modals/ConfirmationModal';
-import LoadingOverlay from '@/components/ui/loading-overlay';
+import LoadingScreen from '@/components/ui/loading-screen';
 
 interface TemplateConfigFormData {
   type: 'template' | 'flowerFrame' | 'color' | 'effect';
@@ -270,17 +270,17 @@ export default function TemplateConfigManagement() {
 
   return (
     <>
-      <LoadingOverlay 
-        isLoading={saving}
-        type="save"
-        message={editing ? "Đang cập nhật cấu hình..." : "Đang tạo cấu hình..."}
-      />
+      {saving && (
+        <LoadingScreen 
+          message={editing ? "Đang cập nhật cấu hình..." : "Đang tạo cấu hình..."}
+        />
+      )}
       
-      <LoadingOverlay 
-        isLoading={deleting !== null}
-        type="delete"
-        message="Đang xoá cấu hình..."
-      />
+      {deleting !== null && (
+        <LoadingScreen 
+          message="Đang xoá cấu hình..."
+        />
+      )}
 
       <div className="space-y-6">
         {/* Statistics Cards */}

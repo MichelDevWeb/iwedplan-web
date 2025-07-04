@@ -18,7 +18,7 @@ import { CheckCircle, XCircle, Download, Phone, Mail } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 interface Attendance {
   id: string;
@@ -193,18 +193,18 @@ export default function AttendanceListModal({ trigger, weddingId }: AttendanceLi
 
   return (
     <>
-      {/* Loading Overlays */}
-      <LoadingOverlay 
-        isLoading={isLoading && isOpen}
-        type="api"
-        message="Đang tải danh sách tham dự..."
-      />
+      {/* Loading Screens */}
+      {isLoading && isOpen && (
+        <LoadingScreen 
+          message="Đang tải danh sách tham dự..."
+        />
+      )}
       
-      <LoadingOverlay 
-        isLoading={exportLoading}
-        type="save"
-        message="Đang xuất file CSV..."
-      />
+      {exportLoading && (
+        <LoadingScreen 
+          message="Đang xuất file CSV..."
+        />
+      )}
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>{trigger}</DialogTrigger>

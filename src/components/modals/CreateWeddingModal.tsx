@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { 
   generateWeddingId, 
   isWeddingIdTaken, 
@@ -238,12 +238,12 @@ export default function CreateWeddingDialog({ open, onOpenChange }: CreateWeddin
 
   return (
     <>
-      {/* Loading Overlay for navigation */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển đến trang điều khiển..."
-      />
+      {/* Loading Screen for navigation */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển đến trang điều khiển..."
+        />
+      )}
       
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">

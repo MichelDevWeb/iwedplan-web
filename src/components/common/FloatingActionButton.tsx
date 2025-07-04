@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
 import { navItems } from '@/config/templateConfig';
 import { useAuth } from '@/contexts/AuthContext';
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 // Map icons to nav items
 const navIcons = {
@@ -252,12 +252,12 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ page, weddi
 
   return (
     <>
-      {/* Loading Overlay for navigation */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển trang..."
-      />
+      {/* Loading Screen for navigation */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển trang..."
+        />
+      )}
 
       {/* Blur Overlay - only show when menu is open */}
       {isMenuOpen && (

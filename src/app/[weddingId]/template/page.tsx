@@ -14,13 +14,12 @@ import WishesSection from "@/components/template-sections/WishesSection";
 import GiftSection from "@/components/template-sections/GiftSection";
 import Footer from "@/components/common/Footer";
 import HeaderNotificationBar from "@/components/common/HeaderNotificationBar";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { getWeddingWebsite } from "@/lib/firebase/weddingService";
 import { WeddingData } from "@/lib/firebase/models";
 import FloatingActionButton from "@/components/common/FloatingActionButton";
 import MusicFloatingButton from "@/components/common/MusicFloatingButton";
 import { QRCodeSVG } from "qrcode.react";
-import LoadingScreen from "@/components/ui/loading-screen";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   saveTemplateSectionSettings,
@@ -267,12 +266,12 @@ export default function WeddingPage() {
       {/* Header Notification Bar */}
       <HeaderNotificationBar />
       
-      {/* Loading Overlay for navigation */}
-      <LoadingOverlay 
-        isLoading={navigationLoading}
-        type="navigation"
-        message="Đang chuyển về trang chủ..."
-      />
+      {/* Loading Screen for navigation */}
+      {navigationLoading && (
+        <LoadingScreen 
+          message="Đang chuyển về trang chủ..."
+        />
+      )}
       
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow pt-0">

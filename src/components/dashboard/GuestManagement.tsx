@@ -8,13 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, CheckCircle, XCircle, Download, Phone, Mail, 
-  Plus, Search, Filter, CalendarDays, UserPlus
+  Search
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { getFirestore } from '@/lib/firebase/firebaseConfig';
 import { collection, query, where, orderBy, getDocs, Timestamp } from '@firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
-import LoadingOverlay from "@/components/ui/loading-overlay";
+import LoadingScreen from "@/components/ui/loading-screen";
 import { WeddingData } from "@/lib/firebase/models";
 
 interface Attendance {
@@ -253,8 +253,8 @@ export default function GuestManagement({ selectedWedding }: GuestManagementProp
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} type="api" message="Đang tải danh sách khách mời..." />
-      <LoadingOverlay isLoading={exportLoading} type="save" message="Đang xuất file CSV..." />
+      {isLoading && <LoadingScreen message="Đang tải danh sách khách mời..." />}
+      {exportLoading && <LoadingScreen message="Đang xuất file CSV..." />}
       
       <Card>
         <CardHeader>

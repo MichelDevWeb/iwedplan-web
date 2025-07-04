@@ -1,0 +1,588 @@
+{
+  "responses": {
+    "budget": {
+      "content": "💰 **Hướng dẫn phân bổ ngân sách đám cưới tại Việt Nam:**\n\n📊 **Tỷ lệ khuyến nghị theo ngân sách:**\n\n🏆 **Premium (1-2 tỷ):**\n• Venue & Catering: 45% (450-900tr)\n• Photography: 15% (150-300tr)\n• Decoration: 12% (120-240tr)\n• Attire: 10% (100-200tr)\n• Music & Entertainment: 8% (80-160tr)\n• Others: 10% (100-200tr)\n\n💎 **Mid-range (500tr-1tỷ):**\n• Venue & Catering: 50% (250-500tr)\n• Photography: 12% (60-120tr)\n• Decoration: 10% (50-100tr)\n• Attire: 10% (50-100tr)\n• Music: 6% (30-60tr)\n• Others: 12% (60-120tr)\n\n🌸 **Budget-friendly (200-500tr):**\n• Venue & Catering: 55% (110-275tr)\n• Photography: 10% (20-50tr)\n• Decoration: 8% (16-40tr)\n• Attire: 12% (24-60tr)\n• Music: 5% (10-25tr)\n• Others: 10% (20-50tr)\n\n✅ **Tôi đã tạo task ngân sách chi tiết vào Todo list!**\n\n💡 **Mẹo tiết kiệm thông minh:**\n🗓️ Tổ chức off-peak: Tháng 3-5, 9-11\n📦 Package deals tiết kiệm 15-30%\n🤝 Đàm phán khi book nhiều dịch vụ\n📱 So sánh giá online trước khi quyết định",
+      "tasks": [
+        {
+          "title": "Lập bảng ngân sách chi tiết đám cưới",
+          "description": "Phân bổ ngân sách theo các hạng mục: venue (40-50%), photo (10-15%), attire (10-15%), decoration (8-10%), music (5-8%), invitation (2-3%), khác (10-15%)",
+          "category": "other",
+          "milestone": "6 tháng trước",
+          "priority": "high",
+          "notes": "Nên dành 10-20% ngân sách dự phòng cho các chi phí phát sinh"
+        }
+      ],
+      "actions": [
+        {
+          "type": "create_budget_breakdown",
+          "label": "Tạo bảng phân bổ ngân sách",
+          "description": "Tự động tạo bảng chi tiết phân bổ ngân sách theo từng hạng mục"
+        },
+        {
+          "type": "suggest_cost_saving",
+          "label": "Gợi ý tiết kiệm chi phí",
+          "description": "Đưa ra các mẹo và gợi ý để tiết kiệm ngân sách đám cưới"
+        },
+        {
+          "type": "compare_packages",
+          "label": "So sánh gói dịch vụ",
+          "description": "So sánh các gói dịch vụ từ nhà cung cấp khác nhau"
+        }
+      ],
+      "advertisements": ["financial", "venue", "photography"]
+    },
+    "emergency": {
+      "content": "🚨 **Kế hoạch cưới gấp - Checklist ưu tiên:**\n\n⚡ **Tuần 1-2 (KHẨN CẤP):**\n✅ Đặt venue (gọi ngay, thương lượng linh hoạt)\n✅ Đăng ký kết hôn (khám sức khỏe ngay)\n✅ Photographer cơ bản\n✅ Trang phục đơn giản\n\n⚡ **Tuần 3-4:**\n✅ Thiệp điện tử/Facebook event\n✅ Hoa cưới đơn giản\n✅ Nhạc/DJ\n✅ Xe hoa\n\n💡 **Mẹo cưới gấp:**\n• Chọn venue có sẵn package\n• Thiệp điện tử thay vì in\n• Studio có sẵn váy cưới\n• Nhờ bạn bè hỗ trợ decoration\n• Book photographer bán thời gian\n\n🎯 **Ngân sách tối ưu: 150-300 triệu**",
+      "tasks": [
+        {
+          "title": "Đặt venue cưới gấp",
+          "description": "Gọi điện trực tiếp 5-10 venue, thương lượng ngày gần nhất có available",
+          "category": "venue",
+          "milestone": "3 ngày",
+          "priority": "high",
+          "notes": "Ưu tiên venue có package all-in-one"
+        },
+        {
+          "title": "Hoàn tất thủ tục pháp lý gấp",
+          "description": "Khám sức khỏe và nộp hồ sơ đăng ký kết hôn ngay",
+          "category": "legal",
+          "milestone": "1 tuần",
+          "priority": "high",
+          "notes": "Liên hệ trung tâm y tế book lịch khẩn"
+        }
+      ],
+      "actions": [
+        {
+          "type": "urgent_vendor_list",
+          "label": "Danh sách nhà cung cấp khẩn cấp",
+          "description": "Vendors có thể phục vụ ngay trong tuần"
+        }
+      ],
+      "advertisements": ["venue", "photography", "attire"]
+    },
+    "early_planning": {
+      "content": "🌟 **Lập kế hoạch sớm - Lợi thế tuyệt đối:**\n\n⏰ **Timeline 12+ tháng trước:**\n\n🎯 **Tháng 12-9 trước:**\n• Xác định concept & budget\n• Research & book venue premium\n• Chọn photographer/videographer top\n• Thiết kế save-the-date\n\n🎯 **Tháng 9-6 trước:**\n• Thử và đặt váy cưới\n• Book vendors chất lượng cao\n• Lên menu chi tiết\n• Chụp ảnh engagement\n\n🎯 **Tháng 6-3 trước:**\n• Thiệp cưới & RSVP\n• Finalise guest list\n• Rehearsal dinner planning\n• Honeymoon booking\n\n💰 **Lợi ích lập kế hoạch sớm:**\n🏆 Được chọn venue/vendor tốt nhất\n💵 Giá ưu đãi (tiết kiệm 20-40%)\n🎨 Thời gian tùy chỉnh chi tiết\n😌 Stress ít hơn, chất lượng cao hơn",
+      "tasks": [
+        {
+          "title": "Xác định concept và ngân sách tổng thể",
+          "description": "Brainstorm theme, style, số khách, ngân sách dự kiến cho toàn bộ đám cưới",
+          "category": "other",
+          "milestone": "12 tháng trước",
+          "priority": "high",
+          "notes": "Dành thời gian nghiên cứu và thảo luận kỹ"
+        },
+        {
+          "title": "Research và book venue premium",
+          "description": "Tìm hiểu và đặt cọc venue yêu thích nhất, thường book trước 9-12 tháng",
+          "category": "venue",
+          "milestone": "10 tháng trước",
+          "priority": "high",
+          "notes": "Venue tốt thường full sớm"
+        }
+      ],
+      "actions": [
+        {
+          "type": "comprehensive_timeline",
+          "label": "Timeline chi tiết 12 tháng",
+          "description": "Kế hoạch đầy đủ từng tháng"
+        }
+      ],
+      "advertisements": ["venue", "photography", "attire"]
+    },
+    "venue": {
+      "content": "🏛️ **Gợi ý địa điểm tổ chức đám cưới tại Việt Nam:**\n\n🌟 **Theo loại hình:**\n• **Khách sạn 5 sao:** Sang trọng, dịch vụ chuyên nghiệp (1.2-2M/bàn)\n• **Trung tâm tiệc cưới:** Chuyên biệt, giá hợp lý (800K-1.5M/bàn)\n• **Resort/Villa:** Không gian riêng tư, chụp ảnh đẹp (1-1.8M/bàn)\n• **Nhà hàng:** Linh hoạt, menu đa dạng (700K-1.2M/bàn)\n\n📋 **Checklist khi chọn venue:**\n✓ Sức chứa phù hợp với số khách\n✓ Menu thử và chất lượng món ăn\n✓ Âm thanh, ánh sáng, trang trí\n✓ Bãi đậu xe, vị trí thuận tiện\n✓ Policy và điều khoản hợp đồng\n\n✅ **Đã tạo task \"Khảo sát địa điểm\" vào Todo list!**",
+      "tasks": [
+        {
+          "title": "Khảo sát và đặt địa điểm tổ chức",
+          "description": "Tìm hiểu ít nhất 3-5 địa điểm, so sánh giá cả, menu, dịch vụ và đặt cọc địa điểm ưng ý nhất",
+          "category": "venue",
+          "milestone": "6 tháng trước",
+          "priority": "high",
+          "notes": "Kiểm tra availability, menu tasting, policy hủy bỏ"
+        },
+        {
+          "title": "Thử menu và tasting",
+          "description": "Đặt lịch thử menu tại các venue đã chọn để quyết định cuối cùng",
+          "category": "venue",
+          "milestone": "5 tháng trước",
+          "priority": "medium",
+          "notes": "Mang theo người thân để có ý kiến đa chiều"
+        }
+      ],
+      "actions": [
+        {
+          "type": "venue_comparison",
+          "label": "So sánh địa điểm",
+          "description": "Tạo bảng so sánh chi tiết các venue về giá cả, dịch vụ, vị trí"
+        },
+        {
+          "type": "schedule_venue_visits",
+          "label": "Lên lịch tham quan",
+          "description": "Tự động lên lịch tham quan các venue đã chọn"
+        },
+        {
+          "type": "calculate_venue_costs",
+          "label": "Tính toán chi phí venue",
+          "description": "Ước tính tổng chi phí bao gồm cả phụ phí và dịch vụ thêm"
+        }
+      ],
+      "advertisements": ["venue", "catering", "decoration"]
+    },
+    "legal": {
+      "content": "📋 **Thủ tục pháp lý đăng ký kết hôn tại Việt Nam:**\n\n📝 **Hồ sơ cần thiết:**\n• Giấy khai sinh (bản chính hoặc sao y)\n• CMND/CCCD (bản chính)\n• Giấy xác nhận tình trạng hôn nhân\n• Giấy khám sức khỏe tiền hôn nhân\n• Đơn đăng ký kết hôn (tại UBND)\n\n⏰ **Quy trình và thời gian:**\n1. **Chuẩn bị hồ sơ** (2 tháng trước)\n2. **Khám sức khỏe** (6 tuần trước)\n3. **Nộp hồ sơ** tại UBND (15 ngày trước)\n4. **Nhận giấy kết hôn** (trong 15 ngày)\n\n⚠️ **Lưu ý quan trọng:**\n• Giấy khám có hiệu lực 6 tháng\n• Phải đăng ký tại nơi thường trú của một bên\n• Mang theo 2 nhân chứng khi làm thủ tục\n\n✅ **Đã tạo 2 tasks về thủ tục pháp lý vào Todo list!**",
+      "tasks": [
+        {
+          "title": "Chuẩn bị hồ sơ đăng ký kết hôn",
+          "description": "Giấy khai sinh, CMND/CCCD, giấy xác nhận độc thân, đơn đăng ký kết hôn",
+          "category": "legal",
+          "milestone": "2 tháng trước",
+          "priority": "high",
+          "notes": "Kiểm tra tính hợp lệ của tất cả giấy tờ"
+        },
+        {
+          "title": "Khám sức khỏe tiền hôn nhân",
+          "description": "Đăng ký khám tại trung tâm y tế, giấy khám có hiệu lực 6 tháng",
+          "category": "legal",
+          "milestone": "6 tuần trước",
+          "priority": "high",
+          "notes": "Đặt lịch sớm để tránh xếp hàng"
+        }
+      ],
+      "actions": [
+        {
+          "type": "legal_document_checklist",
+          "label": "Checklist giấy tờ pháp lý",
+          "description": "Tạo danh sách kiểm tra đầy đủ tất cả giấy tờ cần thiết"
+        },
+        {
+          "type": "schedule_health_check",
+          "label": "Đặt lịch khám sức khỏe",
+          "description": "Tìm và đặt lịch khám sức khỏe tiền hôn nhân"
+        },
+        {
+          "type": "legal_timeline",
+          "label": "Timeline thủ tục pháp lý",
+          "description": "Tạo lịch trình chi tiết cho từng bước thủ tục"
+        }
+      ],
+      "advertisements": ["legal", "medical", "documentation"]
+    },
+    "traditional": {
+      "content": "🏮 **Nghi lễ đám cưới truyền thống Việt Nam:**\n\n🎭 **Các nghi lễ chính:**\n1. **Lễ dạm ngõ** (6 tháng trước): Tìm hiểu, xin phép\n2. **Lễ hỏi cưới** (3-4 tháng trước): Chính thức xin cưới\n3. **Lễ rước dâu** (ngày cưới): Đón dâu về nhà chú rể\n4. **Lễ thành hôn** (ngày cưới): Nghi thức kết hôn\n\n🎁 **Lễ vật hỏi cưới (số lẻ):**\n• Trầu cau (1 khay)\n• Rượu cần (1 bình)\n• Bánh phu thê (1 đôi)\n• Hoa quả (5-7 loại)\n• Trang sức vàng\n• Tiền mừng (phong bì đỏ)\n\n📅 **Chọn ngày tốt:**\n• Tham khảo lịch âm\n• Tránh tháng cô hồn (tháng 7 âm)\n• Thống nhất với cả hai gia đình\n\n💡 **Mẹo quan trọng:** Thảo luận trước nghi thức với đại diện hai gia đình để tránh hiểu lầm!",
+      "tasks": [
+        {
+          "title": "Chọn ngày tốt theo lịch âm",
+          "description": "Tham khảo lịch âm và phong thủy để chọn ngày tốt cho lễ hỏi và ngày cưới",
+          "category": "other",
+          "milestone": "4 tháng trước",
+          "priority": "high",
+          "notes": "Thống nhất với cả hai gia đình"
+        },
+        {
+          "title": "Chuẩn bị lễ vật hỏi cưới",
+          "description": "Mua sắm và chuẩn bị lễ vật theo phong tục: trầu cau, rượu, bánh, hoa quả...",
+          "category": "other",
+          "milestone": "1 tuần trước lễ hỏi",
+          "priority": "medium",
+          "notes": "Số lượng lẻ, tránh số chẵn theo phong tục"
+        },
+        {
+          "title": "Thuê xe hoa rước dâu",
+          "description": "Đặt xe hoa trang trí đẹp để rước dâu theo truyền thống",
+          "category": "other",
+          "milestone": "1 tháng trước",
+          "priority": "medium",
+          "notes": "Chọn xe màu đỏ hoặc trắng, trang trí hoa tươi"
+        },
+        {
+          "title": "Chuẩn bị áo dài truyền thống",
+          "description": "May hoặc thuê áo dài cho cô dâu, chú rể và gia đình trong các nghi lễ",
+          "category": "attire",
+          "milestone": "2 tháng trước",
+          "priority": "medium",
+          "notes": "Màu sắc phù hợp với phong thủy và sở thích"
+        }
+      ],
+      "actions": [
+        {
+          "type": "traditional_ceremony_guide",
+          "label": "Hướng dẫn nghi lễ truyền thống",
+          "description": "Tạo hướng dẫn chi tiết từng bước cho các nghi lễ"
+        },
+        {
+          "type": "gift_preparation_list",
+          "label": "Danh sách chuẩn bị lễ vật",
+          "description": "Tạo checklist đầy đủ các lễ vật cần chuẩn bị"
+        },
+        {
+          "type": "family_coordination",
+          "label": "Phối hợp hai gia đình",
+          "description": "Tạo kế hoạch phối hợp và thống nhất giữa hai gia đình"
+        },
+        {
+          "type": "lunar_calendar_check",
+          "label": "Tra cứu lịch âm",
+          "description": "Kiểm tra và chọn ngày tốt theo lịch âm"
+        }
+      ],
+      "advertisements": ["traditional", "attire", "gifts", "transportation"]
+    },
+    "photography": {
+      "content": "📸 **Dịch vụ nhiếp ảnh đám cưới:**\n\n🎯 **Loại hình dịch vụ:**\n• **Ảnh cưới studio:** 15-40 triệu (bao gồm váy, makeup)\n• **Ảnh cưới ngoại cảnh:** 20-60 triệu\n• **Quay phim ngày cưới:** 25-80 triệu\n• **Live stream:** 5-15 triệu\n\n📋 **Checklist chọn photographer:**\n✓ Xem portfolio và style ảnh\n✓ Gặp mặt photographer trước\n✓ Thỏa thuận về bản quyền\n✓ Số lượng ảnh giao\n✓ Thời gian giao ảnh\n\n💡 **Timeline chụp ảnh:**\n• Ảnh cưới: 2-3 tháng trước\n• Ảnh gia đình: 1 tháng trước\n• Ngày cưới: Full day hoặc half day",
+      "tasks": [
+        {
+          "title": "Tìm và book photographer",
+          "description": "Tìm hiểu, so sánh và đặt cọc photographer phù hợp với style và ngân sách",
+          "category": "photography",
+          "milestone": "4 tháng trước",
+          "priority": "high",
+          "notes": "Xem portfolio kỹ, gặp mặt trực tiếp"
+        },
+        {
+          "title": "Chụp ảnh cưới",
+          "description": "Lên lịch và thực hiện chụp ảnh cưới trước đám cưới",
+          "category": "photography",
+          "milestone": "2 tháng trước",
+          "priority": "medium",
+          "notes": "Chuẩn bị trang phục, makeup, địa điểm"
+        }
+      ],
+      "actions": [
+        {
+          "type": "photographer_comparison",
+          "label": "So sánh photographer",
+          "description": "Tạo bảng so sánh các photographer về style, giá cả, dịch vụ"
+        },
+        {
+          "type": "photography_timeline",
+          "label": "Lịch trình chụp ảnh",
+          "description": "Lập timeline chi tiết cho việc chụp ảnh cưới và ngày cưới"
+        },
+        {
+          "type": "photo_location_scouting",
+          "label": "Tìm địa điểm chụp ảnh",
+          "description": "Khảo sát và chọn địa điểm đẹp cho ảnh cưới"
+        }
+      ],
+      "advertisements": ["photography", "videography", "makeup"]
+    },
+    "music": {
+      "content": "🎵 **Dịch vụ âm nhạc đám cưới:**\n\n🎤 **Loại hình dịch vụ:**\n• **Ban nhạc acoustic:** 8-20 triệu\n• **DJ chuyên nghiệp:** 5-15 triệu\n• **Ca sĩ đặc biệt:** 15-50 triệu\n• **Hệ thống âm thanh:** 3-10 triệu\n\n🎼 **Playlist gợi ý:**\n• Nhạc đón khách: Nhạc không lời, jazz nhẹ\n• Lễ cưới: Nhạc cổ điển, tình ca\n• Tiệc cưới: Pop, dance, nhạc trẻ\n• Kết thúc: Ballad, nhạc chậm\n\n💡 **Lưu ý quan trọng:**\n• Test âm thanh trước buổi lễ\n• Chuẩn bị nhạc dự phòng\n• Thống nhất playlist với MC",
+      "tasks": [
+        {
+          "title": "Chọn và book dịch vụ âm nhạc",
+          "description": "Tìm ban nhạc hoặc DJ phù hợp với phong cách đám cưới",
+          "category": "music",
+          "milestone": "3 tháng trước",
+          "priority": "medium",
+          "notes": "Nghe demo trước khi quyết định"
+        },
+        {
+          "title": "Chuẩn bị playlist nhạc cưới",
+          "description": "Lên danh sách nhạc cho từng phần trong đám cưới",
+          "category": "music",
+          "milestone": "1 tháng trước",
+          "priority": "medium",
+          "notes": "Bao gồm nhạc đặc biệt có ý nghĩa với cặp đôi"
+        }
+      ],
+      "actions": [
+        {
+          "type": "music_vendor_comparison",
+          "label": "So sánh dịch vụ âm nhạc",
+          "description": "So sánh các nhà cung cấp dịch vụ âm nhạc về chất lượng và giá cả"
+        },
+        {
+          "type": "create_wedding_playlist",
+          "label": "Tạo playlist cưới",
+          "description": "Tự động tạo playlist phù hợp cho từng phần trong đám cưới"
+        },
+        {
+          "type": "sound_check_schedule",
+          "label": "Lịch trình test âm thanh",
+          "description": "Lên lịch kiểm tra và test âm thanh trước đám cưới"
+        }
+      ],
+      "advertisements": ["music", "sound", "entertainment"]
+    },
+    "guest_management": {
+      "content": "👥 **Quản lý khách mời hiệu quả:**\n\n📋 **Checklist khách mời:**\n• Lập danh sách khách mời sơ bộ\n• Phân loại: gia đình, bạn bè, đồng nghiệp\n• Cập nhật thông tin liên lạc\n• Gửi save-the-date sớm\n• Theo dõi RSVP\n\n🎯 **Gợi ý số lượng khách:**\n• **Nhỏ (< 100 khách):** Thân mật, chi phí thấp\n• **Trung bình (100-200):** Cân bằng tốt\n• **Lớn (200+):** Hoành tráng, cần venue rộng\n\n💌 **Timeline gửi thiệp:**\n• Save-the-date: 6-8 tháng trước\n• Thiệp chính thức: 2-3 tháng trước\n• Nhắc nhở RSVP: 1 tháng trước",
+      "tasks": [
+        {
+          "title": "Lập danh sách khách mời chi tiết",
+          "description": "Tạo spreadsheet với thông tin đầy đủ: tên, quan hệ, địa chỉ, số điện thoại",
+          "category": "invitation",
+          "milestone": "4 tháng trước",
+          "priority": "high",
+          "notes": "Thống nhất với cả hai gia đình về danh sách"
+        },
+        {
+          "title": "Thiết kế và in thiệp mời",
+          "description": "Chọn thiết kế phù hợp với theme đám cưới và in số lượng cần thiết",
+          "category": "invitation",
+          "milestone": "2 tháng trước",
+          "priority": "medium",
+          "notes": "In thêm 10-15% để dự phòng"
+        }
+      ],
+      "actions": [
+        {
+          "type": "guest_list_template",
+          "label": "Template danh sách khách",
+          "description": "Tạo mẫu Excel để quản lý khách mời"
+        },
+        {
+          "type": "rsvp_tracking",
+          "label": "Theo dõi RSVP",
+          "description": "Hệ thống theo dõi phản hồi từ khách mời"
+        }
+      ],
+      "advertisements": ["invitation", "stationary"]
+    },
+    "honeymoon": {
+      "content": "🌴 **Lập kế hoạch tuần trăng mật:**\n\n✈️ **Điểm đến phổ biến:**\n• **Trong nước:** Phú Quốc, Đà Nẵng, Nha Trang, Sapa\n• **Châu Á:** Bali, Maldives, Nhật Bản, Hàn Quốc\n• **Châu Âu:** Paris, Ý, Santorini, Prague\n\n📅 **Timeline booking:**\n• Passport: 6 tháng trước\n• Visa (nếu cần): 3 tháng trước\n• Vé máy bay: 2-3 tháng trước\n• Khách sạn: 2 tháng trước\n\n💰 **Budget tham khảo:**\n• Trong nước: 15-50 triệu (5-7 ngày)\n• Châu Á: 30-80 triệu (7-10 ngày)\n• Châu Âu: 80-150 triệu (10-14 ngày)",
+      "tasks": [
+        {
+          "title": "Chọn điểm đến tuần trăng mật",
+          "description": "Thảo luận và quyết định điểm đến phù hợp với sở thích và ngân sách",
+          "category": "other",
+          "milestone": "4 tháng trước",
+          "priority": "medium",
+          "notes": "Xem xét thời tiết, visa, ngân sách"
+        },
+        {
+          "title": "Book vé máy bay và khách sạn",
+          "description": "Đặt vé máy bay và accommodation cho chuyến honeymoon",
+          "category": "other",
+          "milestone": "2 tháng trước",
+          "priority": "medium",
+          "notes": "Book sớm để có giá tốt"
+        }
+      ],
+      "actions": [
+        {
+          "type": "honeymoon_planner",
+          "label": "Lập kế hoạch tuần trăng mật",
+          "description": "Tư vấn điểm đến và lịch trình chi tiết"
+        }
+      ],
+      "advertisements": ["travel", "accommodation"]
+    }
+  },
+  "smartActions": {
+    "analyze_timeline": {
+      "label": "Phân tích timeline đám cưới",
+      "description": "AI phân tích thời gian còn lại và đưa ra kế hoạch phù hợp",
+      "icon": "clock",
+      "prompt": "Phân tích thời gian còn lại đến ngày cưới và tạo kế hoạch ưu tiên"
+    },
+    "budget_calculator": {
+      "label": "Tính toán ngân sách thông minh",
+      "description": "Phân tích và đề xuất phân bổ ngân sách tối ưu",
+      "icon": "calculator",
+      "prompt": "Tôi muốn lập kế hoạch ngân sách chi tiết cho đám cưới"
+    },
+    "vendor_matcher": {
+      "label": "Tìm nhà cung cấp phù hợp",
+      "description": "AI gợi ý nhà cung cấp dựa trên ngân sách và sở thích",
+      "icon": "users",
+      "prompt": "Gợi ý các nhà cung cấp dịch vụ phù hợp với ngân sách và style của tôi"
+    },
+    "stress_checker": {
+      "label": "Đánh giá mức độ stress",
+      "description": "Kiểm tra và đưa ra lời khuyên giảm stress trong chuẩn bị cưới",
+      "icon": "heart",
+      "prompt": "Tôi cảm thấy stress trong việc chuẩn bị đám cưới, cần lời khuyên"
+    },
+    "weather_advisor": {
+      "label": "Tư vấn thời tiết",
+      "description": "Đưa ra lời khuyên dựa trên dự báo thời tiết ngày cưới",
+      "icon": "cloud",
+      "prompt": "Tư vấn về thời tiết và cách chuẩn bị cho ngày cưới"
+    }
+  },
+  "quickActions": {
+    "create_comprehensive_plan": {
+      "label": "Tạo kế hoạch toàn diện",
+      "description": "Tự động tạo kế hoạch đầy đủ từ A-Z cho đám cưới",
+      "icon": "sparkles",
+      "categories": ["venue", "photography", "attire", "legal", "traditional", "catering"],
+      "prompt": "Tạo cho tôi một kế hoạch đám cưới toàn diện từ A đến Z"
+    },
+    "legal_procedures_guide": {
+      "label": "Hướng dẫn thủ tục pháp lý",
+      "description": "Tạo hướng dẫn chi tiết các thủ tục đăng ký kết hôn",
+      "icon": "clipboard",
+      "categories": ["legal"],
+      "prompt": "Hướng dẫn tôi các thủ tục pháp lý cần thiết để đăng ký kết hôn"
+    },
+    "traditional_ceremonies": {
+      "label": "Nghi lễ truyền thống",
+      "description": "Thông tin và hướng dẫn các nghi lễ cưới Việt Nam",
+      "icon": "heart",
+      "categories": ["traditional", "attire"],
+      "prompt": "Tôi muốn tìm hiểu về các nghi lễ cưới truyền thống Việt Nam"
+    },
+    "budget_planning": {
+      "label": "Lập kế hoạch ngân sách",
+      "description": "Phân bổ ngân sách chi tiết cho từng hạng mục",
+      "icon": "dollar-sign",
+      "categories": ["other"],
+      "prompt": "Giúp tôi lập kế hoạch và phân bổ ngân sách đám cưới hợp lý"
+    },
+    "vendor_suggestions": {
+      "label": "Gợi ý nhà cung cấp",
+      "description": "Danh sách nhà cung cấp uy tín cho từng dịch vụ",
+      "icon": "users",
+      "categories": ["venue", "photography", "attire", "catering", "music"],
+      "prompt": "Gợi ý cho tôi các nhà cung cấp dịch vụ đám cưới uy tín"
+    },
+    "emergency_planning": {
+      "label": "Kế hoạch cưới gấp",
+      "description": "Hướng dẫn tổ chức đám cưới trong thời gian ngắn",
+      "icon": "clock",
+      "categories": ["venue", "photography", "attire"],
+      "prompt": "Tôi cần tổ chức đám cưới gấp trong vòng 1-2 tháng"
+    }
+  },
+  "chatPatterns": {
+    "greeting": {
+      "keywords": ["xin chào", "hello", "hi", "chào"],
+      "response": "Xin chào! Tôi là Wedding AI Assistant của bạn 🤖✨ Tôi sẵn sàng giúp bạn lập kế hoạch cho đám cưới hoàn hảo! Bạn muốn bắt đầu từ đâu?"
+    },
+    "gratitude": {
+      "keywords": ["cảm ơn", "thanks", "thank you"],
+      "response": "Không có gì! Tôi rất vui được giúp bạn lập kế hoạch cho ngày trọng đại 💕 Còn điều gì khác tôi có thể hỗ trợ không?"
+    },
+    "confused": {
+      "keywords": ["không hiểu", "confused", "unclear"],
+      "response": "Xin lỗi vì gây nhầm lẫn! Hãy để tôi giải thích rõ hơn. Bạn có thể hỏi cụ thể về điều gì khiến bạn bối rối không?"
+    }
+  },
+  "vendors": {
+    "venue": [
+      "Trung tâm tiệc cưới Sen Hồng",
+      "Khách sạn Grand Palace",
+      "Resort Sài Gòn Đại Nam",
+      "Nhà hàng La Fourchette",
+      "Trung tâm Gem Center",
+      "Park Hyatt Saigon",
+      "Windsor Plaza Hotel",
+      "Sheraton Saigon Hotel",
+      "New World Saigon Hotel",
+      "Caravelle Saigon Hotel"
+    ],
+    "photography": [
+      "Studio Olivia",
+      "Ngọc Huy Wedding",
+      "Studio Ao Cưới Mỹ Lan",
+      "Ảnh cưới Ánh Dương",
+      "Kyo Studio",
+      "Bridal Nguyen Phuong",
+      "Love Studio",
+      "Moment Studio",
+      "Golden Moment",
+      "Fairy Tale Studio"
+    ],
+    "attire": [
+      "Thế Giới Áo Cưới",
+      "Camile Bridal",
+      "Áo cưới Meera Meera",
+      "Studio Dressme",
+      "Tú Anh Bridal",
+      "Thanh Mai Wedding",
+      "Cưới Hỏi Trọn Gói",
+      "Bella Bridal",
+      "Princess Wedding",
+      "Royal Bride"
+    ],
+    "catering": [
+      "Buffet Bassac",
+      "Cơm Âm Phủ Bà Năm",
+      "Nhà hàng Ngọc Mai",
+      "Catering Sen Vàng",
+      "Golden Dragon Restaurant",
+      "Majestic Restaurant",
+      "Crystal Catering",
+      "Royal Catering",
+      "Premium Buffet",
+      "Luxury Food Service"
+    ],
+    "music": [
+      "Ban nhạc Flamenco",
+      "DJ Tony Tran",
+      "Acoustic Band Sài Gòn",
+      "MC Thái Duy",
+      "Sound System Pro",
+      "Music Wedding VN",
+      "Event Entertainment",
+      "Wedding Music Co",
+      "Professional DJ Service",
+      "Live Band Vietnam"
+    ],
+    "decoration": [
+      "Cưới Hỏi Trọn Gói",
+      "Deco Wedding VN",
+      "Fresh Flower Studio",
+      "Event Design Co",
+      "Luxury Wedding Decor",
+      "Romantic Setup",
+      "Dream Wedding Deco",
+      "Floral Paradise",
+      "Wedding Design Studio",
+      "Elegant Decoration"
+    ]
+  },
+  "advertisements": {
+    "venue": [
+      {
+        "title": "Ưu đai đặc biệt - Tiệc cưới trọn gói",
+        "description": "Giảm 20% cho booking trước 6 tháng, miễn phí decoration cơ bản",
+        "category": "venue",
+        "type": "discount"
+      },
+      {
+        "title": "Menu thử miễn phí",
+        "description": "Được thử menu miễn phí cho 2 người khi đặt cọc venue",
+        "category": "venue", 
+        "type": "free_trial"
+      }
+    ],
+    "photography": [
+      {
+        "title": "Gói ảnh cưới + ngày cưới",
+        "description": "Combo tiết kiệm: Ảnh cưới studio + chụp ngày cưới chỉ từ 25 triệu",
+        "category": "photography",
+        "type": "package"
+      },
+      {
+        "title": "Album ảnh cao cấp miễn phí",
+        "description": "Tặng album ảnh premium khi đặt gói chụp ảnh trước 3 tháng",
+        "category": "photography",
+        "type": "gift"
+      }
+    ],
+    "legal": [
+      {
+        "title": "Dịch vụ hỗ trợ thủ tục pháp lý",
+        "description": "Hỗ trợ hoàn thành hồ sơ đăng ký kết hôn nhanh chóng, chính xác",
+        "category": "legal",
+        "type": "service"
+      }
+    ],
+    "traditional": [
+      {
+        "title": "Tư vấn nghi lễ truyền thống",
+        "description": "Chuyên gia phong thủy tư vấn chọn ngày tốt và nghi lễ phù hợp",
+        "category": "traditional",
+        "type": "consultation"
+      },
+      {
+        "title": "Lễ vật trọn gói",
+        "description": "Cung cấp đầy đủ lễ vật hỏi cưới theo đúng phong tục",
+        "category": "traditional",
+        "type": "package"
+      }
+    ]
+  }
+} 

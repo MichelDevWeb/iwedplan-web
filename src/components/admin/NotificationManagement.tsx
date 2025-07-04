@@ -21,7 +21,7 @@ import { NotificationData } from '@/lib/firebase/models';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 import ConfirmationModal from '@/components/modals/ConfirmationModal';
-import LoadingOverlay from '@/components/ui/loading-overlay';
+import LoadingScreen from '@/components/ui/loading-screen';
 
 interface NotificationFormData {
   type: 'sale' | 'voucher' | 'system' | 'info' | 'warning';
@@ -283,17 +283,17 @@ export default function NotificationManagement() {
 
   return (
     <>
-      <LoadingOverlay 
-        isLoading={saving}
-        type="save"
-        message={editing ? "Đang cập nhật thông báo..." : "Đang tạo thông báo..."}
-      />
+      {saving && (
+        <LoadingScreen 
+          message={editing ? "Đang cập nhật thông báo..." : "Đang tạo thông báo..."}
+        />
+      )}
       
-      <LoadingOverlay 
-        isLoading={deleting !== null}
-        type="delete"
-        message="Đang xoá thông báo..."
-      />
+      {deleting !== null && (
+        <LoadingScreen 
+          message="Đang xoá thông báo..."
+        />
+      )}
 
       <div className="space-y-6">
         {/* Form Section */}

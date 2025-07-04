@@ -1,0 +1,142 @@
+{
+  "name": "iWedplan - Wedding Planner",
+  "short_name": "iWedplan",
+  "description": "Ứng dụng lập kế hoạch đám cưới thông minh với AI Assistant",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#ec4899",
+  "background_color": "#fdf2f8",
+  "categories": ["lifestyle", "productivity", "social"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard", 
+      "description": "Xem tổng quan đám cưới",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/icons/shortcut-dashboard.svg",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Tạo website",
+      "short_name": "Tạo web",
+      "description": "Tạo website đám cưới mới",
+      "url": "/create/template",
+      "icons": [
+        {
+          "src": "/icons/shortcut-create.svg", 
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "AI Planning",
+      "short_name": "AI Plan",
+      "description": "Trợ lý AI lập kế hoạch cưới",
+      "url": "/dashboard?tab=ai-chat",
+      "icons": [
+        {
+          "src": "/icons/shortcut-ai.svg",
+          "sizes": "96x96", 
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-72.svg    ",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96.svg", 
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128.svg",
+      "sizes": "128x128", 
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152.svg",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384.svg",
+      "sizes": "384x384",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml", 
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-dashboard.svg",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Dashboard quản lý đám cưới"
+    },
+    {
+      "src": "/screenshots/mobile-template.svg", 
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Tạo website đám cưới"
+    },
+    {
+      "src": "/screenshots/mobile-ai-chat.svg",
+      "sizes": "390x844", 
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "Trợ lý AI lập kế hoạch"
+    },
+    {
+      "src": "/screenshots/desktop-dashboard.svg",
+      "sizes": "1280x800",
+      "type": "image/svg+xml", 
+      "form_factor": "wide",
+      "label": "Dashboard trên máy tính"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.iwedplan.twa",
+      "id": "com.iwedplan.twa"
+    }
+  ],
+  "prefer_related_applications": false
+} 
